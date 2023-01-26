@@ -2,35 +2,23 @@
 % Please edit documentation in R/preflib.R
 \name{preflib}
 \alias{preflib}
-\alias{read.soc}
-\alias{read.soi}
-\alias{read.toc}
-\alias{read.toi}
 \alias{as.aggregated_rankings.preflib}
 \title{Read Preflib Election Data Files}
 \usage{
-read.soc(file)
-
-read.soi(file)
-
-read.toc(file)
-
-read.toi(file)
-
 \method{as.aggregated_rankings}{preflib}(x, ...)
 }
 \arguments{
-\item{file}{An election data file, conventionally with extension \code{.soc},
-\code{.soi}, \code{.toc} or \code{.toi} according to data type.}
-
 \item{x}{An object of class \code{"preflib"}.}
 
 \item{...}{Additional arguments passed to \code{\link[=as.rankings]{as.rankings()}}: \code{freq},
 \code{input} or \code{items} will be ignored with a warning as they are set
 automatically.}
+
+\item{file}{A preferential data file, conventionally with extension \code{.soc},
+\code{.soi}, \code{.toc} or \code{.toi} according to data type.}
 }
 \value{
-A data frame of class \code{"preflib"} with first column \code{Freq},
+A data frame of class \code{"preflib"} with first column \code{Frequency},
 giving the frequency of the ranking in that row, and remaining columns
 \code{Rank 1}, \ldots, \code{Rank p} giving the items ranked from first to
 last place in that ranking. Ties are represented by vector elements in list
@@ -39,7 +27,7 @@ corresponding to each item number.
 }
 \description{
 Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types storing
-election data as defined by
+preferencial data as defined by
 \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 }
 \details{
@@ -62,7 +50,7 @@ data frame, storing the item names as an attribute. The
 by the item names.
 
 A Preflib file may be corrupt, in the sense that the ordered items do not
-match the named items. In this case, the file can be read is as a data
+match the named items. In this case, the file can be read in as a data
 frame (with a warning) using the corresponding \verb{read.*} function, but
 \code{as.aggregated_rankings} will throw an error.
 }
@@ -82,7 +70,7 @@ preflib <- "https://www.preflib.org/static/data/ED/"
 # strict complete orderings of four films on Netflix
 netflix <- read.soc(file.path(preflib, "netflix/ED-00004-00000101.soc"))
 head(netflix)
-attr(netflix, "items")
+attr(netflix, "ALTERNATIVE NAMES")
 
 head(as.rankings(netflix))
 
