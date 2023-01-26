@@ -26,7 +26,7 @@
 #' match the named items. In this case, the file can be read in as a data
 #' frame (with a warning) using the corresponding `read.*` function, but
 #' `as.aggregated_rankings` will throw an error.
-#' @return A data frame of class `"preflib"` with first column \code{Freq},
+#' @return A data frame of class `"preflib"` with first column \code{Frequency},
 #' giving the frequency of the ranking in that row, and remaining columns
 #' \code{Rank 1}, \ldots, \code{Rank p} giving the items ranked from first to
 #' last place in that ranking. Ties are represented by vector elements in list
@@ -65,7 +65,7 @@
 #' # strict complete orderings of four films on Netflix
 #' netflix <- read.soc(file.path(preflib, "netflix/ED-00004-00000101.soc"))
 #' head(netflix)
-#' attr(netflix, "items")
+#' attr(netflix, "ALTERNATIVE NAMES")
 #'
 #' head(as.rankings(netflix))
 #'
@@ -87,7 +87,7 @@
 #' @name preflib
 NULL
 
-read.items <- function(file) {
+read.preflib <- function(file) {
     test  <- tryCatch(file(file, "rt"), silent = TRUE,
                       warning = function(w) w, error = function(e) e)
     if (!inherits(test, "connection")) {
@@ -162,9 +162,9 @@ read.items <- function(file) {
     # Replace NA with blank ties
     items[is.na(items)] <- ""
     # Replace character columns with lists
-    items[, seq(2, dim(items)[2])] <- as.data.frame(
+    items[, seq(2, ncol(items))] <- as.data.frame(
       sapply(
-        items[, seq(2, dim(items)[2])],
+        items[, seq(2, ncol(items))],
         strsplit,
         split = ","
       )
@@ -177,94 +177,18 @@ read.items <- function(file) {
     )
     names(items) <- c(
       "Frequency",
-      paste("Rank", seq_len(dim(items)[2]  - 1))
+      paste("Rank", seq_len(ncol(items)  - 1))
     )
     attributes(items) <- c(attributes(items), preflib_attributes)
-    items
-}
-
-#' @importFrom utils count.fields
-read.strict <- function(file, incomplete = FALSE){
-    items <- read.items(file)
-    # count maximum number of ranks
-    if (incomplete){
-        r <- max(count.fields(file, sep = ",")) - 1L
-    } else r <- length(items)
-    # read frequencies and ordered items
-    nm <- c("Freq", paste("Rank", seq_len(r)))
-    obs <- read.csv(file, skip = length(items) + 2L, header = FALSE,
-                    col.names = nm, check.names = FALSE)
-    preflib(obs, items)
-}
-
-#' @importFrom utils count.fields
-read.ties <- function(file, incomplete = FALSE){
-    items <- read.items(file)
-    r <- length(items)
-    skip <- r + 2L
-    input <- chartr("{}", "''", readLines(file, encoding = "UTF-8"))
-    # count maximum number of ranks for incomplete rankings
-    if (incomplete){
-        r <- max(count.fields(textConnection(input), quote = "'",
-                              sep = ",", skip = skip)) - 1L
-    }
-    # read counts and ordered items
-    nm <- c("Freq", paste("Rank", seq_len(r)))
-    obs <- read.csv(text = input, skip = skip, header = FALSE, quote = "'",
-                    col.names = nm, check.names = FALSE,
-                    na.strings = "", stringsAsFactors = FALSE)
-    # split up ties (don't use array list as dim attribute kep on MacOS)
-    rank_class <- vapply(obs, is.character, logical(1))
-    for (i in which(rank_class)){
-        obs[[i]] <- lapply(strsplit( obs[[i]], ","), as.numeric)
-    }
-    preflib(obs, items)
-}
-
-preflib <- function(obs, items){
-    obs_items <- sort(unique(unlist(obs[, -1])))
-    unnamed <- setdiff(as.character(obs_items), names(items))
-    n <- length(unnamed)
-    if (n) {
-        warning("Corrupt file. Items with no name:\n",
-                paste(unnamed[seq(min(n, 10L))], ", ..."[n > 10L],
-                      collapse = ", "))
-    }
-    structure(obs, items = items, class = c("preflib", class(obs)))
-}
-
-#' @rdname preflib
-#' @export
-read.soc <- function(file){
-    read.strict(file, incomplete = FALSE)
-}
-
-#' @rdname preflib
-#' @export
-read.soi <- function(file){
-    # unused ranks will be NA
-    read.strict(file, incomplete = TRUE)
-}
-
-#' @rdname preflib
-#' @export
-read.toc <- function(file){
-    read.ties(file, incomplete = FALSE)
-}
-
-#' @rdname preflib
-#' @export
-read.toi <- function(file){
-    # unused ranks will be NA
-    read.ties(file, incomplete = TRUE)
+    class(items) <- c("preflib", class(items))
 }
 
 #' @rdname preflib
 #' @method as.aggregated_rankings preflib
 #' @export
-as.aggregated_rankings.preflib <- function(x, ...){
+as.aggregated_rankings.preflib <- function(x, ...) {
     nc <- ncol(x)
-    if (identical(colnames(x), c("Freq", paste("Rank", seq(nc - 1))))){
+    if (identical(colnames(x), c("Frequency", paste("Rank", seq(nc - 1))))) {
         dots <- match.call(as.aggregated_rankings.preflib,
                            expand.dots = FALSE)[["..."]]
         ignore <- names(dots) %in% c("freq", "input", "items")
@@ -273,7 +197,9 @@ as.aggregated_rankings.preflib <- function(x, ...){
                     "items of class \"preflib\"")
         dots <- dots[setdiff(names(dots), c("freq", "input", "items"))]
         do.call(as.rankings.matrix,
-                c(list(as.matrix(x[, -1]), freq = x[, 1],
-                       input = "orderings", items = attr(x, "items")), dots))
-    } else stop("`x` is not a valid \"preflib\" object")
+                c(list(as.matrix(x[, -1]), freq = x[, 1], input = "orderings",
+                       items = attr(x, "ALTERNATIVE NAMES")), dots))
+    } else {
+      stop("`x` is not a valid \"preflib\" object")
+    }
 }
