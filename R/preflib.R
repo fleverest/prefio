@@ -124,9 +124,7 @@ read.items <- function(file){ # read one line to find number of items
                       quote = "'")
     names(items) <- c(
       "Frequency",
-      unlist(
-        paste0("Rank", seq_len(dim(items)[2]  - 1))
-      )
+      paste0("Rank", seq_len(dim(items)[2]  - 1))
     )
     attributes(items) <- c(attributes(items), preflib_attributes)
     items
