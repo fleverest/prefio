@@ -181,6 +181,7 @@ read.preflib <- function(file) {
     )
     attributes(items) <- c(attributes(items), preflib_attributes)
     class(items) <- c("preflib", class(items))
+    items
 }
 
 #' @rdname preflib
