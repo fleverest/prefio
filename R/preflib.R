@@ -87,12 +87,14 @@
 #' @name preflib
 NULL
 
-read.items <- function(file){ # read one line to find number of items
+read.items <- function(file) {
     test  <- tryCatch(file(file, "rt"), silent = TRUE,
                       warning = function(w) w, error = function(e) e)
     if (!inherits(test, "connection")) {
         stop(test$message, call. = FALSE)
-    } else close(test)
+    } else {
+      close(test)
+    }
     # Read the file into memory
     lines <- readLines(file)
 
@@ -155,7 +157,24 @@ read.items <- function(file){ # read one line to find number of items
                       header = FALSE,
                       stringsAsFactors = FALSE,
                       strip.white = TRUE,
-                      quote = "'")
+                      quote = "'",
+                      colClasses = rep("character", n_alternatives))
+    # Replace NA with blank ties
+    items[is.na(items)] <- ""
+    # Replace character columns with lists
+    items[, seq(2, dim(items)[2])] <- as.data.frame(
+      sapply(
+        items[, seq(2, dim(items)[2])],
+        strsplit,
+        split = ","
+      )
+    )
+    # Convert all data in the output to integer-valued vectors
+    items <- rapply(
+      items,
+      as.integer,
+      how = "replace"
+    )
     names(items) <- c(
       "Frequency",
       paste0("Rank", seq_len(dim(items)[2]  - 1))
