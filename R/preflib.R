@@ -11,10 +11,6 @@
 #' \item{.toc}{Orders with Ties - Complete List}
 #' \item{.toi}{Orders with Ties - Incomplete List}
 #' }
-#' Note that the file types do not distinguish between types of incomplete
-#' orderings, i.e. whether they are a complete ranking of a subset of items
-#' (as supported by [prefio()]) or top-\eqn{n} rankings of \eqn{n} items
-#' from the full set of items (not currently supported by [prefio()]).
 #'
 #' The numerically coded orderings and their frequencies are read into a
 #' data frame, storing the item names as an attribute. The
