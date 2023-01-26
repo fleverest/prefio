@@ -23,7 +23,7 @@
 #' by the item names.
 #'
 #' A Preflib file may be corrupt, in the sense that the ordered items do not
-#' match the named items. In this case, the file can be read is as a data
+#' match the named items. In this case, the file can be read in as a data
 #' frame (with a warning) using the corresponding `read.*` function, but
 #' `as.aggregated_rankings` will throw an error.
 #' @return A data frame of class `"preflib"` with first column \code{Freq},
