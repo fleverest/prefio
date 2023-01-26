@@ -1,7 +1,7 @@
 #' Read Preflib Election Data Files
 #'
 #' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` file types storing
-#' election data as defined by
+#' preferencial data as defined by
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 #'
 #' The file types supported are
@@ -33,7 +33,7 @@
 #' columns. The data frame has an attribute \code{"items"} giving the labels
 #' corresponding to each item number.
 #'
-#' @param file An election data file, conventionally with extension `.soc`,
+#' @param file A preferential data file, conventionally with extension `.soc`,
 #' `.soi`, `.toc` or `.toi` according to data type.
 #' @param x An object of class `"preflib"`.
 #' @param ... Additional arguments passed to [as.rankings()]: `freq`,
@@ -90,14 +90,45 @@ NULL
 read.items <- function(file){ # read one line to find number of items
     test  <- tryCatch(file(file, "rt"), silent = TRUE,
                       warning = function(w) w, error = function(e) e)
-    if (!inherits(test, "connection")){
+    if (!inherits(test, "connection")) {
         stop(test$message, call. = FALSE)
     } else close(test)
-    p <- as.integer(read.csv(file, nrows = 1L, header = FALSE))
-    # get items
-    items <- read.csv(file, skip = 1L, nrows = p, header = FALSE,
-                      stringsAsFactors = FALSE, strip.white = TRUE)[,2L]
-    names(items) <- seq_len(p)
+    # Read the file into memory
+    lines <- readLines(file)
+
+    # Filter the header lines and convert them to key:value attributes
+    header_lines <- sub("# ", "", grep("^#", lines, value = TRUE))
+    metadata <- regmatches(
+      header_lines,
+      regexpr(": ", header_lines),
+      invert = TRUE
+    )
+    preflib_attributes <- lapply(metadata, function(x) x[2])
+    names(preflib_attributes) <- sapply(metadata, function(x) x[1])
+
+    # Filter the data lines and 'encourage' them into a csv format
+    data_lines <- grep("^[^#]", lines, value = TRUE)
+    data_lines <- chartr("{}", "''", data_lines)
+    csv_string <- paste(
+      sub(
+        "^([0-9]+): ",
+        "\\1,",
+        data_lines
+      ),
+      collapse = "\n"
+    )
+    items <- read.csv(text = csv_string,
+                      header = FALSE,
+                      stringsAsFactors = FALSE,
+                      strip.white = TRUE,
+                      quote = "'")
+    names(items) <- c(
+      "Frequency",
+      unlist(
+        paste0("Rank", seq_len(dim(items)[2]  - 1))
+      )
+    )
+    attributes(items) <- c(attributes(items), preflib_attributes)
     items
 }
 
