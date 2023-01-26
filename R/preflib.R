@@ -177,7 +177,7 @@ read.items <- function(file) {
     )
     names(items) <- c(
       "Frequency",
-      paste0("Rank", seq_len(dim(items)[2]  - 1))
+      paste("Rank", seq_len(dim(items)[2]  - 1))
     )
     attributes(items) <- c(attributes(items), preflib_attributes)
     items
