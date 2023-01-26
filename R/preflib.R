@@ -106,6 +106,40 @@ read.items <- function(file){ # read one line to find number of items
     preflib_attributes <- lapply(metadata, function(x) x[2])
     names(preflib_attributes) <- sapply(metadata, function(x) x[1])
 
+    # Assert that the attributes contain both "NUMBER ALTERNATIVES" and
+    # "ALTERNATIVE NAME X".
+    if (!"NUMBER ALTERNATIVES" %in% names(preflib_attributes)) {
+      stop(paste0("PrefLib datafile is corrupt: ",
+                  "missing 'NUMBER ALTERNATIVES' metadata."))
+    }
+    n_alternatives <- preflib_attributes[["NUMBER ALTERNATIVES"]]
+    if (
+      !all(
+        paste(
+          "ALTERNATIVE NAME",
+          seq_len(n_alternatives)
+        ) %in% names(preflib_attributes)
+      )
+    ) {
+      stop(paste0("PrefLib datafile is corrupt: ",
+                  "missing 'ALTERNATIVE NAME X' metadata."))
+    }
+
+    # Concatenate all the 'ALTERNATIVE NAME X' into a list of names
+    alternative_names <- unlist(
+      preflib_attributes[
+        paste(
+          "ALTERNATIVE NAME",
+          seq_len(n_alternatives)
+        )
+      ]
+    )
+    # Remove each 'ALTERNATIVE NAME X' and replace with a list
+    preflib_attributes[
+      paste("ALTERNATIVE NAME", seq_len(n_alternatives))
+    ] <- NULL
+    preflib_attributes[["ALTERNATIVE NAMES"]] <- alternative_names
+
     # Filter the data lines and 'encourage' them into a csv format
     data_lines <- grep("^[^#]", lines, value = TRUE)
     data_lines <- chartr("{}", "''", data_lines)
