@@ -174,4 +174,129 @@
 #' as.matrix(O, format = "long")
 #'
 #' @export
-NULL
+preferences <- function(data,
+                        format,
+                        id,
+                        rank,
+                        alternative,
+                        alternative_names,
+                        frequency,
+                        aggregate) {
+  stop("Not implemented")
+}
+
+#' @rdname preferences
+#' @method [ preferences
+#' @param i The index of the preference-set to access.
+#' @param j The index of the rank to access, or if \code{by.rank = TRUE} the
+#' index of the alternative to obtain the rank for.
+#' @param by.rank When \code{TRUE}, columns \eqn{i} represent the ranks for
+#' alternative \eqn{i}. By default, columns \eqn{i} contain the alternatives
+#' in rank \eqn{i}.
+#' @param drop If \code{TRUE}, return single row/column matrices as a vector.
+#' @param width The width in number of characters to format each preference,
+#' truncating by "..." when they are too long.
+#' @export
+"[.preferences" <- function(x, i, j, ..., drop = TRUE, by.rank = FALSE) {
+  stop("Not implemented")
+}
+
+#' @rdname preferences
+#' @export
+as.preferences <- function(x, ...) {
+  UseMethod("as.preferences")
+}
+
+#' @rdname preferences
+#' @export
+as.preferences.default <- function(x,
+                                   format = c("ordering", "ranking", "long"),
+                                   id = NULL,
+                                   alternative = NULL,
+                                   rank = NULL,
+                                   alternative_names = NULL,
+                                   frequency = NULL,
+                                   aggregate = FALSE) {
+  stop("Not implemented")
+}
+
+#' @rdname preferences
+#' @export
+as.preferences.matrix <- function(x,
+                                  format = c("ordering", "ranking", "long"),
+                                  id = NULL,
+                                  alternative = NULL,
+                                  rank = NULL,
+                                  alternative_names = NULL,
+                                  frequency = NULL,
+                                  aggregate = FALSE) {
+  stop("Not implemented")
+}
+
+#' @method as.data.frame preferences
+#' @export
+as.data.frame.preferences <- function(x, row.names = NULL, optional = FALSE, ...,
+                                      nm = paste(deparse(substitute(x),
+                                                         width.cutoff = 20L),
+                                                 collapse = " ")) {
+  stop("Not implemented")
+}
+
+#' @method length preferences
+#' @export
+length.preferences <- function(x) {
+  nrow(x)
+}
+
+#' @method is.na preferences
+#' @export
+is.na.preferences <- function(x) {
+  # Alternatives are only listed once
+  apply(x,
+        1L,
+        function(x) {
+          y <- unlist(x)
+          identical(unique(y), unname(y))
+        })
+}
+
+#' @method print preferences
+#' @export
+print.preferences <- function(x, ...) {
+  print.default(format(x, ...))
+}
+
+#' @method format preferences
+#' @rdname preferences
+#' @export
+format.preferences <- function(x, width = 40L, ...) {
+  f <- function(i, alternatives) {
+    keep <- !is.na(i) & i != 0L
+    obj <- alternatives[keep]
+    i <- i[keep]
+    ord <- order(i)
+    if (length(obj) > 1L) {
+      op <- ifelse(diff(i[ord]) == 0L, " = ", " > ")
+      paste(obj[ord], c(op, ""), sep = "", collapse = "")
+    } else {
+      NA
+    }
+  }
+  value <- apply(x, 1L, f, alternatives = attr(x, "alternatives"))
+  nc <- nchar(value)
+  trunc <- !is.na(nc) & nc > width
+  value[trunc] <- paste(strtrim(value[trunc], width - 4), "...")
+  value
+}
+
+#' @method rbind preferences
+#' @export
+rbind.preferences <- function(...) {
+  stop("Not implemented")
+}
+
+#' @method as.matrix preferences
+#' @export
+as.matrix.preferences <- function(x, ...) {
+  unclass(x)
+}
