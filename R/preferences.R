@@ -153,16 +153,16 @@
 #' O[, -c(3:4)]
 #'
 #' # Exclude pear from the rankings
-#' O[, -4, by.ranking = TRUE]
+#' O[, -4, by.rank = TRUE]
 #'
 #' # Get the highest-ranked alternatives from the third preference-set
 #' O[3, 1]
 #'
 #' # Get the rank of apple in the third preference-set
-#' O[3, 1, by.ranking = TRUE]
+#' O[3, 1, by.rank = TRUE]
 #'
 #' # Get all the ranks assiged to apple as a vector
-#' O[, 1, by.ranking = TRUE]
+#' O[, 1, by.rank = TRUE]
 #'
 #' # Convert the preferences to a ranking matrix
 #' as.matrix(O, format = "ranking")
