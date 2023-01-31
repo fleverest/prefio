@@ -49,16 +49,16 @@
 #'
 #' @param data A \code{data.frame} or \code{matrix} in one of three formats:
 #' \describe{
-#' \item{ordering}{Orderings must be a \code{data.frame} with
+#' \item{"ordering"}{Orderings must be a \code{data.frame} with
 #'                  \code{"list"}-valued columns. Each row represents an
 #'                  ordering of the alternatives from first to last,
 #'                  representing ties by a list of vectors corresponding to
 #'                  the alternatives.}
-#' \item{ranking}{Each row assigns a ranking to each alternative, each column
+#' \item{"ranking"}{Each row assigns a ranking to each alternative, each column
 #'                  gives the rankings assigned to a single alterntive. Rankings
 #'                  should be dense, otherwise they will be converted to dense
 #'                  rankings.}
-#' \item{long}{Three columns: an \code{id} column grouping the rows which
+#' \item{"long"}{Three columns: an \code{id} column grouping the rows which
 #'                correspond to a single set of preferences, a
 #'                \code{alternative} column specifying (either by index or by
 #'                name) the alternative each row refers to, and a \code{rank}
@@ -84,7 +84,7 @@
 #' \code{\link{aggregated_preferences}} object.
 #' @param frequency An optional integer vector containing the number of
 #' occurences of each preference. If provided, the method will return a
-#' \code{\linl{aggregated_preferences}} object with the corresponding
+#' \code{\link{aggregated_preferences}} object with the corresponding
 #' frequencies.
 #'
 #' @return By default, a \code{"preferences"} object, which is a
@@ -96,7 +96,7 @@
 #' @examples
 #' # create rankings from data in long form
 #'
-#' # example long form data
+#' # Example long-form data
 #' x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
 #'                 alternative = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
 #'                            LETTERS[3:5]),
@@ -114,85 +114,207 @@
 #'
 #' # Creating a preferences object with this data will attempt to resolve these
 #' # issues automatically, sending warnings when assumptions need to be made.
-#' preferences(x, id = id, alternative = alternative, rank = rank)
+#' preferences(x, id = "id", alternative = "alternative", rank = "rank")
 #'
 #' # Convert an existing matrix of rankings to a preferences object.
-#' R <- matrix(c(1, 2, 0, 0,
+#' rnk <- matrix(c(1, 2, 0, 0,
 #'               4, 1, 2, 3,
 #'               2, 1, 1, 1,
 #'               1, 2, 3, 0,
 #'               2, 1, 1, 0,
 #'               1, 0, 3, 2), nrow = 6, byrow = TRUE)
-#' colnames(R) <- c("apple", "banana", "orange", "pear")
+#' colnames(rnk) <- c("apple", "banana", "orange", "pear")
 #'
-#' R <- as.preferences(R, format = "ranking")
+#' rnk <- as.preferences(rnk, format = "ranking")
 #'
 #' # Convert an existing data.frame of orderings to a preferences object.
-#' O <- data.frame(
+#' ord <- preferences(data.frame(
 #'   rank1 = I(list()),
 #'   rank2 = I(list()),
 #'   rank3 = I(list()),
 #'   rank4 = I(list())
-#'  )
-#' O[1,] <- list(list("apple"), list("banana"), list(c()), list(c()))
-#' O[2,] <- list(list("banana"), list("orange"), list("pear"), list("apple"))
-#' O[3,] <- list(list(c("banana", "orange", "pear")), list("apple"),
-#'                                                list(c()), list(c()))
-#' O[4,] <- list(list("apple"), list("banana"), list("orange"), list(c()))
-#' O[5,] <- list(list("banana", "orange"), list("apple"), list(c()), list(c()))
-#' O[6,] <- list(list("apple"), list("pear"), list("orange"), list(c()))
+#' ))
+#' ord[1,] <- list("apple", "banana")
+#' ord[2,] <- list("banana", "orange", "pear", "apple")
+#' ord[3,] <- list(c("banana", "orange", "pear"), "apple")
+#' ord[4,] <- list("apple", "banana", "orange")
+#' ord[5,] <- list(c("banana", "orange"), "apple")
+#' ord[6,] <- list("apple", "pear", "orange")
 #'
 #' # Alternatively, we could have referred to each alternative by index and
 #' # passed `alternative_names = c("apple", "banana", "orange", "pear")`.
-#' O <- as.preferences(O)
+#' ord <- as.preferences(ord)
 #'
 #' # Access the first three sets of preferences
-#' O[1:3, ]
+#' ord[1:3, ]
 #'
 #' # Truncate preferences to at most 2 ranks
-#' O[, -c(3:4)]
+#' ord[, -c(3:4)]
 #'
 #' # Exclude pear from the rankings
-#' O[, -4, by.rank = TRUE]
+#' ord[, -4, by.rank = FALSE]
 #'
 #' # Get the highest-ranked alternatives from the third preference-set
-#' O[3, 1]
+#' ord[3, 1]
 #'
 #' # Get the rank of apple in the third preference-set
-#' O[3, 1, by.rank = TRUE]
+#' ord[3, 1, by.rank = FALSE]
 #'
 #' # Get all the ranks assiged to apple as a vector
-#' O[, 1, by.rank = TRUE]
+#' ord[, 1, by.rank = FALSE]
 #'
 #' # Convert the preferences to a ranking matrix
-#' as.matrix(O, format = "ranking")
+#' as.matrix(ord, format = "ranking")
 #'
 #' # Convert the preferences to a ordering matrix
-#' as.matrix(O, format = "ordering")
+#' as.matrix(ord, format = "ordering")
 #'
 #' # Convert the preferences to a long-format matrix
-#' as.matrix(O, format = "long")
+#' as.matrix(ord, format = "long")
 #'
 #' @export
 preferences <- function(data,
-                        format,
-                        id,
-                        rank,
-                        alternative,
-                        alternative_names,
-                        frequency,
-                        aggregate) {
-  stop("Not implemented")
+                        format = c("long", "ordering", "ranking"),
+                        id = NULL,
+                        rank = NULL,
+                        alternative = NULL,
+                        alternative_names = NULL,
+                        frequency = NULL,
+                        aggregate = FALSE) {
+  # First we reformat the data into a matrix of rankings.
+  if (format == "long") {
+    x <- data[, c(id, alternative, rank)]
+    if (ncol(x) != 3L) {
+      stop(paste("When using long format, 'id', 'alternative' and 'rank'",
+                 "must all specify names of columns in 'data'."))
+    }
+    colnames(x) <- c("id", "alternative", "rank")
+
+    # Show warning if any columns contain NA
+    if (any(is.na(x))) {
+      warning("Dropping rows containing `NA`.")
+    }
+    # Filter rows containing NA
+    x <- x %>%  dplyr::filter(!is.na(rank) & !is.na(alternative))
+
+    # Validate alternatives
+    if (missing(alternative_names)) {
+      alternative_names <- sort(unique(x$alternative))
+    }
+    if (is.character(x$alternative)) {
+      if (length(setdiff(x$alternative, alternative_names)) > 0L) {
+        stop(paste("Cannot coerce into `preferences`:",
+                   "found `alternative` not in `alternative_names`."))
+      }
+    } else if (is.numeric(x$alternative)) {
+        if (any(x$alternative > length(alternative_names))) {
+          stop(paste("Cannot coerce into `preferences`:",
+                     "`alternative` index out of bounds."))
+        }
+        x$alternative <- alternative_names[x$alternative]
+    }
+    x$alternative <- factor(x$alternative)
+    levels(x$alternative) <- alternative_names
+
+    # Validate rank
+    old_rank <- x$rank
+    x$rank <- as.integer(x$rank)
+    if (any(is.na(x$rank)) || any(x$rank != old_rank)) {
+      stop("Cannot coerce into `preferences`: `rank` must be integer-valued.")
+    }
+
+    # Convert into ranking matrix
+    ranking <- x %>%
+    # Filter duplicate rankings, keeping the highest ranking for an alternative.
+      dplyr::group_by(id, alternative) %>%
+      remove_duplicates() %>%
+    # Convert rankings to dense rankings
+      dplyr::ungroup(alternative) %>%
+      dplyr::mutate(rank = as_dense(rank)) %>%
+    # Convert long-format rankings to wide rankings
+      tidyr::spread("alternative", "rank", drop = FALSE) %>%
+      dplyr::ungroup() %>%
+      dplyr::select(alternative_names) %>%
+      as.matrix
+    return(ranking)
+  } else if (format == "ordering") {
+    x <- data
+    # Ensure the object is a data.frame with "list" columns
+    if (!is.data.frame(data) || !all(unlist(lapply(data, typeof)) == "list")) {
+      stop(paste("`data` in \"ordering\" format must be a `data.frame` with",
+                 "`list`-valued columns."))
+    }
+    # Ensure alternatives are either always character or always integer-valued
+    alternative_types <- unique(rapply(x, typeof))
+    if (length(alternative_types) != 1L ||
+        !alternative_types %in% c("character", "numeric")) {
+      stop(paste("Alternatives must be listed by name everywhere",
+                 "or by index everywhere."))
+    }
+    if (missing(alternative_names)) {
+      alternative_names <- sort(unique(unlist(x)))
+    }
+    # Convert the ordering data into a matrix of rankings.
+    ranking <- t(apply(
+      x,
+      1,
+      function(x) {
+        structure(
+          rep(seq_along(x),
+              sapply(x, length))[match(alternative_names, unlist(x))],
+          names = alternative_names
+        )
+      }
+    ))
+    return(as.preferences.matrix(ranking))
+  } else if (format == "ranking") {
+    return(as.preferences.matrix(data))
+  } else {
+    stop(paste("Format '", format, "' not implemented. `format` must be one",
+                "of 'ordering', 'ranking' or 'long'."))
+  }
 }
+
+# A helper to detect duplicate
+remove_duplicates <- function(x) {
+  counts_gt1 <- dplyr::count(x)$n > 1
+  if (any(counts_gt1)) {
+    # TODO: show id:alternative pairs which contain duplicate entries.
+    # via `x[counts_gt1, c("id", "alternative")]`
+    warning(paste("Found duplicate rankings, only highest rank for each",
+                  "alternative will be considered."))
+  }
+  return(dplyr::top_n(x, 1, -abs(rank)))
+}
+
+# An alternative to `dplyr::dense_rank` which raises a warning.
+as_dense <- function(rank) {
+  drank <- dplyr::dense_rank(rank)
+  if (!all(drank == rank)) {
+    warning("Converted ranking to dense ranking.")
+  }
+  drank
+}
+
+rankings_to_ordering_list <- function(ranking) {
+  apply(ranking,
+        1,
+        function(ro) {
+          sapply(1:max(ranking[!is.na(ranking)]),
+                 \(x) names(ro)[which(ro == x)])
+        }
+  )
+}
+
 
 #' @rdname preferences
 #' @method [ preferences
 #' @param i The index of the preference-set to access.
-#' @param j The index of the rank to access, or if \code{by.rank = TRUE} the
-#' index of the alternative to obtain the rank for.
-#' @param by.rank When \code{TRUE}, columns \eqn{i} represent the ranks for
-#' alternative \eqn{i}. By default, columns \eqn{i} contain the alternatives
-#' in rank \eqn{i}.
+#' @param j The rank index to access, or if \code{by.rank = TRUE} the
+#' index or name of the alternative to obtain the ranking for.
+#' @param by.rank When \code{FALSE}, columns \eqn{j} contain the alternatives
+#' in rank \eqn{j}. By default, columns \eqn{j} represent the rank for the
+#' in rank \eqn{j}.
 #' @param drop If \code{TRUE}, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
@@ -210,36 +332,33 @@ as.preferences <- function(x, ...) {
 #' @rdname preferences
 #' @export
 as.preferences.default <- function(x,
-                                   format = c("ordering", "ranking", "long"),
+                                   format,
                                    id = NULL,
                                    alternative = NULL,
                                    rank = NULL,
                                    alternative_names = NULL,
                                    frequency = NULL,
                                    aggregate = FALSE) {
-  stop("Not implemented")
+  preferences(x,
+              format = format,
+              id = id,
+              alternative = alternative,
+              rank = rank,
+              alternative_names = alternative_names,
+              frequency = frequency,
+              aggregate = aggregate)
 }
 
 #' @rdname preferences
 #' @export
 as.preferences.matrix <- function(x,
-                                  format = c("ordering", "ranking", "long"),
-                                  id = NULL,
-                                  alternative = NULL,
-                                  rank = NULL,
-                                  alternative_names = NULL,
+                                  format,
                                   frequency = NULL,
                                   aggregate = FALSE) {
-  stop("Not implemented")
-}
+  if (mode(x) != "numeric" && format == "ranking") {
+      stop("Values should be numeric ranks for 'ranking' format.")
+  }
 
-#' @method as.data.frame preferences
-#' @export
-as.data.frame.preferences <- function(x, row.names = NULL, optional = FALSE, ...,
-                                      nm = paste(deparse(substitute(x),
-                                                         width.cutoff = 20L),
-                                                 collapse = " ")) {
-  stop("Not implemented")
 }
 
 #' @method length preferences
@@ -292,6 +411,12 @@ format.preferences <- function(x, width = 40L, ...) {
 #' @method rbind preferences
 #' @export
 rbind.preferences <- function(...) {
+  stop("Not implemented")
+}
+
+#' @method as.data.frame preferences
+#' @export
+as.data.frame.preferences <- function(x, ...) {
   stop("Not implemented")
 }
 

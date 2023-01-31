@@ -228,7 +228,7 @@ as.rankings.matrix <- function(x,
     if (mode(x) != "numeric" && input == "rankings"){
         stop("values should be numeric ranks for `input = rankings`")
     }
-    if (input == "orderings"){
+    if (input == "orderings") {
         # define items, N.B. matrix cells may be vectors; may have NAs
         code <- sort(setdiff(unlist(c(x)), 0L))
         if (is.null(items)){
