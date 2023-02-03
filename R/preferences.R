@@ -401,6 +401,50 @@ ranking_to_ordering <- function(ranking) {
   out
 }
 
+#' @method identical preferences
+#' @export
+identical.preferences <- function(x1, x2, ...) {
+  # If the alternatives are different return FALSE everywhere
+  if (!all(dim(x1) == dim(x2))) {
+    return(FALSE)
+  }
+  if (!identical(sort(attr(x1, "alternatives")),
+                 sort(attr(x2, "alternatives")))) {
+    return(FALSE)
+  }
+  # Sort the columns of x2 to be in the same order as x1
+  x2 <- x2[, attr(x1, "alternatives")]
+  identical(unclass(x1), unclass(x2))
+}
+
+#' @method Ops preferences
+#' @export
+Ops.preferences <- function(x1, x2) {
+  op <- .Generic[[1]]
+  switch(op,
+         `==` = {
+           minlen <- min(nrow(x1), nrow(x2))
+           maxlen <- max(nrow(x1), nrow(x2))
+           cmp <- sapply(seq_len(minlen), function(i) identical(x1[i], x2[i]))
+           if (minlen < maxlen) {
+             warning("Objects being compared are not the same length.")
+             cmp <- c(cmp, rep(FALSE, maxlen - minlen))
+           }
+           return(cmp)
+         },
+         `!=` = {
+           minlen <- min(nrow(x1), nrow(x2))
+           maxlen <- max(nrow(x1), nrow(x2))
+           cmp <- sapply(seq_len(minlen), function(i) identical(x1[i], x2[i]))
+           if (minlen < maxlen) {
+             warning("Objects being compared are not the same length.")
+             cmp <- c(cmp, rep(FALSE, maxlen - minlen))
+           }
+           return(!cmp)
+         },
+         stop("Undefined operation for \"preferences\"."))
+
+}
 
 #' @rdname preferences
 #' @method [ preferences
@@ -414,10 +458,20 @@ ranking_to_ordering <- function(ranking) {
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
 #' @export
-"[.preferences" <- function(x, i, j, ..., drop = TRUE, by.ordering = FALSE) {
+"[.preferences" <- function(x, i, j, ..., drop = FALSE, by.ordering = FALSE) {
+
+  if (!missing(j) && is.numeric(j) && any(j > ncol(x) | j < -ncol(x))) {
+    stop("Subscript `j` out of bounds.")
+  }
+  if (!missing(i) && is.numeric(i) && any(i > nrow(x) | i < -nrow(x))) {
+    stop("Subscript `i` out of bounds.")
+  }
 
   # Accessing orderings
   if (by.ordering) {
+    if (drop) {
+      message("Cannot drop when returning as orderings")
+    }
     if (!missing(i)) {
       if (!is.numeric(i)) {
         stop("When accessing preferences as ordering lists, index must ",
@@ -435,25 +489,55 @@ ranking_to_ordering <- function(ranking) {
     if (missing(i)) {
       value <- unclass(x)
     } else {
+      j <- TRUE
       # always a vector if picking out elements of rankings matrix
       if (is.matrix(i)) {
-        return(.subset(x, i))
+        stop("Cannot subset by matrix.")
       }
       # else subset of rankings
-      value <- .subset(x, i, TRUE, drop = FALSE)
+      value <- .subset(x, i, j, drop = FALSE)
     }
   } else {
-    # Project all preferences onto chosen subset TODO:
     # Subset items (never drop)
     if (missing(i)) {
       i <- TRUE
     }
-    value <- .subset(x, i, j, drop = FALSE)
-    # recode and drop items with <=2 items if necessary
+    # Subset and convert to dense rank again.
+    value <- do.call(rbind,
+                     apply(.subset(x, i, j, drop = FALSE),
+                           1L,
+                           dplyr::dense_rank,
+                           simplify = FALSE))
   }
-  structure(value,
-            dimnames = list(NULL, colnames(value)[j]),
-            alternatives = colnames(value))
+  alternatives <- attr(x, "alternatives")
+
+  # Sort subset of alternatives so that they appear in the same order as the
+  # original preferences' alternatives.
+  if (!is.character(j)) {
+    sub_alternatives <- alternatives[j]
+  } else {
+    sub_alternatives <- j
+  }
+  ord <- order(match(sub_alternatives, alternatives))
+  value <- value[, ord, drop = drop]
+  sub_alternatives <- sub_alternatives[ord]
+
+  if (is.null(dim(value))) {
+    if (length(sub_alternatives) > 1L) {
+      names(value) <- sub_alternatives
+    }
+    value
+  } else if (is.character(j)) {
+    structure(value,
+              dimnames = list(NULL, sub_alternatives),
+              alternatives = sub_alternatives,
+              class = "preferences")
+  } else {
+    structure(value,
+              dimnames = list(NULL, sub_alternatives),
+              alternatives = sub_alternatives,
+              class = "preferences")
+  }
 }
 
 #' @rdname preferences
@@ -552,8 +636,10 @@ format.preferences <- function(x, width = 40L, ...) {
     if (length(obj) > 1L) {
       op <- ifelse(diff(i[ord]) == 0L, " = ", " > ")
       paste(obj[ord], c(op, ""), sep = "", collapse = "")
+    } else if (length(obj) == 1L) {
+      obj
     } else {
-      NA
+      "blank"
     }
   }
   value <- apply(x, 1L, f, alternatives = attr(x, "alternatives"))

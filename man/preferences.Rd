@@ -11,33 +11,39 @@
 \usage{
 preferences(
   data,
-  format,
-  id,
-  rank,
-  alternative,
-  alternative_names,
-  frequency,
-  aggregate
+  format = c("long", "ordering", "ranking"),
+  id = NULL,
+  rank = NULL,
+  alternative = NULL,
+  alternative_names = NULL,
+  frequency = NULL,
+  aggregate = FALSE,
+  verbose = TRUE,
+  ...
 )
 
-\method{[}{preferences}(x, i, j, ..., drop = TRUE, by.rank = FALSE)
+\method{[}{preferences}(x, i, j, ..., drop = FALSE, by.ordering = FALSE)
 
 as.preferences(x, ...)
 
 \method{as.preferences}{default}(
   x,
-  format = "ordering",
+  format,
+  id = NULL,
+  alternative = NULL,
+  rank = NULL,
   alternative_names = NULL,
-  frequency = NULL,
-  aggregate = FALSE
+  verbose = TRUE
 )
 
 \method{as.preferences}{matrix}(
   x,
-  format = "ordering",
+  format = c("ranking", "long"),
+  id = NULL,
+  alternative = NULL,
+  rank = NULL,
   alternative_names = NULL,
-  frequency = NULL,
-  aggregate = FALSE
+  verbose = TRUE
 )
 
 \method{format}{preferences}(x, width = 40L, ...)
@@ -97,12 +103,12 @@ index or name of the alternative to obtain the ranking for.}
 
 \item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
 
-\item{by.rank}{When \code{TRUE}, columns \eqn{j} represent the ranks for
-alternative \eqn{j}. By default, columns \eqn{j} contain the alternatives
-in rank \eqn{j}.}
-
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
+
+\item{by.rank}{When \code{FALSE}, columns \eqn{j} contain the alternatives
+in rank \eqn{j}. By default, columns \eqn{j} represent the rank for the
+in rank \eqn{j}.}
 }
 \value{
 By default, a \code{"preferences"} object, which is a
@@ -184,59 +190,63 @@ split(x, x$ranking)
 preferences(x, id = "id", alternative = "alternative", rank = "rank")
 
 # Convert an existing matrix of rankings to a preferences object.
-R <- matrix(c(1, 2, 0, 0,
-              4, 1, 2, 3,
-              2, 1, 1, 1,
-              1, 2, 3, 0,
-              2, 1, 1, 0,
-              1, 0, 3, 2), nrow = 6, byrow = TRUE)
-colnames(R) <- c("apple", "banana", "orange", "pear")
+rnk <- matrix(c(1, 2, 0, 0,
+                4, 1, 2, 3,
+                2, 1, 1, 1,
+                1, 2, 3, 0,
+                2, 1, 1, 0,
+                1, 0, 3, 2), nrow = 6, byrow = TRUE)
+colnames(rnk) <- c("apple", "banana", "orange", "pear")
 
-R <- as.preferences(R, format = "ranking")
+rnk <- as.preferences(rnk, format = "ranking")
 
 # Convert an existing data.frame of orderings to a preferences object.
-O <- data.frame(
-  rank1 = I(list()),
-  rank2 = I(list()),
-  rank3 = I(list()),
-  rank4 = I(list())
- )
-O[1,] <- list("apple", "banana")
-O[2,] <- list("banana", "orange", "pear", "apple")
-O[3,] <- list(c("banana", "orange", "pear"), "apple")
-O[4,] <- list("apple", "banana", "orange")
-O[5,] <- list(c("banana", "orange"), "apple")
-O[6,] <- list("apple", "pear", "orange")
+ord <- preferences(
+  data.frame(
+    rank1 = I(list()),
+    rank2 = I(list()),
+    rank3 = I(list()),
+    rank4 = I(list())
+  ),
+  format = "ordering",
+  alternative_names = c("apple", "banana", "orange", "pear")
+)
+ord[1,] <- list(1, 2) # apple, banana
+ord[2,] <- list("banana", "orange", "pear", "apple")
+ord[3,] <- list(c("banana", "orange", "pear"), "apple")
+ord[4,] <- list("apple", "banana", "orange")
+ord[5,] <- list(c("banana", "orange"), "apple")
+ord[6,] <- list("apple", "pear", "orange")
 
 # Alternatively, we could have referred to each alternative by index and
 # passed `alternative_names = c("apple", "banana", "orange", "pear")`.
-O <- as.preferences(O)
+ord <- as.preferences(ord)
 
 # Access the first three sets of preferences
-O[1:3, ]
+ord[1:3, ]
 
-# Truncate preferences to at most 2 ranks
-O[, -c(3:4)]
+# Truncate preferences to the top 2 ranks
+ord[, 1:2, by.ordering = TRUE]
 
 # Exclude pear from the rankings
-O[, -4, by.rank = TRUE]
+ord[, -4]
 
 # Get the highest-ranked alternatives from the third preference-set
-O[3, 1]
+ord[3, 1, by.ordering = TRUE]
 
 # Get the rank of apple in the third preference-set
-O[3, 1, by.rank = TRUE]
+ord[3, 1]
 
 # Get all the ranks assiged to apple as a vector
-O[, 1, by.rank = TRUE]
+ord[, 1]
 
 # Convert the preferences to a ranking matrix
-as.matrix(O, format = "ranking")
+as.matrix(ord, format = "ranking")
 
 # Convert the preferences to a ordering matrix
-as.matrix(O, format = "ordering")
+as.matrix(ord, format = "ordering")
 
 # Convert the preferences to a long-format matrix
-as.matrix(O, format = "long")
+as.matrix(ord, format = "long")
 
 }
