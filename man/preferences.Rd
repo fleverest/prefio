@@ -68,9 +68,8 @@ column specifying the rank for the associated
 \code{alternative}.}
 }}
 
-\item{format}{The format of the data: one of
-\code{c("ordering", "ranking", "long")}. By default, \code{data} is assumed
-to be in \code{ordering} format.}
+\item{format}{The format of the data: one of "ordering", "ranking", or
+"long". By default, \code{data} is assumed to be in \code{ordering} format.}
 
 \item{id}{For \code{data} in long-format: the column representing the
 preference set grouping.}
@@ -89,26 +88,27 @@ the \code{alternative_names} character vector should be in the correct order.}
 
 \item{frequency}{An optional integer vector containing the number of
 occurences of each preference. If provided, the method will return a
-\code{\link{aggregated_preferences}} object with the corresponding
+\verb{\link{aggregated_preferences}} object with the corresponding
 frequencies.}
 
 \item{aggregate}{If \code{TRUE}, aggregate the preferences via
-\code{\link{aggregate.preferences}} before returning. This returns a
-\code{\link{aggregated_preferences}} object.}
+\verb{\link{aggregate.preferences}} before returning. This returns a
+\verb{\link{aggregated_preferences}} object.}
 
 \item{i}{The index of the preference-set to access.}
 
-\item{j}{The rank index to access, or if \code{by.rank = TRUE} the
+\item{j}{The rank index to access, or if \code{by.ordering = TRUE} the
 index or name of the alternative to obtain the ranking for.}
 
 \item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
 
+\item{by.ordering}{When \code{FALSE}, returns a \code{"preferences"} object:
+internally rows \eqn{i} contain the ranking assigned to each alternative
+in preference \eqn{p_i}. When \code{TRUE}, returns a \code{"data.frame"} where
+rows group the the candidates in order of rank.}
+
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
-
-\item{by.rank}{When \code{FALSE}, columns \eqn{j} contain the alternatives
-in rank \eqn{j}. By default, columns \eqn{j} represent the rank for the
-in rank \eqn{j}.}
 }
 \value{
 By default, a \code{"preferences"} object, which is a
@@ -133,8 +133,8 @@ rank. Hence, there are four distinct types of preferential data:
 }
 The data type is stored alongside the \code{"preferences"} as an attribute
 \code{attr(preferences, "DATA TYPE")}. To convert between types, there are
-four methods for doing so; namely \code{\link{as.soc}}, \code{\link{as.soi}},
-\code{\link{as.toc}} and \code{\link{as.toi}}. Canonically, all strict orders
+four methods for doing so; namely \verb{\link{as.soc}}, \verb{\link{as.soi}},
+\verb{\link{as.toc}} and \verb{\link{as.toi}}. Canonically, all strict orders
 can be converted into orders with ties, and all complete orderings can be
 converted into incomplete orderings. Incomplete orders can also be converted
 to complete orders with ties, where all unlisted alternatives appear tied

@@ -1,56 +1,56 @@
 #' Preferences Object
 #'
-#' Create a \code{"preferences"} object from Ordinal Preference data in either
-#' \code{ordering} or \code{ranking} format.
+#' Create a `"preferences"` object from Ordinal Preference data in either
+#' `ordering` or `ranking` format.
 #'
 #' Ordinal preferences can order every alternative, or they can order a subset.
 #' Some preferential datasets will contain ties between alternatives at a given
 #' rank. Hence, there are four distinct types of preferential data:
 #' \describe{
-#' \item{\code{"soc"}}{Strict Orders - Complete List}
-#' \item{\code{"soi"}}{Strict Orders - Incomplete List}
-#' \item{\code{"toc"}}{Orders with Ties - Complete List}
-#' \item{\code{"toi"}}{Orders with Ties - Incomplete List}
+#' \item{`"soc"`}{Strict Orders - Complete List}
+#' \item{`"soi"`}{Strict Orders - Incomplete List}
+#' \item{`"toc"`}{Orders with Ties - Complete List}
+#' \item{`"toi"`}{Orders with Ties - Incomplete List}
 #' }
-#' The data type is stored alongside the \code{"preferences"} as an attribute
-#' \code{attr(preferences, "DATA TYPE")}. To convert between types, there are
-#' four methods for doing so; namely \code{\link{as.soc}}, \code{\link{as.soi}},
-#' \code{\link{as.toc}} and \code{\link{as.toi}}. Canonically, all strict orders
+#' The data type is stored alongside the `"preferences"` as an attribute
+#' `attr(preferences, "DATA TYPE")`. To convert between types, there are
+#' four methods for doing so; namely `\link{as.soc}`, `\link{as.soi}`,
+#' `\link{as.toc}` and `\link{as.toi}`. Canonically, all strict orders
 #' can be converted into orders with ties, and all complete orderings can be
 #' converted into incomplete orderings. Incomplete orders can also be converted
 #' to complete orders with ties, where all unlisted alternatives appear tied
 #' in last preference.
 #'
-#' A set of preferences can be represented either by \code{ranking} or by
-#' \code{ordering}. These correspond to the two ways you can list a set of
+#' A set of preferences can be represented either by `ranking` or by
+#' `ordering`. These correspond to the two ways you can list a set of
 #' preferences in a vector:
 #' \describe{
-#' \item{\code{ordering}}{The alternatives are listed in order of most preferred
+#' \item{`ordering`}{The alternatives are listed in order of most preferred
 #'                          to least preferred, allowing for pairs of
 #'                          alternatives in the case of ties.}
-#' \item{\code{ranking}}{The rank assigned to each alternative is listed in
+#' \item{`ranking`}{The rank assigned to each alternative is listed in
 #'                        order of some predefined index on the alternatives.
 #'                        rankings should be dense, otherwise they will be
 #'                        converted to dense rankings.}
 #' }
-#' When reading \code{"preferences"} from an \code{ordering} matrix, the index
-#' on the alternatives is the order passed to the \code{alternative_names}
-#' parameter. When reading from a \code{rankings} matrix, if no
-#' \code{alternative_names} are provided, the order is inferred from the named
+#' When reading `"preferences"` from an `ordering` matrix, the index
+#' on the alternatives is the order passed to the `alternative_names`
+#' parameter. When reading from a `rankings` matrix, if no
+#' `alternative_names` are provided, the order is inferred from the named
 #' columns.
 #'
-#' A \code{"preferences"} object can also be read from a long-format matrix,
-#' where there are three columns: \code{id}, \code{alternative} and
-#' \code{rank}. The \code{id} variable groups the rows of the matrix which
+#' A `"preferences"` object can also be read from a long-format matrix,
+#' where there are three columns: `id`, `alternative` and
+#' `rank`. The `id` variable groups the rows of the matrix which
 #' correspond to a single set of preferences, which the \code{alternative:rank},
 #' pairs indicate how each alternative is ranked. When reading a matrix from
-#' this format and no \code{alternative_names} parameter is passed, the
+#' this format and no `alternative_names` parameter is passed, the
 #' order is determined automatically.
 #'
-#' @param data A \code{data.frame} or \code{matrix} in one of three formats:
+#' @param data A `data.frame` or `matrix` in one of three formats:
 #' \describe{
-#' \item{"ordering"}{Orderings must be a \code{data.frame} with
-#'                  \code{"list"}-valued columns. Each row represents an
+#' \item{"ordering"}{Orderings must be a `data.frame` with
+#'                  `"list"`-valued columns. Each row represents an
 #'                  ordering of the alternatives from first to last,
 #'                  representing ties by a list of vectors corresponding to
 #'                  the alternatives.}
@@ -58,37 +58,36 @@
 #'                  gives the rankings assigned to a single alterntive. Rankings
 #'                  should be dense, otherwise they will be converted to dense
 #'                  rankings.}
-#' \item{"long"}{Three columns: an \code{id} column grouping the rows which
+#' \item{"long"}{Three columns: an `id` column grouping the rows which
 #'                correspond to a single set of preferences, a
-#'                \code{alternative} column specifying (either by index or by
-#'                name) the alternative each row refers to, and a \code{rank}
+#'                `alternative` column specifying (either by index or by
+#'                name) the alternative each row refers to, and a `rank`
 #'                column specifying the rank for the associated
-#'                \code{alternative}.}
+#'                `alternative`.}
 #' }
-#' @param format The format of the data: one of
-#' \code{c("ordering", "ranking", "long")}. By default, \code{data} is assumed
-#' to be in \code{ordering} format.
-#' @param id For \code{data} in long-format: the column representing the
+#' @param format The format of the data: one of "ordering", "ranking", or
+#' "long". By default, `data` is assumed to be in `ordering` format.
+#' @param id For `data` in long-format: the column representing the
 #' preference set grouping.
-#' @param alternative For \code{data} in long-format: the column representing
+#' @param alternative For `data` in long-format: the column representing
 #' the alternatives by name or by index, in which case the
-#' \code{alternative_names} parameter should also be passed, or the alternatives
+#' `alternative_names` parameter should also be passed, or the alternatives
 #' will be named by the integers.
-#' @param rank For \code{data} in long-format: the column representing the
+#' @param rank For `data` in long-format: the column representing the
 #' rank for the associated alternative.
 #' @param alternative_names The names of the full set of alternatives. When
 #' loading data using integer-valued indices in place of alternative names,
-#' the \code{alternative_names} character vector should be in the correct order.
-#' @param aggregate If \code{TRUE}, aggregate the preferences via
-#' \code{\link{aggregate.preferences}} before returning. This returns a
-#' \code{\link{aggregated_preferences}} object.
+#' the `alternative_names` character vector should be in the correct order.
+#' @param aggregate If `TRUE`, aggregate the preferences via
+#' `\link{aggregate.preferences}` before returning. This returns a
+#' `\link{aggregated_preferences}` object.
 #' @param frequency An optional integer vector containing the number of
 #' occurences of each preference. If provided, the method will return a
-#' \code{\link{aggregated_preferences}} object with the corresponding
+#' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
 #'
-#' @return By default, a \code{"preferences"} object, which is a
-#' \code{data.frame} with \code{"list"}-valued columns corresponding to
+#' @return By default, a `"preferences"` object, which is a
+#' `data.frame` with `"list"`-valued columns corresponding to
 #' preferences on the alternatives. This may be an ordering on subsets of the
 #' alternatives in the case of ties, or a potentially-partial strict ordering.
 #' In the case of partial or tied preferences, some entries may be empty lists.
@@ -449,12 +448,13 @@ Ops.preferences <- function(x1, x2) {
 #' @rdname preferences
 #' @method [ preferences
 #' @param i The index of the preference-set to access.
-#' @param j The rank index to access, or if \code{by.rank = TRUE} the
+#' @param j The rank index to access, or if `by.ordering = TRUE` the
 #' index or name of the alternative to obtain the ranking for.
-#' @param by.rank When \code{FALSE}, columns \eqn{j} contain the alternatives
-#' in rank \eqn{j}. By default, columns \eqn{j} represent the rank for the
-#' in rank \eqn{j}.
-#' @param drop If \code{TRUE}, return single row/column matrices as a vector.
+#' @param by.ordering When `FALSE`, returns a `"preferences"` object:
+#' internally rows \eqn{i} contain the ranking assigned to each alternative
+#' in preference \eqn{p_i}. When `TRUE`, returns a `"data.frame"` where
+#' rows group the the candidates in order of rank.
+#' @param drop If `TRUE`, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
 #' @export
