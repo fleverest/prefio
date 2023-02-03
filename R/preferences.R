@@ -13,13 +13,10 @@
 #' \item{`"toi"`}{Orders with Ties - Incomplete List}
 #' }
 #' The data type is stored alongside the `"preferences"` as an attribute
-#' `attr(preferences, "DATA TYPE")`. To convert between types, there are
-#' four methods for doing so; namely `\link{as.soc}`, `\link{as.soi}`,
-#' `\link{as.toc}` and `\link{as.toi}`. Canonically, all strict orders
-#' can be converted into orders with ties, and all complete orderings can be
-#' converted into incomplete orderings. Incomplete orders can also be converted
-#' to complete orders with ties, where all unlisted alternatives appear tied
-#' in last preference.
+#' `attr(preferences, "DATA TYPE")`. The data type is determined automatically.
+#' If every preference ranks every alternative, then the data type will be
+#' "soc" or "soi". Similarly, if no preference contains a tie the data type
+#' will be "toc" or "toi".
 #'
 #' A set of preferences can be represented either by `ranking` or by
 #' `ordering`. These correspond to the two ways you can list a set of
