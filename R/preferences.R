@@ -407,12 +407,12 @@ identical.preferences <- function(x1, x2, ...) {
   if (!all(dim(x1) == dim(x2))) {
     return(FALSE)
   }
-  if (!identical(sort(attr(x1, "alternatives")),
-                 sort(attr(x2, "alternatives")))) {
+  if (!identical(sort(attr(x1, "ALTERNATIVE NAMES")),
+                 sort(attr(x2, "ALTERNATIVE NAMES")))) {
     return(FALSE)
   }
   # Sort the columns of x2 to be in the same order as x1
-  x2 <- x2[, attr(x1, "alternatives")]
+  x2 <- x2[, attr(x1, "ALTERNATIVE NAMES")]
   identical(unclass(x1), unclass(x2))
 }
 
@@ -509,7 +509,7 @@ Ops.preferences <- function(x1, x2) {
                            dplyr::dense_rank,
                            simplify = FALSE))
   }
-  alternatives <- attr(x, "alternatives")
+  alternatives <- attr(x, "ALTERNATIVE NAMES")
 
   # Sort subset of alternatives so that they appear in the same order as the
   # original preferences' alternatives.
@@ -530,15 +530,45 @@ Ops.preferences <- function(x1, x2) {
   } else if (is.character(j)) {
     structure(value,
               dimnames = list(NULL, sub_alternatives),
-              alternatives = sub_alternatives,
-              class = "preferences")
+               "ALTERNATIVE NAMES" = sub_alternatives,
+              class = "preferences",
+              "DATA TYPE" = preftype(value))
   } else {
     structure(value,
               dimnames = list(NULL, sub_alternatives),
-              alternatives = sub_alternatives,
-              class = "preferences")
+               "ALTERNATIVE NAMES" = sub_alternatives,
+              class = "preferences",
+              "DATA TYPE" = preftype(value))
   }
 }
+
+# A helper function to determine the type of the preference data:
+# "soc", "soi", "toc", or "toi".
+preftype <- function(prefs) {
+  x <- as.matrix(prefs)
+  complete <- anyNA(x)
+  ties <- FALSE
+  for (i in seq_len(nrow(x))) {
+    if (anyDuplicated(x[i,])) {
+      ties <- TRUE
+      break
+    }
+  }
+  if (complete) {
+    if (ties) {
+      "toc"
+    } else {
+      "soc"
+    }
+  } else {
+    if (ties) {
+      "toi"
+    } else {
+      "soi"
+    }
+  }
+}
+
 
 #' @rdname preferences
 #' @export
@@ -596,7 +626,8 @@ as.preferences.matrix <- function(x,
     alternative_names <- colnames(prefs)
   }
   class(prefs) <- c("preferences", class(prefs))
-  attr(prefs, "alternatives") <- alternative_names
+  attr(prefs, "ALTERNATIVE NAMES") <- alternative_names
+  attr(prefs, "DATA TYPE") <- preftype(prefs)
   return(prefs)
 }
 
@@ -642,7 +673,7 @@ format.preferences <- function(x, width = 40L, ...) {
       "blank"
     }
   }
-  value <- apply(x, 1L, f, alternatives = attr(x, "alternatives"))
+  value <- apply(x, 1L, f,  alternatives = attr(x, "ALTERNATIVE NAMES"))
   nc <- nchar(value)
   trunc <- !is.na(nc) & nc > width
   value[trunc] <- paste(strtrim(value[trunc], width - 4), "...")
@@ -718,8 +749,8 @@ as.data.frame.preferences <- function(x,
 #' @export
 as.matrix.preferences <- function(x, ...) {
   m <- unclass(x)
-  colnames(m) <- attr(x, "alternatives")
-  attr(m, "alternatives") <- NULL
+  colnames(m) <- attr(x, "ALTERNATIVE NAMES")
+  attr(m, "ALTERNATIVE NAMES") <- NULL
   return(m)
 }
 
