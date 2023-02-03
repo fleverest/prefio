@@ -1,10 +1,10 @@
 Package: prefio
 Title: Structures for Preference Data
-Description: Convenient structures for creating, sourcing and manipulating
-  preference data.
+Description: Convenient structures for creating, sourcing, reading, writing
+  and manipulating ordinal preference data.
 Authors@R: c(
   person("Floyd", "Everest", email = "me@floydeverest.com",
-         role = c("ctb", "cre"), comment = c(ORCID = "0000-0002-2726-6736")),
+         role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2726-6736")),
   person("Heather", "Turner", email = "ht@heatherturner.net",
          role = c("aut"), comment = c(ORCID = "0000-0002-1256-3375")))
 Version: 0.0.0.9000
