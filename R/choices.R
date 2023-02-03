@@ -12,7 +12,7 @@
 #' \item{choices}{A list where each element represents the alternatives
 #' chosen for a single rank in the preference set.}
 #' \item{options}{A list where each element represents the options (i.e. the
-#' set of alternatives available to choose from) for a single rank in the
+#' set of remaining alternatives to choose from) for a single rank in the
 #' preference set.}
 #' \item{preference_set}{A list where each element represents the preference set
 #' that the choice belongs to.}
