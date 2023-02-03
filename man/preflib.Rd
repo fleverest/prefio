@@ -2,32 +2,28 @@
 % Please edit documentation in R/preflib.R
 \name{preflib}
 \alias{preflib}
-\alias{as.aggregated_rankings.preflib}
-\title{Read Preflib Election Data Files}
-\usage{
-\method{as.aggregated_rankings}{preflib}(x, ...)
-}
+\title{Read Ordinal Preference Data From PrefLib}
 \arguments{
-\item{x}{An object of class \code{"preflib"}.}
-
-\item{...}{Additional arguments passed to \code{\link[=as.rankings]{as.rankings()}}: \code{freq},
-\code{input} or \code{items} will be ignored with a warning as they are set
-automatically.}
-
 \item{file}{A preferential data file, conventionally with extension \code{.soc},
 \code{.soi}, \code{.toc} or \code{.toi} according to data type.}
+
+\item{x}{An object of class \code{"preflib"}.}
+
+\item{as.aggregated_preferences}{When \code{TRUE}, returns an object of class
+\code{\link[=aggregate.preferences]{"aggregated_preferences"}}. When \code{FALSE}, returns
+a \code{"data.frame"} containing the raw PrefLib data.}
+
+\item{...}{Additional arguments passed to \code{\link[=as.aggregated_preferences]{as.aggregated_preferences()}}:
+\code{frequencies}, \code{format} or \code{alternative_names} will be ignored as they are
+set automatically.}
 }
 \value{
-A data frame of class \code{"preflib"} with first column \code{Frequency},
-giving the frequency of the ranking in that row, and remaining columns
-\code{Rank 1}, \ldots, \code{Rank p} giving the items ranked from first to
-last place in that ranking. Ties are represented by vector elements in list
-columns. The data frame has an attribute \code{"items"} giving the labels
-corresponding to each item number.
+An \code{\link[=aggregate.preferences]{"aggregated_preferences"}} object
+containing the PrefLib data.
 }
 \description{
 Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types storing
-preferencial data as defined by
+ordinal preference data as defined by
 \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 }
 \details{
@@ -41,14 +37,13 @@ The file types supported are
 
 The numerically coded orderings and their frequencies are read into a
 data frame, storing the item names as an attribute. The
-\code{as.aggregated_rankings} method converts these to an
-\code{\link[=aggregate.rankings]{"aggregated_rankings"}} object with the items labelled
-by the item names.
+\code{as.aggregated_preferences} method converts these to an
+\code{\link[=aggregate.preferences]{"aggregated_preferences"}} object with the
+alternatives labelled by name.
 
-A Preflib file may be corrupt, in the sense that the ordered items do not
-match the named items. In this case, the file can be read in as a data
-frame (with a warning) using the corresponding \verb{read.*} function, but
-\code{as.aggregated_rankings} will throw an error.
+A Preflib file may be corrupt, in the sense that the ordered alternatives do
+not match their names. In this case, the file can be read in as a data
+frame (with a warning), but \code{as.aggregated_preferences} will throw an error.
 }
 \note{
 The Netflix and cities datasets used in the examples are from
@@ -57,32 +52,19 @@ data sets require a citation for re-use.
 }
 \examples{
 
-# can take a little while depending on speed of internet connection
+# Can take a little while depending on speed of internet connection
 
 \dontrun{
 # url for preflib data in the "Election Data" category
-preflib <- "https://www.preflib.org/static/data/ED/"
+preflib <- "https://www.preflib.org/static/data/"
 
 # strict complete orderings of four films on Netflix
-netflix <- read.soc(file.path(preflib, "netflix/ED-00004-00000101.soc"))
+netflix <- read.preflib(file.path(preflib, "netflix/00004-00000101.soc"))
 head(netflix)
 attr(netflix, "ALTERNATIVE NAMES")
 
-head(as.rankings(netflix))
-
 # strict incomplete orderings of 6 random cities from 36 in total
-cities <- read.soi(file.path(preflib, "cities/ED-00034-00000001.soi"))
-
-# strict incomplete orderings of drivers in the 1961 F1 races
-# 8 races with 17 to 34 drivers in each
-f1 <- read.soi(file.path(preflib, "f1/ED-00010-00000001.soi"))
-
-# complete orderings with ties of 30 skaters
-skaters <- read.toc(file.path(preflib, "skate/ED-00006-00000001.toc"))
-
-# incomplete orderings with ties of 10 sushi items from 100 total
-# orderings were derived from numeric ratings
-sushi <- read.toi(file.path(preflib, "sushi/ED-00014-00000003.toi"))
+cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
 }
 }
 \references{

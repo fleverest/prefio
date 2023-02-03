@@ -16,7 +16,7 @@ preferences(
   rank = NULL,
   alternative = NULL,
   alternative_names = NULL,
-  frequency = NULL,
+  frequencies = NULL,
   aggregate = FALSE,
   verbose = TRUE,
   ...
@@ -86,7 +86,7 @@ will be named by the integers.}
 loading data using integer-valued indices in place of alternative names,
 the \code{alternative_names} character vector should be in the correct order.}
 
-\item{frequency}{An optional integer vector containing the number of
+\item{frequencies}{An optional integer vector containing the number of
 occurences of each preference. If provided, the method will return a
 \verb{\link{aggregated_preferences}} object with the corresponding
 frequencies.}
@@ -132,13 +132,10 @@ rank. Hence, there are four distinct types of preferential data:
 \item{\code{"toi"}}{Orders with Ties - Incomplete List}
 }
 The data type is stored alongside the \code{"preferences"} as an attribute
-\code{attr(preferences, "DATA TYPE")}. To convert between types, there are
-four methods for doing so; namely \verb{\link{as.soc}}, \verb{\link{as.soi}},
-\verb{\link{as.toc}} and \verb{\link{as.toi}}. Canonically, all strict orders
-can be converted into orders with ties, and all complete orderings can be
-converted into incomplete orderings. Incomplete orders can also be converted
-to complete orders with ties, where all unlisted alternatives appear tied
-in last preference.
+\code{attr(preferences, "DATA TYPE")}. The data type is determined automatically.
+If every preference ranks every alternative, then the data type will be
+"soc" or "soi". Similarly, if no preference contains a tie the data type
+will be "toc" or "toi".
 
 A set of preferences can be represented either by \code{ranking} or by
 \code{ordering}. These correspond to the two ways you can list a set of

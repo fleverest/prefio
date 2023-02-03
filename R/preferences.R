@@ -78,7 +78,7 @@
 #' @param aggregate If `TRUE`, aggregate the preferences via
 #' `\link{aggregate.preferences}` before returning. This returns a
 #' `\link{aggregated_preferences}` object.
-#' @param frequency An optional integer vector containing the number of
+#' @param frequencies An optional integer vector containing the number of
 #' occurences of each preference. If provided, the method will return a
 #' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
@@ -179,17 +179,17 @@ preferences <- function(data,
                         rank = NULL,
                         alternative = NULL,
                         alternative_names = NULL,
-                        frequency = NULL,
+                        frequencies = NULL,
                         aggregate = FALSE,
                         verbose = TRUE,
                         ...) {
   format <- match.arg(format, c("long", "ordering", "ranking"))
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
-    if (!missing(frequency)) {
+    if (!missing(frequencies)) {
       warning("When creating \"preferences\" from long-format data,",
-              "`frequency` parameter is ignored.")
-      frequency <- NULL
+              "`frequencies` parameter is ignored.")
+      frequencies <- NULL
     }
     ranking <- long_to_ranking(data,
                                id,
@@ -205,6 +205,7 @@ preferences <- function(data,
     ranking <- ordering_to_ranking(data, alternative_names, verbose)
     prefs <- as.preferences.matrix(ranking,
                                    format = "ranking",
+                                   alternative_names = alternative_names,
                                    ..., verbose = verbose)
   } else if (format == "ranking") {
     x <- data
@@ -237,22 +238,22 @@ validate_ordering <- function(x,
                               verbose = TRUE) {
 
   # Ensure the object is a data.frame with "list" columns
-  if (!is.data.frame(data) || !all(unlist(lapply(data, typeof)) == "list")) {
+  if (!is.data.frame(x) || !all(sapply(x, typeof) == "list")) {
     stop("`data` in \"ordering\" format must be a \"data.frame\" with ",
                "\"list\"-valued columns.")
   }
 
   # Ensure alternatives are either always character or always integer-valued
-  alternative_types <- unique(rapply(data, typeof))
+  alternative_types <- unique(rapply(x, typeof))
   if (length(alternative_types) != 1L ||
-      !alternative_types %in% c("character", "numeric")) {
+      !alternative_types %in% c("character", "numeric", "integer")) {
     stop("Alternatives must be listed by name everywhere ",
                "or by index everywhere.")
   }
 
   # Warn user if alternatives are listed by index without any alternative_names
   if (missing(alternative_names)) {
-    alternative_names <- sort(unique(unlist(data)))
+    alternative_names <- sort(unique(unlist(x)))
     if (is.numeric(alternative_names) && verbose) {
       message("Alternatives listed by index but no `alternative_names` passed ",
               "to method. Using numeric names.")
@@ -268,21 +269,33 @@ ordering_to_ranking <- function(data,
 
   validate_ordering(data, alternative_names, verbose)
 
-  if (missing(alternative_names)) {
-    alternative_names <- as.character(sort(unique(unlist(data))))
+  if (is.null(alternative_names)) {
+    if (!is.null(attr(data, "ALTERNATIVE NAMES"))) {
+      alternative_names <- attr(data, "ALTERNATIVE NAMES")
+    } else {
+      alternative_names <- as.character(sort(unique(unlist(data))))
+    }
   }
   # Convert the ordering data into a matrix of rankings.
-  return(t(apply(
-    data,
-    1,
-    function(x) {
-      structure(
-        rep(seq_along(x),
-            sapply(x, length))[match(alternative_names, unlist(x))],
-        names = alternative_names
-      )
-    }
-  )))
+  if (unique(rapply(data[, 1], typeof)) == "character") {
+    data <- rapply(data,
+                   function(a) which(alternative_names == a),
+                   how = "replace")
+  }
+  n_ranks <- ncol(data)
+  n_alts <- length(alternative_names)
+  structure(
+    t(apply(
+      data,
+      1L,
+      function(x) {
+        vals <- rep(NA, n_alts)
+        vals[unlist(x)] <- rep(seq_len(n_ranks), sapply(x, length))
+        vals
+      }
+    )),
+    dimnames = list(NULL, alternative_names)
+  )
 }
 
 # A helper function to validate ordinal preferences in long format.
@@ -390,7 +403,7 @@ ranking_to_ordering <- function(ranking) {
         1,
         function(r) {
           sapply(seq_len(max_rank),
-                 \(x) names(r)[which(r == x)])
+                 function(x) names(r)[which(r == x)])
         }
   )))
   colnames(out) <- paste0("Rank", seq_len(max_rank))
@@ -457,10 +470,10 @@ Ops.preferences <- function(x1, x2) {
 #' @export
 "[.preferences" <- function(x, i, j, ..., drop = FALSE, by.ordering = FALSE) {
 
-  if (!missing(j) && is.numeric(j) && any(j > ncol(x) | j < -ncol(x))) {
+  if (!missing(j) && is.numeric(j) && any(abs(j) > ncol(x))) {
     stop("Subscript `j` out of bounds.")
   }
-  if (!missing(i) && is.numeric(i) && any(i > nrow(x) | i < -nrow(x))) {
+  if (!missing(i) && is.numeric(i) && any(abs(i) > nrow(x))) {
     stop("Subscript `i` out of bounds.")
   }
 
@@ -528,13 +541,13 @@ Ops.preferences <- function(x1, x2) {
     structure(value,
               dimnames = list(NULL, sub_alternatives),
                "ALTERNATIVE NAMES" = sub_alternatives,
-              class = "preferences",
+              class = c("preferences", class(value)),
               "DATA TYPE" = preftype(value))
   } else {
     structure(value,
               dimnames = list(NULL, sub_alternatives),
                "ALTERNATIVE NAMES" = sub_alternatives,
-              class = "preferences",
+              class = c("preferences", class(value)),
               "DATA TYPE" = preftype(value))
   }
 }
@@ -585,6 +598,7 @@ as.preferences.default <- function(x,
   # Convert orderings data.frames into ranking matrices.
   if ("data.frame" %in% class(x) && all(sapply(x, typeof) == "list")) {
     x <- ordering_to_ranking(x, alternative_names, verbose)
+    format <- "ranking"
   }
   x <- as.matrix(x)
   as.preferences.matrix(x,
@@ -605,7 +619,7 @@ as.preferences.matrix <- function(x,
                                   rank = NULL,
                                   alternative_names = NULL,
                                   verbose = TRUE) {
-  format <- match.arg(format, c("long", "ordering", "ranking"))
+  format <- match.arg(format, c("ranking", "long"))
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
     prefs <- long_to_ranking(x,
@@ -701,7 +715,8 @@ rbind.preferences <- function(...) {
     }
     # rbind all preferences matrices
     preflist <- do.call("rbind", lapply(preflist, unclass))
-    structure(preflist, class = "preferences")
+    structure(preflist,
+              class = unique(c("preferences", class(preflist))))
 }
 
 #' @method as.data.frame preferences
@@ -758,4 +773,10 @@ utils::str
 #' @method str preferences
 str.preferences <- function(object, ...) {
     str(unclass(object))
+}
+
+#' @method rep preferences
+#' @export
+rep.preferences <- function(x, ...) {
+  x[rep(seq_len(nrow(x)), ...)]
 }

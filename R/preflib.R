@@ -1,7 +1,7 @@
-#' Read Preflib Election Data Files
+#' Read Ordinal Preference Data From PrefLib
 #'
 #' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` file types storing
-#' preferencial data as defined by
+#' ordinal preference data as defined by
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 #'
 #' The file types supported are
@@ -14,27 +14,26 @@
 #'
 #' The numerically coded orderings and their frequencies are read into a
 #' data frame, storing the item names as an attribute. The
-#' `as.aggregated_rankings` method converts these to an
-#' [`"aggregated_rankings"`][aggregate.rankings] object with the items labelled
-#' by the item names.
+#' `as.aggregated_preferences` method converts these to an
+#' [`"aggregated_preferences"`][aggregate.preferences] object with the
+#' alternatives labelled by name.
 #'
-#' A Preflib file may be corrupt, in the sense that the ordered items do not
-#' match the named items. In this case, the file can be read in as a data
-#' frame (with a warning) using the corresponding `read.*` function, but
-#' `as.aggregated_rankings` will throw an error.
-#' @return A data frame of class `"preflib"` with first column \code{Frequency},
-#' giving the frequency of the ranking in that row, and remaining columns
-#' \code{Rank 1}, \ldots, \code{Rank p} giving the items ranked from first to
-#' last place in that ranking. Ties are represented by vector elements in list
-#' columns. The data frame has an attribute \code{"items"} giving the labels
-#' corresponding to each item number.
+#' A Preflib file may be corrupt, in the sense that the ordered alternatives do
+#' not match their names. In this case, the file can be read in as a data
+#' frame (with a warning), but `as.aggregated_preferences` will throw an error.
+#'
+#' @return An [`"aggregated_preferences"`][aggregate.preferences] object
+#' containing the PrefLib data.
 #'
 #' @param file A preferential data file, conventionally with extension `.soc`,
 #' `.soi`, `.toc` or `.toi` according to data type.
 #' @param x An object of class `"preflib"`.
-#' @param ... Additional arguments passed to [as.rankings()]: `freq`,
-#' `input` or `items` will be ignored with a warning as they are set
-#' automatically.
+#' @param as.aggregated_preferences When `TRUE`, returns an object of class
+#' [`"aggregated_preferences"`][aggregate.preferences]. When `FALSE`, returns
+#' a `"data.frame"` containing the raw PrefLib data.
+#' @param ... Additional arguments passed to [as.aggregated_preferences()]:
+#' `frequencies`, `format` or `alternative_names` will be ignored as they are
+#' set automatically.
 #' @note The Netflix and cities datasets used in the examples are from
 #' Caragiannis et al (2017) and Bennet and Lanning (2007) respectively. These
 #' data sets require a citation for re-use.
@@ -52,32 +51,19 @@
 #'
 #' @examples
 #'
-#' # can take a little while depending on speed of internet connection
+#' # Can take a little while depending on speed of internet connection
 #'
 #' \dontrun{
 #' # url for preflib data in the "Election Data" category
-#' preflib <- "https://www.preflib.org/static/data/ED/"
+#' preflib <- "https://www.preflib.org/static/data/"
 #'
 #' # strict complete orderings of four films on Netflix
-#' netflix <- read.soc(file.path(preflib, "netflix/ED-00004-00000101.soc"))
+#' netflix <- read.preflib(file.path(preflib, "netflix/00004-00000101.soc"))
 #' head(netflix)
 #' attr(netflix, "ALTERNATIVE NAMES")
 #'
-#' head(as.rankings(netflix))
-#'
 #' # strict incomplete orderings of 6 random cities from 36 in total
-#' cities <- read.soi(file.path(preflib, "cities/ED-00034-00000001.soi"))
-#'
-#' # strict incomplete orderings of drivers in the 1961 F1 races
-#' # 8 races with 17 to 34 drivers in each
-#' f1 <- read.soi(file.path(preflib, "f1/ED-00010-00000001.soi"))
-#'
-#' # complete orderings with ties of 30 skaters
-#' skaters <- read.toc(file.path(preflib, "skate/ED-00006-00000001.toc"))
-#'
-#' # incomplete orderings with ties of 10 sushi items from 100 total
-#' # orderings were derived from numeric ratings
-#' sushi <- read.toi(file.path(preflib, "sushi/ED-00014-00000003.toi"))
+#' cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
 #' }
 #' @importFrom utils read.csv
 #' @name preflib
@@ -149,54 +135,39 @@ read.preflib <- function(file) {
       ),
       collapse = "\n"
     )
-    items <- read.csv(text = csv_string,
+    preferences <- read.csv(text = csv_string,
                       header = FALSE,
                       stringsAsFactors = FALSE,
                       strip.white = TRUE,
                       quote = "'",
                       colClasses = rep("character", n_alternatives))
     # Replace NA with blank ties
-    items[is.na(items)] <- ""
+    preferences[is.na(preferences)] <- ""
     # Replace character columns with lists
-    items[, seq(2, ncol(items))] <- as.data.frame(
+    preferences[, seq(2, ncol(preferences))] <- as.data.frame(
       sapply(
-        items[, seq(2, ncol(items))],
+        preferences[, seq(2, ncol(preferences))],
         strsplit,
         split = ","
       )
     )
     # Convert all data in the output to integer-valued vectors
-    items <- rapply(
-      items,
+    preferences <- rapply(
+      preferences,
       as.integer,
       how = "replace"
     )
-    names(items) <- c(
+    names(preferences) <- c(
       "Frequency",
-      paste("Rank", seq_len(ncol(items)  - 1))
+      paste("Rank", seq_len(ncol(preferences)  - 1))
     )
-    attributes(items) <- c(attributes(items), preflib_attributes)
-    class(items) <- c("preflib", class(items))
-    items
-}
-
-#' @rdname preflib
-#' @method as.aggregated_rankings preflib
-#' @export
-as.aggregated_rankings.preflib <- function(x, ...) {
-    nc <- ncol(x)
-    if (identical(colnames(x), c("Frequency", paste("Rank", seq(nc - 1))))) {
-        dots <- match.call(as.aggregated_rankings.preflib,
-                           expand.dots = FALSE)[["..."]]
-        ignore <- names(dots) %in% c("freq", "input", "items")
-        if (any(ignore))
-            warning("`freq`, `input` and `items` are set automatically for ",
-                    "items of class \"preflib\"")
-        dots <- dots[setdiff(names(dots), c("freq", "input", "items"))]
-        do.call(as.rankings.matrix,
-                c(list(as.matrix(x[, -1]), freq = x[, 1], input = "orderings",
-                       items = attr(x, "ALTERNATIVE NAMES")), dots))
-    } else {
-      stop("`x` is not a valid \"preflib\" object")
-    }
+    frequencies <- preferences[, 1]
+    preferences <- preferences[, -1]
+    attributes(preferences) <- c(attributes(preferences), preflib_attributes)
+    preferences <- as.preferences(
+      preferences,
+      "ordering",
+      alternative_names = attr(preferences, "ALTERNATIVE NAMES")
+    )
+    aggregate(preferences, frequencies = frequencies)
 }
