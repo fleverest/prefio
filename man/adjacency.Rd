@@ -2,30 +2,32 @@
 % Please edit documentation in R/adjacency.R
 \name{adjacency}
 \alias{adjacency}
-\title{Create an Adjacency Matrix for a set of Rankings}
+\title{Create an Adjacency Matrix for a set of Preferences}
 \usage{
 adjacency(object, weights = NULL, ...)
 }
 \arguments{
-\item{object}{a \code{\link{rankings}} object, or an object that can be
-coerced by \code{as.rankings}.}
+\item{object}{a \verb{\link{preferences}} object, or an object that can be
+coerced by \code{as.preferences}.}
 
-\item{weights}{an optional vector of weights for the rankings.}
+\item{weights}{an optional vector of weights for the preferences.}
 
 \item{...}{further arguments passed to/from methods.}
 }
 \value{
-An N by N matrix, where N is the number of items that can be ranked.
+An \eqn{N} by \eqn{N} matrix, where \eqn{N} is the number of
+alternatives.
 }
 \description{
-Convert a set of rankings to an adjacency matrix summarising wins
-and losses between pairs of items.
+Convert a set of preferences to an adjacency matrix summarising wins
+and losses between pairs of alternatives.
 }
 \details{
-For a \code{"rankings"} object based on N items, the adjacency matrix is an
-N by N matrix, with element (i, j) being the number of times item i wins over
-item j. For example, in the ranking \\{1\\} > \\{3, 4\\} > \\{2\\},
-item 1 wins over items 2, 3, and 4, and items 3 and 4 win over item 2.
+For a \code{"preferences"} object with \eqn{N} alternatives, the adjacency
+matrix is an \eqn{N} by \eqn{N} matrix, with element \eqn{(i, j)} being the
+number of times item \eqn{i} wins over item \eqn{j}. For example, in the
+preferences \\{1\\} > \\{3, 4\\} > \\{2\\}, item 1 wins over items 2, 3,
+and 4, while items 3 and 4 win over item 2.
 
 If \code{weights} is specified, the values in the adjacency matrix are the
 weighted counts.
@@ -34,7 +36,7 @@ weighted counts.
 X <- matrix(c(2, 1, 2, 1, 2,
               3, 2, 0, 0, 1,
               1, 0, 2, 2, 3), nrow = 3, byrow = TRUE)
-X <- as.rankings(X)
+X <- as.preferences(X)
 adjacency(X)
 
 adjacency(X, weights = c(1, 1, 2))

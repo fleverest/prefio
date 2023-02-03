@@ -4,29 +4,32 @@
 \alias{choices}
 \title{Choices Object}
 \usage{
-choices(rankings, names = FALSE)
+choices(preferences, names = FALSE)
 }
 \arguments{
-\item{rankings}{a \code{"\link{rankings}"} object, or an object that can be
-coerced by \code{as.rankings}.}
+\item{preferences}{a \code{"\link{preferences}"} object, or an object that can be
+coerced by \code{as.preferences}.}
 
 \item{names}{logical: if \code{TRUE} use the object names in the returned
 \code{"choices"} object, else use object indices.}
 }
 \value{
 A data frame of class \code{"choices"} with elements:
-\item{choices}{ A list where each element represents the set of items
-chosen for a single rank in the ranking.}
-\item{alternatives}{ A list where each element represents the set of items
-to choose from for a single rank in the ranking.}
-\item{ranking}{ A list where each element represents the ranking that the
-choice belongs to.}
+\describe{
+\item{choices}{A list where each element represents the alternatives
+chosen for a single rank in the preference set.}
+\item{options}{A list where each element represents the options (i.e. the
+set of alternatives available to choose from) for a single rank in the
+preference set.}
+\item{preference_set}{A list where each element represents the preference set
+that the choice belongs to.}
+}
 The list stores the number of choices and the names of the objects as the
 attributes \code{"nchoices"} and \code{"objects"} respectively.
 }
 \description{
-Convert a set of rankings to a list of choices, alternatives, and
-rankings.
+Convert a set of preferences to a list of choices, options, and
+preferences.
 }
 \examples{
 R <- matrix(c(1, 2, 0, 0,

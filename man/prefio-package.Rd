@@ -6,7 +6,7 @@
 \alias{prefio-package}
 \title{prefio: Structures for Preference Data}
 \description{
-Convenient structures for creating, sourcing and manipulating preference data.
+Convenient structures for creating, sourcing, reading, writing and manipulating ordinal preference data.
 }
 \seealso{
 Useful links:
@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Floyd Everest \email{me@floydeverest.com} (\href{https://orcid.org/0000-0002-2726-6736}{ORCID}) [contributor]
+\strong{Maintainer}: Floyd Everest \email{me@floydeverest.com} (\href{https://orcid.org/0000-0002-2726-6736}{ORCID})
 
 Authors:
 \itemize{

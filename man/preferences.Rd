@@ -6,6 +6,7 @@
 \alias{as.preferences}
 \alias{as.preferences.default}
 \alias{as.preferences.matrix}
+\alias{as.preferences.aggregated_preferences}
 \alias{format.preferences}
 \title{Preferences Object}
 \usage{
@@ -28,7 +29,7 @@ as.preferences(x, ...)
 
 \method{as.preferences}{default}(
   x,
-  format,
+  format = c("ranking", "long"),
   id = NULL,
   alternative = NULL,
   rank = NULL,
@@ -45,6 +46,8 @@ as.preferences(x, ...)
   alternative_names = NULL,
   verbose = TRUE
 )
+
+\method{as.preferences}{aggregated_preferences}(aggregated_preferences, ...)
 
 \method{format}{preferences}(x, width = 40L, ...)
 }

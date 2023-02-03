@@ -1,21 +1,24 @@
 #' Choices Object
 #'
-#' Convert a set of rankings to a list of choices, alternatives, and
-#' rankings.
+#' Convert a set of preferences to a list of choices, options, and
+#' preferences.
 #'
-#' @param rankings a \code{"\link{rankings}"} object, or an object that can be
-#' coerced by \code{as.rankings}.
+#' @param preferences a `"\link{preferences}"` object, or an object that can be
+#' coerced by \code{as.preferences}.
 #' @param names logical: if \code{TRUE} use the object names in the returned
 #' \code{"choices"} object, else use object indices.
-#' @return A data frame of class \code{"choices"} with elements:
-#' \item{choices}{ A list where each element represents the set of items
-#' chosen for a single rank in the ranking.}
-#' \item{alternatives}{ A list where each element represents the set of items
-#' to choose from for a single rank in the ranking.}
-#' \item{ranking}{ A list where each element represents the ranking that the
-#' choice belongs to.}
+#' @return A data frame of class `"choices"` with elements:
+#' \describe{
+#' \item{choices}{A list where each element represents the alternatives
+#' chosen for a single rank in the preference set.}
+#' \item{options}{A list where each element represents the options (i.e. the
+#' set of alternatives available to choose from) for a single rank in the
+#' preference set.}
+#' \item{preference_set}{A list where each element represents the preference set
+#' that the choice belongs to.}
+#' }
 #' The list stores the number of choices and the names of the objects as the
-#' attributes \code{"nchoices"} and \code{"objects"} respectively.
+#' attributes `"nchoices"` and `"objects"` respectively.
 #' @examples
 #' R <- matrix(c(1, 2, 0, 0,
 #'               4, 1, 2, 3,
@@ -34,59 +37,62 @@
 #' attr(coded_choices, "objects")
 #'
 #' @export
-choices <- function(rankings, names = FALSE) {
-    # check rankings are valid
-    if (!inherits(rankings, "rankings")) rankings <- as.rankings(rankings)
+choices <- function(preferences, names = FALSE) {
+    # check preferences are valid
+    if (!inherits(preferences, "preferences")) {
+      preferences <- as.preferences(preferences)
+    }
     # treat as matrix for faster indexing
-    rankings <- unclass(rankings)
-    N <- ncol(rankings)
-    J <- apply(rankings, 1L, max)
-    onames <- colnames(rankings)
+    preferences <- unclass(preferences)
+    preferences[is.na(preferences)] <- 0
+    N <- ncol(preferences)
+    J <- apply(preferences, 1L, max)
+    onames <- colnames(preferences)
     opt <- seq_len(N)
-    if (names & !is.null(onames)) {
+    if (names && !is.null(onames)) {
         opt <- onames
     }
-    choices <- alternatives <- list()
-    ranking <- c()
+    choices <- options <- list()
+    preference_set <- c()
     for (j in seq_len(max(J))) {
         ## j-th choices
-        cho <- apply((rankings == j)[J >= j, , drop = FALSE], 1L,
+        cho <- apply((preferences == j)[J >= j, , drop = FALSE], 1L,
                      function(z) opt[z])
         if (is.matrix(cho)) {
             cho <- unname(split(cho, col(cho)))
         }
         choices <- c(choices, cho)
-        ## j-th alternatives
-        alt <- apply((rankings > j - 1L)[J >= j, , drop = FALSE], 1L,
+        ## j-th options
+        alt <- apply((preferences > j - 1L)[J >= j, , drop = FALSE], 1L,
                      function(z) opt[z])
         if (is.matrix(alt)) {
             alt <- unname(split(alt, col(alt)))
         }
-        alternatives <- c(alternatives, alt)
-        ranking <- c(ranking, which(J >= j))
+        options <- c(options, alt)
+        preference_set <- c(preference_set, which(J >= j))
     }
-    ii <- order(ranking)
+    ii <- order(preference_set)
     nchoices <- length(choices)
     out <- data.frame(matrix(NA, nrow = nchoices, ncol = 0))
     out$choices <- choices[ii]
-    out$alternatives <- alternatives[ii]
-    out$ranking <- ranking[ii]
+    out$options <- options[ii]
+    out$preference_set <- preference_set[ii]
     attr(out, "nchoices") <- nchoices
     attr(out, "objects") <- onames
     class(out) <- c("choices", class(out))
     out
-    ## Alow weights per choice/alternatives combination?
+    ## Alow weights per choice/options combination?
 }
 
 #' @method print choices
 #' @export
 print.choices <- function(x, ...) {
-    rankings <- x$ranking
-    for (i in unique(rankings)) {
-        cat("Ranking:", i, "\n")
+    preferences <- x$preference_set
+    for (i in unique(preferences)) {
+        cat("Preference Set:", i, "\n")
         cat("-------------- \n")
-        ccho <- x$choices[rankings == i]
-        calt <- x$alternatives[rankings == i]
+        ccho <- x$choices[preferences == i]
+        calt <- x$options[preferences == i]
         for (j in seq_along(ccho)) {
             ch <- paste0("{", paste(ccho[[j]], collapse = ", "), "}")
             al <- paste0("{", paste(calt[[j]], collapse = ", "), "}")

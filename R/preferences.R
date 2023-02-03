@@ -589,7 +589,7 @@ as.preferences <- function(x, ...) {
 #' @rdname preferences
 #' @export
 as.preferences.default <- function(x,
-                                   format,
+                                   format = c("ranking", "long"),
                                    id = NULL,
                                    alternative = NULL,
                                    rank = NULL,
@@ -640,6 +640,13 @@ as.preferences.matrix <- function(x,
   attr(prefs, "ALTERNATIVE NAMES") <- alternative_names
   attr(prefs, "DATA TYPE") <- preftype(prefs)
   return(prefs)
+}
+
+#' @rdname preferences
+#' @export
+as.preferences.aggregated_preferences <- function(aggregated_preferences, ...) {
+  return(rep(aggregated_preferences$preferences,
+             aggregated_preferences$frequencies))
 }
 
 #' @method length preferences
