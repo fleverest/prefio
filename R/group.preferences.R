@@ -1,41 +1,39 @@
 #' Group Preferences
 #'
-#' Create an object of class \code{"grouped_preferences"} which associates a
-#' group index with an object of class \code{"preferences"}. This allows the
-#' preferences to be linked to covariates with group-specific values as the basis
-#' for model-based recursive partitioning, see \code{\link{pltree}}.
+#' Create an object of class `"grouped_preferences"` which associates a
+#' group index with an object of class `"preferences"`. This allows the
+#' preferences to be linked to covariates with group-specific values.
 #'
-#' @param index a numeric vector of length equal to the number of preferences
+#' @param index A numeric vector of length equal to the number of preferences
 #' specifying the subject for each ranking.
-#' @param x a [`"preferences"`][preferences] object for `group()`; an
-#' object that can be coerced to a \code{"grouped_preferences"} object for
-#' \code{as.grouped_preferences()}, otherwise a \code{"grouped_preferences"} object.
-#' @param i indices specifying groups to extract, may be any data type accepted
-#' by \code{\link{[}}.
-#' @param j indices specifying items to extract, as for \code{\link{[}}.
-#' @param drop if \code{TRUE} return single row/column matrices as a vector.
-#' @param as.grouped_preferences if \code{TRUE} return a grouped_preferences object,
-#' otherwise return a matrix/vector.
-#' @param max the maximum number of preferences to format per subject.
-#' @param width the maximum width in number of characters to format each
+#' @param x A [`"preferences"`][preferences] object for `group()`; an object
+#' that can be coerced to a `"grouped_preferences"` object for
+#' `as.grouped_preferences()`, otherwise a `"grouped_preferences"` object.
+#' @param i Indices specifying groups to extract, may be any data type accepted
+#' by `\link{[}`.
+#' @param j Indices specifying items to extract, as for `\link{[}`.
+#' @param drop If `TRUE`, return single row/column matrices as a vector.
+#' @param as.grouped_preferences If `TRUE` return a `"grouped_preferences"`
+#' object, otherwise return a matrix/vector.
+#' @param max The maximum number of preferences to format per subject.
+#' @param width The maximum width in number of characters to format each
 #' ranking.
-#' @param ... additional arguments passed on to \code{\link{as.preferences}}
-#' by \code{grouped_preferences} or \code{as.grouped_preferences}; unused by
-#' \code{format}.
-#' @return An object of class \code{"grouped_preferences"}, which is a vector of
+#' @param ... Additional arguments passed on to `\link{as.preferences}`
+#' by `grouped_preferences` or `as.grouped_preferences`; unused by
+#' `format`.
+#' @return An object of class `"grouped_preferences"`, which is a vector of
 #' of group IDs with the following attributes:
-#' \item{preferences}{ The \code{"preferences"} object.}
+#' \item{preferences}{ The `"preferences"` object.}
 #' \item{index}{ An index match each ranking to each group ID.}
 #' \item{R}{ A matrix with items ordered from last to first place, for each
-#' ranking. }
+#' ranking.}
 #' \item{S}{ The preferences matrix with the ranks replaced by the size of the
-#' chosen set for free choices and zero for forced choices. }
+#' chosen set for free choices and zero for forced choices.}
 #' \item{id}{ A list with elements of the adjacency matrix that are incremented
-#' by each ranking. }
-#' @seealso \code{\link{pltree}}
+#' by each ranking.}
 #' @examples
 #'
-#' # ungrouped preferences (5 preference sets, 4 alternatives)
+#' # ungrouped preferences (5 preference sets, 4 items)
 #' R <- as.preferences(matrix(c(1, 2, 0, 0,
 #'                              0, 2, 1, 0,
 #'                              0, 0, 1, 2,
@@ -67,14 +65,14 @@
 #' ## object
 #' G[2, -3, as.grouped_preferences = FALSE]
 #' @export
-group <- function(x, index, ...){
+group <- function(x, index, ...) {
     UseMethod("group")
 }
 
 #' @method group preferences
 #' @export
-group.preferences <- function(x, index, ...){
-    if (!(is.vector(index) & length(index) == nrow(x)))
+group.preferences <- function(x, index, ...) {
+    if (!(is.vector(index) && length(index) == nrow(x)))
         stop("index must be a vector with length equal to preferences")
     index <- as.numeric(index)
     do.call("structure",
@@ -85,7 +83,7 @@ group.preferences <- function(x, index, ...){
 
 
 # ranking stats - summaries used in model fitting, compute once for all
-ranking_stats <- function(preferences){
+ranking_stats <- function(preferences) {
     preferences <- unclass(preferences)
     nr <- nrow(preferences)
     nc <- ncol(preferences)

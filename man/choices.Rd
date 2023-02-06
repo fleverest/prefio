@@ -16,11 +16,10 @@ coerced by \code{as.preferences}.}
 \value{
 A data frame of class \code{"choices"} with elements:
 \describe{
-\item{choices}{A list where each element represents the alternatives
-chosen for a single rank in the preference set.}
-\item{options}{A list where each element represents the options (i.e. the
-set of alternatives available to choose from) for a single rank in the
-preference set.}
+\item{choices}{A list where each element represents the items chosen for a
+single rank in the preference set.}
+\item{alternatives}{A list where each element represents the alternatives
+(i.e. the set of remaining items to choose from) for a single rank.}
 \item{preference_set}{A list where each element represents the preference set
 that the choice belongs to.}
 }
@@ -28,7 +27,7 @@ The list stores the number of choices and the names of the objects as the
 attributes \code{"nchoices"} and \code{"objects"} respectively.
 }
 \description{
-Convert a set of preferences to a list of choices, options, and
+Convert a set of preferences to a list of choices, alternatives, and
 preferences.
 }
 \examples{

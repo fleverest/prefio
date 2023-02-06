@@ -1,8 +1,11 @@
 #' Read Ordinal Preference Data From PrefLib
 #'
-#' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` file types storing
-#' ordinal preference data as defined by
-#' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
+#' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` files storing
+#' ordinal preference data format as defined by
+#' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
+#' into a `"preferences"` object.
+#'
+#' Note that PrefLib refers to the items being ordered by "alternatives".
 #'
 #' The file types supported are
 #' \describe{
@@ -16,7 +19,7 @@
 #' data frame, storing the item names as an attribute. The
 #' `as.aggregated_preferences` method converts these to an
 #' [`"aggregated_preferences"`][aggregate.preferences] object with the
-#' alternatives labelled by name.
+#' items labelled by name.
 #'
 #' A Preflib file may be corrupt, in the sense that the ordered alternatives do
 #' not match their names. In this case, the file can be read in as a data
@@ -32,7 +35,7 @@
 #' [`"aggregated_preferences"`][aggregate.preferences]. When `FALSE`, returns
 #' a `"data.frame"` containing the raw PrefLib data.
 #' @param ... Additional arguments passed to [as.aggregated_preferences()]:
-#' `frequencies`, `format` or `alternative_names` will be ignored as they are
+#' `frequencies`, `format` or `item_names` will be ignored as they are
 #' set automatically.
 #' @note The Netflix and cities datasets used in the examples are from
 #' Caragiannis et al (2017) and Bennet and Lanning (2007) respectively. These
@@ -60,7 +63,7 @@
 #' # strict complete orderings of four films on Netflix
 #' netflix <- read.preflib(file.path(preflib, "netflix/00004-00000101.soc"))
 #' head(netflix)
-#' attr(netflix, "ALTERNATIVE NAMES")
+#' attr(netflix, "item_names")
 #'
 #' # strict incomplete orderings of 6 random cities from 36 in total
 #' cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
@@ -161,7 +164,7 @@ read.preflib <- function(file) {
     preferences <- as.preferences(
       preferences,
       "ordering",
-      alternative_names = alternative_names
+      item_names = alternative_names
     )
     aggregated_prefs <- aggregate(preferences, frequencies = frequencies)
     attr(aggregated_prefs, "preflib") <- preflib_attributes

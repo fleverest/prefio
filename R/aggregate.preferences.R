@@ -11,7 +11,7 @@
 #' @param frequencies A vector of frequencies for preferences that have been
 #' previously aggregated.
 #' @param i indices specifying preferences to extract, as for `\link{[}`.
-#' @param j indices specifying alternatives to extract, as for `\link{[}`.
+#' @param j indices specifying items to extract, as for `\link{[}`.
 #' @param drop if `TRUE` return single row/column matrices as a vector.
 #' @param as.aggregated_preferences if `TRUE` create an
 #' `"aggregated_preferences"` object from the indexed preferences Otherwise
@@ -42,7 +42,7 @@
 #' # subsetting applies to the preferences, e.g. first two unique preferences
 #' A[1:2]
 #'
-#' # (partial) preferences projected to alternatives 2-4 only
+#' # (partial) preferences projected to items 2-4 only
 #' A[, 2:4]
 #'
 #' # convert to a matrix

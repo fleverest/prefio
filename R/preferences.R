@@ -1,11 +1,10 @@
 #' Preferences Object
 #'
-#' Create a `"preferences"` object from Ordinal Preference data in either
-#' `ordering` or `ranking` format.
+#' Create a `"preferences"` object for representing Ordinal Preference datasets.
 #'
-#' Ordinal preferences can order every alternative, or they can order a subset.
-#' Some preferential datasets will contain ties between alternatives at a given
-#' rank. Hence, there are four distinct types of preferential data:
+#' Ordinal preferences can order every item, or they can order a subset. Some
+#' ordinal preference datasets will contain ties between items at a given rank.
+#' Hence, there are four distinct types of preferential data:
 #' \describe{
 #' \item{`"soc"`}{Strict Orders - Complete List}
 #' \item{`"soi"`}{Strict Orders - Incomplete List}
@@ -13,8 +12,8 @@
 #' \item{`"toi"`}{Orders with Ties - Incomplete List}
 #' }
 #' The data type is stored alongside the `"preferences"` as an attribute
-#' `attr(preferences, "DATA TYPE")`. The data type is determined automatically.
-#' If every preference ranks every alternative, then the data type will be
+#' `attr(preferences, "preftype")`. The data type is determined automatically.
+#' If every preference ranks every item, then the data type will be
 #' "soc" or "soi". Similarly, if no preference contains a tie the data type
 #' will be "toc" or "toi".
 #'
@@ -22,59 +21,56 @@
 #' `ordering`. These correspond to the two ways you can list a set of
 #' preferences in a vector:
 #' \describe{
-#' \item{`ordering`}{The alternatives are listed in order of most preferred
-#'                          to least preferred, allowing for pairs of
-#'                          alternatives in the case of ties.}
-#' \item{`ranking`}{The rank assigned to each alternative is listed in
-#'                        order of some predefined index on the alternatives.
-#'                        rankings should be dense, otherwise they will be
-#'                        converted to dense rankings.}
+#' \item{`ordering`}{The items are listed in order of most preferred to least
+#'                        preferred, allowing for pairs of items in the case of
+#'                        ties.}
+#' \item{`ranking`}{The rank assigned to each item is listed in order of some
+#'                        predefined index on the items. Rankings should be
+#'                        dense, otherwise they will be converted to dense
+#'                        rankings.}
 #' }
-#' When reading `"preferences"` from an `ordering` matrix, the index
-#' on the alternatives is the order passed to the `alternative_names`
-#' parameter. When reading from a `rankings` matrix, if no
-#' `alternative_names` are provided, the order is inferred from the named
-#' columns.
+#' When reading `"preferences"` from an `ordering` matrix, the index on the
+#' items is the order passed to the `item_names` parameter. When reading from
+#' a `rankings` matrix, if no `item_names` are provided, the order is inferred
+#' from the named columns.
 #'
-#' A `"preferences"` object can also be read from a long-format matrix,
-#' where there are three columns: `id`, `alternative` and
-#' `rank`. The `id` variable groups the rows of the matrix which
-#' correspond to a single set of preferences, which the \code{alternative:rank},
-#' pairs indicate how each alternative is ranked. When reading a matrix from
-#' this format and no `alternative_names` parameter is passed, the
-#' order is determined automatically.
+#' A `"preferences"` object can also be read from a long-format matrix, where
+#' there are three columns: `id`, `item` and `rank`. The `id` variable groups
+#' the rows of the matrix which correspond to a single set of preferences, which
+#' the `item:rank`, pairs indicate how each item is ranked. When reading a
+#' matrix from this format and no `item_names` parameter is passed, the order is
+#' determined automatically.
 #'
 #' @param data A `data.frame` or `matrix` in one of three formats:
 #' \describe{
-#' \item{"ordering"}{Orderings must be a `data.frame` with
-#'                  `"list"`-valued columns. Each row represents an
-#'                  ordering of the alternatives from first to last,
-#'                  representing ties by a list of vectors corresponding to
-#'                  the alternatives.}
-#' \item{"ranking"}{Each row assigns a ranking to each alternative, each column
-#'                  gives the rankings assigned to a single alterntive. Rankings
+#' \item{"ordering"}{Orderings must be a `data.frame` with `"list"`-valued
+#'                   columns. Each row represents an ordering of the items
+#'                   from first to last, representing ties by a list of
+#'                   vectors corresponding to the items.}
+#' \item{"ranking"}{Each row assigns a ranking to each item, each column
+#'                  gives the rankings assigned to a single item. Rankings
 #'                  should be dense, otherwise they will be converted to dense
 #'                  rankings.}
 #' \item{"long"}{Three columns: an `id` column grouping the rows which
 #'                correspond to a single set of preferences, a
-#'                `alternative` column specifying (either by index or by
-#'                name) the alternative each row refers to, and a `rank`
+#'                `item` column specifying (either by index or by
+#'                name) the item each row refers to, and a `rank`
 #'                column specifying the rank for the associated
-#'                `alternative`.}
+#'                `item`.}
 #' }
 #' @param format The format of the data: one of "ordering", "ranking", or
 #' "long". By default, `data` is assumed to be in `ordering` format.
 #' @param id For `data` in long-format: the column representing the
 #' preference set grouping.
-#' @param alternative For `data` in long-format: the column representing
-#' the alternatives by name or by index, in which case the
-#' `alternative_names` parameter should also be passed, or the alternatives
-#' will be named by the integers.
+#' @param item For `data` in long-format: the column representing
+#' the items by name or by index, in which case the
+#' `item_names` parameter should also be passed, or the items will be named as
+#' integers.
 #' @param rank For `data` in long-format: the column representing the
-#' rank for the associated alternative.
-#' @param alternative_names The names of the full set of alternatives. When
-#' loading data using integer-valued indices in place of alternative names,
-#' the `alternative_names` character vector should be in the correct order.
+#' rank for the associated item.
+#' @param item_names The names of the full set of items. When loading data using
+#' integer-valued indices in place of item names, the `item_names` character
+#' vector should be in the correct order.
 #' @param aggregate If `TRUE`, aggregate the preferences via
 #' `\link{aggregate.preferences}` before returning. This returns a
 #' `\link{aggregated_preferences}` object.
@@ -83,34 +79,34 @@
 #' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
 #'
-#' @return By default, a `"preferences"` object, which is a
-#' `data.frame` with `"list"`-valued columns corresponding to
-#' preferences on the alternatives. This may be an ordering on subsets of the
-#' alternatives in the case of ties, or a potentially-partial strict ordering.
-#' In the case of partial or tied preferences, some entries may be empty lists.
+#' @return By default, a `"preferences"` object, which is a `data.frame` with
+#' `"list"`-valued columns corresponding to preferences on the items. This may
+#' be an ordering on subsets of the items in the case of ties, or a
+#' potentially-partial strict ordering. In the case of partial or tied
+#' preferences, some entries may be empty lists.
 #'
 #' @examples
 #' # create rankings from data in long form
 #'
 #' # Example long-form data
 #' x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
-#'                 alternative = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
+#'                 item = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
 #'                            LETTERS[3:5]),
 #'                 rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3))
 #'
-#' # * Set #1 has two different ranks for the same alternative (alternative C
-#' # has rank 1 and 2). This alternative will be excluded from the preferences.
+#' # * Set #1 has two different ranks for the same item (item C
+#' # has rank 1 and 2). This item will be excluded from the preferences.
 #' # * All ranks are missing in set #2, a technically valid partial ordering
 #' # * Some ranks are missing in set #3, a perfectly valid partial ordering
-#' # * Set #4 has inconsistent ranks for two alternatives, and a rank with a
-#' # missing alternative.
+#' # * Set #4 has inconsistent ranks for two items, and a rank with a
+#' # missing item.
 #' # * Set #5 is not a dense-ranking. It will be converted to be dense and then
 #' # inferred to be a regular partial ordering with ties.
 #' split(x, x$ranking)
 #'
 #' # Creating a preferences object with this data will attempt to resolve these
 #' # issues automatically, sending warnings when assumptions need to be made.
-#' preferences(x, id = "id", alternative = "alternative", rank = "rank")
+#' preferences(x, id = "id", item = "item", rank = "rank")
 #'
 #' # Convert an existing matrix of rankings to a preferences object.
 #' rnk <- matrix(c(1, 2, 0, 0,
@@ -132,7 +128,7 @@
 #'     rank4 = I(list())
 #'   ),
 #'   format = "ordering",
-#'   alternative_names = c("apple", "banana", "orange", "pear")
+#'   item_names = c("apple", "banana", "orange", "pear")
 #' )
 #' ord[1,] <- list(1, 2) # apple, banana
 #' ord[2,] <- list("banana", "orange", "pear", "apple")
@@ -141,8 +137,8 @@
 #' ord[5,] <- list(c("banana", "orange"), "apple")
 #' ord[6,] <- list("apple", "pear", "orange")
 #'
-#' # Alternatively, we could have referred to each alternative by index and
-#' # passed `alternative_names = c("apple", "banana", "orange", "pear")`.
+#' # Alternatively, we could have referred to each item by index and
+#' # passed `item_names = c("apple", "banana", "orange", "pear")`.
 #' ord <- as.preferences(ord)
 #'
 #' # Access the first three sets of preferences
@@ -154,7 +150,7 @@
 #' # Exclude pear from the rankings
 #' ord[, -4]
 #'
-#' # Get the highest-ranked alternatives from the third preference-set
+#' # Get the highest-ranked items from the third preference-set
 #' ord[3, 1, by.ordering = TRUE]
 #'
 #' # Get the rank of apple in the third preference-set
@@ -177,8 +173,8 @@ preferences <- function(data,
                         format = c("long", "ordering", "ranking"),
                         id = NULL,
                         rank = NULL,
-                        alternative = NULL,
-                        alternative_names = NULL,
+                        item = NULL,
+                        item_names = NULL,
                         frequencies = NULL,
                         aggregate = FALSE,
                         verbose = TRUE,
@@ -193,7 +189,7 @@ preferences <- function(data,
     }
     ranking <- long_to_ranking(data,
                                id,
-                               alternative,
+                               item,
                                rank,
                                NULL,
                                verbose)
@@ -202,23 +198,23 @@ preferences <- function(data,
                                    format = "ranking",
                                    ..., verbose = verbose)
   } else if (format == "ordering") {
-    ranking <- ordering_to_ranking(data, alternative_names, verbose)
+    ranking <- ordering_to_ranking(data, item_names, verbose)
     prefs <- as.preferences.matrix(ranking,
                                    format = "ranking",
-                                   alternative_names = alternative_names,
+                                   item_names = item_names,
                                    ..., verbose = verbose)
   } else if (format == "ranking") {
     x <- data
-    # Infer alterntive names
-    if (missing(alternative_names) && colnames(x)) {
-      alternative_names <- colnames(x)
-    } else if (missing(alternative_names) && !colnames(x)) {
-      message(paste0("Alternative names could not be inferred from ",
+    # Infer item names
+    if (missing(item_names) && colnames(x)) {
+      item_names <- colnames(x)
+    } else if (missing(item_names) && !colnames(x)) {
+      message(paste0("Item names could not be inferred from ",
                      "ranked data. Defaulting to the integers 1-", dim(x)[2]))
     }
     prefs <- as.preferences.matrix(data,
                                    format = "ranking",
-                                   alternative_names = alternative_names,
+                                   item_names = item_names,
                                    ..., verbose = verbose)
   } else {
     stop("Format '", format, "' not implemented: Must be one ",
@@ -234,7 +230,7 @@ preferences <- function(data,
 
 # A helper function to validate ordinal preferences in ordering format.
 validate_ordering <- function(x,
-                              alternative_names,
+                              item_names,
                               verbose = TRUE) {
 
   # Ensure the object is a data.frame with "list" columns
@@ -243,47 +239,47 @@ validate_ordering <- function(x,
                "\"list\"-valued columns.")
   }
 
-  # Ensure alternatives are either always character or always integer-valued
-  alternative_types <- unique(rapply(x, typeof))
-  if (length(alternative_types) != 1L ||
-      !alternative_types %in% c("character", "numeric", "integer")) {
-    stop("Alternatives must be listed by name everywhere ",
+  # Ensure items are either always character or always integer-valued
+  item_types <- unique(rapply(x, typeof))
+  if (length(item_types) != 1L ||
+      !item_types %in% c("character", "numeric", "integer")) {
+    stop("Items must be listed by name everywhere ",
                "or by index everywhere.")
   }
 
-  # Warn user if alternatives are listed by index without any alternative_names
-  if (missing(alternative_names)) {
-    alternative_names <- sort(unique(unlist(x)))
-    if (is.numeric(alternative_names) && verbose) {
-      message("Alternatives listed by index but no `alternative_names` passed ",
+  # Warn user if items are listed by index without any item_names
+  if (missing(item_names)) {
+    item_names <- sort(unique(unlist(x)))
+    if (is.numeric(item_names) && verbose) {
+      message("Items listed by index but no `item_names` passed ",
               "to method. Using numeric names.")
-      alternative_names <- as.character(alternative_names)
+      item_names <- as.character(item_names)
     }
   }
 }
 
 # A helper function to convert ordering-form data into a rankings matrix.
 ordering_to_ranking <- function(data,
-                                alternative_names,
+                                item_names,
                                 verbose = TRUE) {
 
-  validate_ordering(data, alternative_names, verbose)
+  validate_ordering(data, item_names, verbose)
 
-  if (is.null(alternative_names)) {
-    if (!is.null(attr(data, "ALTERNATIVE NAMES"))) {
-      alternative_names <- attr(data, "ALTERNATIVE NAMES")
+  if (is.null(item_names)) {
+    if (!is.null(attr(data, "item_names"))) {
+      item_names <- attr(data, "item_names")
     } else {
-      alternative_names <- as.character(sort(unique(unlist(data))))
+      item_names <- as.character(sort(unique(unlist(data))))
     }
   }
   # Convert the ordering data into a matrix of rankings.
   if (unique(rapply(data[, 1], typeof)) == "character") {
     data <- rapply(data,
-                   function(a) which(alternative_names == a),
+                   function(a) which(item_names == a),
                    how = "replace")
   }
   n_ranks <- ncol(data)
-  n_alts <- length(alternative_names)
+  n_alts <- length(item_names)
   structure(
     t(apply(
       data,
@@ -294,18 +290,18 @@ ordering_to_ranking <- function(data,
         vals
       }
     )),
-    dimnames = list(NULL, alternative_names)
+    dimnames = list(NULL, item_names)
   )
 }
 
 # A helper function to validate ordinal preferences in long format.
 validate_long <- function(data,
-                          alternative_names,
+                          item_names,
                           verbose = TRUE) {
 
-  # Raise error if `id`, `alternative` or `rank` are invalid.
+  # Raise error if `id`, `item` or `rank` are invalid.
   if (ncol(data) != 3L) {
-    stop("When using long-format, `id`, `alternative` and `rank` ",
+    stop("When using long-format, `id`, `item` and `rank` ",
                "must all specify names of columns in `data`.")
   }
 
@@ -317,25 +313,25 @@ validate_long <- function(data,
   }
 
   # Find duplicated items
-  if (anyDuplicated(paste(data$id, data$alternative, sep = ":")) && verbose) {
-    message("Duplicated rankings per alternative detected: ",
+  if (anyDuplicated(paste(data$id, data$item, sep = ":")) && verbose) {
+    message("Duplicated rankings per item detected: ",
             "only the highest ranks will be used.")
   }
 
-  # Validate alternatives
-  if (is.null(alternative_names)) {
-    alternative_names <- sort(unique(data$alternative))
+  # Validate items
+  if (is.null(item_names)) {
+    item_names <- sort(unique(data$item))
   }
-  if (is.character(data$alternative)) {
-    if (is.null(setdiff(sort(unique(data$alternative)),
-                        alternative_names))) {
-      stop("Found `alternative` not in `alternative_names`.")
+  if (is.character(data$item)) {
+    if (is.null(setdiff(sort(unique(data$item)),
+                        item_names))) {
+      stop("Found `item` not in `item_names`.")
     }
-  } else if (is.numeric(data$alternative)) {
-      if (any(data$alternative > length(alternative_names))) {
-        stop("`alternative` index out of bounds.")
+  } else if (is.numeric(data$item)) {
+      if (any(data$item > length(item_names))) {
+        stop("`item` index out of bounds.")
       }
-      data$alternative <- alternative_names[data$alternative]
+      data$item <- item_names[data$item]
   }
 
   # Validate rank
@@ -349,48 +345,48 @@ validate_long <- function(data,
 # A helper function to convert long-form data into a rankings matrix.
 long_to_ranking <- function(data,
                             id,
-                            alternative,
+                            item,
                             rank,
-                            alternative_names = NULL,
+                            item_names = NULL,
                             verbose = TRUE) {
   # Take only required columns
-  data <- data[, c(id, alternative, rank)]
-  colnames(data) <- c("id", "alternative", "rank")
+  data <- data[, c(id, item, rank)]
+  colnames(data) <- c("id", "item", "rank")
 
-  validate_long(data, alternative_names, verbose)
+  validate_long(data, item_names, verbose)
 
   data$rank <- as.integer(data$rank)
 
-  # Process alternative_names
-  if (is.null(alternative_names)) {
-    alternative_names <- as.character(sort(unique(data$alternative)))
+  # Process item_names
+  if (is.null(item_names)) {
+    item_names <- as.character(sort(unique(data$item)))
   }
-  if (is.numeric(data$alternative)) {
-    data$alternative <- alternative_names[data$alternative]
+  if (is.numeric(data$item)) {
+    data$item <- item_names[data$item]
   }
-  data$alternative <- factor(data$alternative)
-  levels(data$alternative) <- alternative_names
+  data$item <- factor(data$item)
+  levels(data$item) <- item_names
 
   # Return the ranking matrix
   return(data %>%
     # Filter rows containing NA
-    dplyr::filter(!is.na(rank) & !is.na(alternative) & !is.na(id)) %>%
-    # Filter duplicate rankings, keeping the highest ranking for an alternative.
-    dplyr::group_by(id, alternative) %>%
+    dplyr::filter(!is.na(rank) & !is.na(item) & !is.na(id)) %>%
+    # Filter duplicate rankings, keeping the highest ranking for an item.
+    dplyr::group_by(id, item) %>%
     dplyr::top_n(1, -rank) %>%
     # Convert rankings to dense rankings
-    dplyr::ungroup(alternative) %>%
+    dplyr::ungroup(item) %>%
     dplyr::mutate(rank = dplyr::dense_rank(rank)) %>%
     # Convert long-format rankings to wide rankings
-    tidyr::spread("alternative", "rank", drop = FALSE) %>%
+    tidyr::spread("item", "rank", drop = FALSE) %>%
     dplyr::ungroup() %>%
-    dplyr::select(alternative_names) %>%
+    dplyr::select(item_names) %>%
     as.matrix()
   )
 }
 
 # A helper to validate ordinal preferences in ranking format.
-validate_ranking <- function(data, alternative_names, verbose) {
+validate_ranking <- function(data, item_names, verbose) {
   if (!class(data) == "matrix") {
 
   }
@@ -413,16 +409,16 @@ ranking_to_ordering <- function(ranking) {
 #' @method identical preferences
 #' @export
 identical.preferences <- function(x1, x2, ...) {
-  # If the alternatives are different return FALSE everywhere
+  # If the items are different return FALSE everywhere
   if (!all(dim(x1) == dim(x2))) {
     return(FALSE)
   }
-  if (!identical(sort(attr(x1, "ALTERNATIVE NAMES")),
-                 sort(attr(x2, "ALTERNATIVE NAMES")))) {
+  if (!identical(sort(attr(x1, "item_names")),
+                 sort(attr(x2, "item_names")))) {
     return(FALSE)
   }
   # Sort the columns of x2 to be in the same order as x1
-  x2 <- x2[, attr(x1, "ALTERNATIVE NAMES")]
+  x2 <- x2[, attr(x1, "item_names")]
   identical(unclass(x1), unclass(x2))
 }
 
@@ -459,9 +455,9 @@ Ops.preferences <- function(x1, x2) {
 #' @method [ preferences
 #' @param i The index of the preference-set to access.
 #' @param j The rank index to access, or if `by.ordering = TRUE` the
-#' index or name of the alternative to obtain the ranking for.
+#' index or name of the item to obtain the ranking for.
 #' @param by.ordering When `FALSE`, returns a `"preferences"` object:
-#' internally rows \eqn{i} contain the ranking assigned to each alternative
+#' internally rows \eqn{i} contain the ranking assigned to each item
 #' in preference \eqn{p_i}. When `TRUE`, returns a `"data.frame"` where
 #' rows group the the candidates in order of rank.
 #' @param drop If `TRUE`, return single row/column matrices as a vector.
@@ -491,6 +487,9 @@ Ops.preferences <- function(x1, x2) {
     } else {
       value <- x
     }
+    if (missing(j)) {
+      j <- TRUE
+    }
     return(ranking_to_ordering(value)[, j])
   }
 
@@ -519,36 +518,36 @@ Ops.preferences <- function(x1, x2) {
                            dplyr::dense_rank,
                            simplify = FALSE))
   }
-  alternatives <- attr(x, "ALTERNATIVE NAMES")
+  items <- attr(x, "item_names")
 
-  # Sort subset of alternatives so that they appear in the same order as the
-  # original preferences' alternatives.
+  # Sort subset of items so that they appear in the same order as the
+  # original preferences' items.
   if (!is.character(j)) {
-    sub_alternatives <- alternatives[j]
+    sub_items <- items[j]
   } else {
-    sub_alternatives <- j
+    sub_items <- j
   }
-  ord <- order(match(sub_alternatives, alternatives))
+  ord <- order(match(sub_items, items))
   value <- value[, ord, drop = drop]
-  sub_alternatives <- sub_alternatives[ord]
+  sub_items <- sub_items[ord]
 
   if (is.null(dim(value))) {
-    if (length(sub_alternatives) > 1L) {
-      names(value) <- sub_alternatives
+    if (length(sub_items) > 1L) {
+      names(value) <- sub_items
     }
     value
   } else if (is.character(j)) {
     structure(value,
-              dimnames = list(NULL, sub_alternatives),
-               "ALTERNATIVE NAMES" = sub_alternatives,
+              dimnames = list(NULL, sub_items),
+              item_names = sub_items,
               class = c("preferences", class(value)),
-              "DATA TYPE" = preftype(value))
+              preftype = preftype(value))
   } else {
     structure(value,
-              dimnames = list(NULL, sub_alternatives),
-               "ALTERNATIVE NAMES" = sub_alternatives,
+              dimnames = list(NULL, sub_items),
+              item_names = sub_items,
               class = c("preferences", class(value)),
-              "DATA TYPE" = preftype(value))
+              preftype = preftype(value))
   }
 }
 
@@ -559,7 +558,7 @@ preftype <- function(prefs) {
   complete <- anyNA(x)
   ties <- FALSE
   for (i in seq_len(nrow(x))) {
-    if (anyDuplicated(x[i,])) {
+    if (anyDuplicated(x[i, ])) {
       ties <- TRUE
       break
     }
@@ -591,22 +590,22 @@ as.preferences <- function(x, ...) {
 as.preferences.default <- function(x,
                                    format = c("ranking", "long"),
                                    id = NULL,
-                                   alternative = NULL,
+                                   item = NULL,
                                    rank = NULL,
-                                   alternative_names = NULL,
+                                   item_names = NULL,
                                    verbose = TRUE) {
   # Convert orderings data.frames into ranking matrices.
   if ("data.frame" %in% class(x) && all(sapply(x, typeof) == "list")) {
-    x <- ordering_to_ranking(x, alternative_names, verbose)
+    x <- ordering_to_ranking(x, item_names, verbose)
     format <- "ranking"
   }
   x <- as.matrix(x)
   as.preferences.matrix(x,
                         format,
                         id,
-                        alternative,
+                        item,
                         rank,
-                        alternative_names,
+                        item_names,
                         verbose)
 }
 
@@ -615,30 +614,30 @@ as.preferences.default <- function(x,
 as.preferences.matrix <- function(x,
                                   format = c("ranking", "long"),
                                   id = NULL,
-                                  alternative = NULL,
+                                  item = NULL,
                                   rank = NULL,
-                                  alternative_names = NULL,
+                                  item_names = NULL,
                                   verbose = TRUE) {
   format <- match.arg(format, c("ranking", "long"))
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
     prefs <- long_to_ranking(x,
                              id,
-                             alternative,
+                             item,
                              rank,
-                             alternative_names,
+                             item_names,
                              verbose)
   } else if (format == "ranking") {
     prefs <- x
   } else {
     stop("Not implemented.")
   }
-  if (missing(alternative_names)) {
-    alternative_names <- colnames(prefs)
+  if (missing(item_names)) {
+    item_names <- colnames(prefs)
   }
   class(prefs) <- c("preferences", class(prefs))
-  attr(prefs, "ALTERNATIVE NAMES") <- alternative_names
-  attr(prefs, "DATA TYPE") <- preftype(prefs)
+  attr(prefs, "item_names") <- item_names
+  attr(prefs, "preftype") <- preftype(prefs)
   return(prefs)
 }
 
@@ -677,9 +676,9 @@ print.preferences <- function(x, ...) {
 #' @rdname preferences
 #' @export
 format.preferences <- function(x, width = 40L, ...) {
-  f <- function(i, alternatives) {
+  f <- function(i, items) {
     keep <- !is.na(i) & i != 0L
-    obj <- alternatives[keep]
+    obj <- items[keep]
     i <- i[keep]
     ord <- order(i)
     if (length(obj) > 1L) {
@@ -691,7 +690,7 @@ format.preferences <- function(x, width = 40L, ...) {
       "blank"
     }
   }
-  value <- apply(x, 1L, f,  alternatives = attr(x, "ALTERNATIVE NAMES"))
+  value <- apply(x, 1L, f,  items = attr(x, "item_names"))
   nc <- nchar(value)
   trunc <- !is.na(nc) & nc > width
   value[trunc] <- paste(strtrim(value[trunc], width - 4), "...")
@@ -707,14 +706,14 @@ rbind.preferences <- function(...) {
     ref <- nm[[1L]]
     ok <- vapply(nm, identical, TRUE, ref)
     if (any(!ok)) {
-        alternative_names <- sort(unique(unlist(nm)))
+        item_names <- sort(unique(unlist(nm)))
         preflist <- lapply(
           preflist,
           function(x) {
             preflist <- matrix(0L,
                                nrow = nrow(x),
-                               ncol = length(alternative_names),
-                               dimnames = list(NULL, alternative_names))
+                               ncol = length(item_names),
+                               dimnames = list(NULL, item_names))
             preflist[, colnames(x)] <- x
             preflist
           }
@@ -768,8 +767,8 @@ as.data.frame.preferences <- function(x,
 #' @export
 as.matrix.preferences <- function(x, ...) {
   m <- unclass(x)
-  colnames(m) <- attr(x, "ALTERNATIVE NAMES")
-  attr(m, "ALTERNATIVE NAMES") <- NULL
+  colnames(m) <- attr(x, "item_names")
+  attr(m, "item_names") <- NULL
   return(m)
 }
 

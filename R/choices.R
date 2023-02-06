@@ -1,6 +1,6 @@
 #' Choices Object
 #'
-#' Convert a set of preferences to a list of choices, options, and
+#' Convert a set of preferences to a list of choices, alternatives, and
 #' preferences.
 #'
 #' @param preferences a `"\link{preferences}"` object, or an object that can be
@@ -9,11 +9,10 @@
 #' \code{"choices"} object, else use object indices.
 #' @return A data frame of class `"choices"` with elements:
 #' \describe{
-#' \item{choices}{A list where each element represents the alternatives
-#' chosen for a single rank in the preference set.}
-#' \item{options}{A list where each element represents the options (i.e. the
-#' set of remaining alternatives to choose from) for a single rank in the
-#' preference set.}
+#' \item{choices}{A list where each element represents the items chosen for a
+#' single rank in the preference set.}
+#' \item{alternatives}{A list where each element represents the alternatives
+#' (i.e. the set of remaining items to choose from) for a single rank.}
 #' \item{preference_set}{A list where each element represents the preference set
 #' that the choice belongs to.}
 #' }
@@ -52,7 +51,7 @@ choices <- function(preferences, names = FALSE) {
     if (names && !is.null(onames)) {
         opt <- onames
     }
-    choices <- options <- list()
+    choices <- alternatives <- list()
     preference_set <- c()
     for (j in seq_len(max(J))) {
         ## j-th choices
@@ -62,26 +61,26 @@ choices <- function(preferences, names = FALSE) {
             cho <- unname(split(cho, col(cho)))
         }
         choices <- c(choices, cho)
-        ## j-th options
+        ## j-th alternatives
         alt <- apply((preferences > j - 1L)[J >= j, , drop = FALSE], 1L,
                      function(z) opt[z])
         if (is.matrix(alt)) {
             alt <- unname(split(alt, col(alt)))
         }
-        options <- c(options, alt)
+        alternatives <- c(alternatives, alt)
         preference_set <- c(preference_set, which(J >= j))
     }
     ii <- order(preference_set)
     nchoices <- length(choices)
     out <- data.frame(matrix(NA, nrow = nchoices, ncol = 0))
     out$choices <- choices[ii]
-    out$options <- options[ii]
+    out$alternatives <- alternatives[ii]
     out$preference_set <- preference_set[ii]
     attr(out, "nchoices") <- nchoices
     attr(out, "objects") <- onames
     class(out) <- c("choices", class(out))
     out
-    ## Alow weights per choice/options combination?
+    ## Alow weights per choice/alternatives combination?
 }
 
 #' @method print choices
@@ -92,7 +91,7 @@ print.choices <- function(x, ...) {
         cat("Preference Set:", i, "\n")
         cat("-------------- \n")
         ccho <- x$choices[preferences == i]
-        calt <- x$options[preferences == i]
+        calt <- x$alternatives[preferences == i]
         for (j in seq_along(ccho)) {
             ch <- paste0("{", paste(ccho[[j]], collapse = ", "), "}")
             al <- paste0("{", paste(calt[[j]], collapse = ", "), "}")

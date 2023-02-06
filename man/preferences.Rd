@@ -15,8 +15,8 @@ preferences(
   format = c("long", "ordering", "ranking"),
   id = NULL,
   rank = NULL,
-  alternative = NULL,
-  alternative_names = NULL,
+  item = NULL,
+  item_names = NULL,
   frequencies = NULL,
   aggregate = FALSE,
   verbose = TRUE,
@@ -31,9 +31,9 @@ as.preferences(x, ...)
   x,
   format = c("ranking", "long"),
   id = NULL,
-  alternative = NULL,
+  item = NULL,
   rank = NULL,
-  alternative_names = NULL,
+  item_names = NULL,
   verbose = TRUE
 )
 
@@ -41,9 +41,9 @@ as.preferences(x, ...)
   x,
   format = c("ranking", "long"),
   id = NULL,
-  alternative = NULL,
+  item = NULL,
   rank = NULL,
-  alternative_names = NULL,
+  item_names = NULL,
   verbose = TRUE
 )
 
@@ -54,21 +54,20 @@ as.preferences(x, ...)
 \arguments{
 \item{data}{A \code{data.frame} or \code{matrix} in one of three formats:
 \describe{
-\item{"ordering"}{Orderings must be a \code{data.frame} with
-\code{"list"}-valued columns. Each row represents an
-ordering of the alternatives from first to last,
-representing ties by a list of vectors corresponding to
-the alternatives.}
-\item{"ranking"}{Each row assigns a ranking to each alternative, each column
-gives the rankings assigned to a single alterntive. Rankings
+\item{"ordering"}{Orderings must be a \code{data.frame} with \code{"list"}-valued
+columns. Each row represents an ordering of the items
+from first to last, representing ties by a list of
+vectors corresponding to the items.}
+\item{"ranking"}{Each row assigns a ranking to each item, each column
+gives the rankings assigned to a single item. Rankings
 should be dense, otherwise they will be converted to dense
 rankings.}
 \item{"long"}{Three columns: an \code{id} column grouping the rows which
 correspond to a single set of preferences, a
-\code{alternative} column specifying (either by index or by
-name) the alternative each row refers to, and a \code{rank}
+\code{item} column specifying (either by index or by
+name) the item each row refers to, and a \code{rank}
 column specifying the rank for the associated
-\code{alternative}.}
+\code{item}.}
 }}
 
 \item{format}{The format of the data: one of "ordering", "ranking", or
@@ -78,16 +77,16 @@ column specifying the rank for the associated
 preference set grouping.}
 
 \item{rank}{For \code{data} in long-format: the column representing the
-rank for the associated alternative.}
+rank for the associated item.}
 
-\item{alternative}{For \code{data} in long-format: the column representing
-the alternatives by name or by index, in which case the
-\code{alternative_names} parameter should also be passed, or the alternatives
-will be named by the integers.}
+\item{item}{For \code{data} in long-format: the column representing
+the items by name or by index, in which case the
+\code{item_names} parameter should also be passed, or the items will be named as
+integers.}
 
-\item{alternative_names}{The names of the full set of alternatives. When
-loading data using integer-valued indices in place of alternative names,
-the \code{alternative_names} character vector should be in the correct order.}
+\item{item_names}{The names of the full set of items. When loading data using
+integer-valued indices in place of item names, the \code{item_names} character
+vector should be in the correct order.}
 
 \item{frequencies}{An optional integer vector containing the number of
 occurences of each preference. If provided, the method will return a
@@ -101,12 +100,12 @@ frequencies.}
 \item{i}{The index of the preference-set to access.}
 
 \item{j}{The rank index to access, or if \code{by.ordering = TRUE} the
-index or name of the alternative to obtain the ranking for.}
+index or name of the item to obtain the ranking for.}
 
 \item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
 
 \item{by.ordering}{When \code{FALSE}, returns a \code{"preferences"} object:
-internally rows \eqn{i} contain the ranking assigned to each alternative
+internally rows \eqn{i} contain the ranking assigned to each item
 in preference \eqn{p_i}. When \code{TRUE}, returns a \code{"data.frame"} where
 rows group the the candidates in order of rank.}
 
@@ -114,20 +113,19 @@ rows group the the candidates in order of rank.}
 truncating by "..." when they are too long.}
 }
 \value{
-By default, a \code{"preferences"} object, which is a
-\code{data.frame} with \code{"list"}-valued columns corresponding to
-preferences on the alternatives. This may be an ordering on subsets of the
-alternatives in the case of ties, or a potentially-partial strict ordering.
-In the case of partial or tied preferences, some entries may be empty lists.
+By default, a \code{"preferences"} object, which is a \code{data.frame} with
+\code{"list"}-valued columns corresponding to preferences on the items. This may
+be an ordering on subsets of the items in the case of ties, or a
+potentially-partial strict ordering. In the case of partial or tied
+preferences, some entries may be empty lists.
 }
 \description{
-Create a \code{"preferences"} object from Ordinal Preference data in either
-\code{ordering} or \code{ranking} format.
+Create a \code{"preferences"} object for representing Ordinal Preference datasets.
 }
 \details{
-Ordinal preferences can order every alternative, or they can order a subset.
-Some preferential datasets will contain ties between alternatives at a given
-rank. Hence, there are four distinct types of preferential data:
+Ordinal preferences can order every item, or they can order a subset. Some
+ordinal preference datasets will contain ties between items at a given rank.
+Hence, there are four distinct types of preferential data:
 \describe{
 \item{\code{"soc"}}{Strict Orders - Complete List}
 \item{\code{"soi"}}{Strict Orders - Incomplete List}
@@ -135,8 +133,8 @@ rank. Hence, there are four distinct types of preferential data:
 \item{\code{"toi"}}{Orders with Ties - Incomplete List}
 }
 The data type is stored alongside the \code{"preferences"} as an attribute
-\code{attr(preferences, "DATA TYPE")}. The data type is determined automatically.
-If every preference ranks every alternative, then the data type will be
+\code{attr(preferences, "preftype")}. The data type is determined automatically.
+If every preference ranks every item, then the data type will be
 "soc" or "soi". Similarly, if no preference contains a tie the data type
 will be "toc" or "toi".
 
@@ -144,50 +142,48 @@ A set of preferences can be represented either by \code{ranking} or by
 \code{ordering}. These correspond to the two ways you can list a set of
 preferences in a vector:
 \describe{
-\item{\code{ordering}}{The alternatives are listed in order of most preferred
-to least preferred, allowing for pairs of
-alternatives in the case of ties.}
-\item{\code{ranking}}{The rank assigned to each alternative is listed in
-order of some predefined index on the alternatives.
-rankings should be dense, otherwise they will be
-converted to dense rankings.}
+\item{\code{ordering}}{The items are listed in order of most preferred to least
+preferred, allowing for pairs of items in the case of
+ties.}
+\item{\code{ranking}}{The rank assigned to each item is listed in order of some
+predefined index on the items. Rankings should be
+dense, otherwise they will be converted to dense
+rankings.}
 }
-When reading \code{"preferences"} from an \code{ordering} matrix, the index
-on the alternatives is the order passed to the \code{alternative_names}
-parameter. When reading from a \code{rankings} matrix, if no
-\code{alternative_names} are provided, the order is inferred from the named
-columns.
+When reading \code{"preferences"} from an \code{ordering} matrix, the index on the
+items is the order passed to the \code{item_names} parameter. When reading from
+a \code{rankings} matrix, if no \code{item_names} are provided, the order is inferred
+from the named columns.
 
-A \code{"preferences"} object can also be read from a long-format matrix,
-where there are three columns: \code{id}, \code{alternative} and
-\code{rank}. The \code{id} variable groups the rows of the matrix which
-correspond to a single set of preferences, which the \code{alternative:rank},
-pairs indicate how each alternative is ranked. When reading a matrix from
-this format and no \code{alternative_names} parameter is passed, the
-order is determined automatically.
+A \code{"preferences"} object can also be read from a long-format matrix, where
+there are three columns: \code{id}, \code{item} and \code{rank}. The \code{id} variable groups
+the rows of the matrix which correspond to a single set of preferences, which
+the \code{item:rank}, pairs indicate how each item is ranked. When reading a
+matrix from this format and no \code{item_names} parameter is passed, the order is
+determined automatically.
 }
 \examples{
 # create rankings from data in long form
 
 # Example long-form data
 x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
-                alternative = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
+                item = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
                            LETTERS[3:5]),
                 rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3))
 
-# * Set #1 has two different ranks for the same alternative (alternative C
-# has rank 1 and 2). This alternative will be excluded from the preferences.
+# * Set #1 has two different ranks for the same item (item C
+# has rank 1 and 2). This item will be excluded from the preferences.
 # * All ranks are missing in set #2, a technically valid partial ordering
 # * Some ranks are missing in set #3, a perfectly valid partial ordering
-# * Set #4 has inconsistent ranks for two alternatives, and a rank with a
-# missing alternative.
+# * Set #4 has inconsistent ranks for two items, and a rank with a
+# missing item.
 # * Set #5 is not a dense-ranking. It will be converted to be dense and then
 # inferred to be a regular partial ordering with ties.
 split(x, x$ranking)
 
 # Creating a preferences object with this data will attempt to resolve these
 # issues automatically, sending warnings when assumptions need to be made.
-preferences(x, id = "id", alternative = "alternative", rank = "rank")
+preferences(x, id = "id", item = "item", rank = "rank")
 
 # Convert an existing matrix of rankings to a preferences object.
 rnk <- matrix(c(1, 2, 0, 0,
@@ -209,7 +205,7 @@ ord <- preferences(
     rank4 = I(list())
   ),
   format = "ordering",
-  alternative_names = c("apple", "banana", "orange", "pear")
+  item_names = c("apple", "banana", "orange", "pear")
 )
 ord[1,] <- list(1, 2) # apple, banana
 ord[2,] <- list("banana", "orange", "pear", "apple")
@@ -218,8 +214,8 @@ ord[4,] <- list("apple", "banana", "orange")
 ord[5,] <- list(c("banana", "orange"), "apple")
 ord[6,] <- list("apple", "pear", "orange")
 
-# Alternatively, we could have referred to each alternative by index and
-# passed `alternative_names = c("apple", "banana", "orange", "pear")`.
+# Alternatively, we could have referred to each item by index and
+# passed `item_names = c("apple", "banana", "orange", "pear")`.
 ord <- as.preferences(ord)
 
 # Access the first three sets of preferences
@@ -231,7 +227,7 @@ ord[, 1:2, by.ordering = TRUE]
 # Exclude pear from the rankings
 ord[, -4]
 
-# Get the highest-ranked alternatives from the third preference-set
+# Get the highest-ranked items from the third preference-set
 ord[3, 1, by.ordering = TRUE]
 
 # Get the rank of apple in the third preference-set

@@ -29,7 +29,7 @@ previously aggregated.}
 
 \item{i}{indices specifying preferences to extract, as for \verb{\link{[}}.}
 
-\item{j}{indices specifying alternatives to extract, as for \verb{\link{[}}.}
+\item{j}{indices specifying items to extract, as for \verb{\link{[}}.}
 
 \item{drop}{if \code{TRUE} return single row/column matrices as a vector.}
 
@@ -67,7 +67,7 @@ A <- aggregate(R)
 # subsetting applies to the preferences, e.g. first two unique preferences
 A[1:2]
 
-# (partial) preferences projected to alternatives 2-4 only
+# (partial) preferences projected to items 2-4 only
 A[, 2:4]
 
 # convert to a matrix

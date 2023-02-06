@@ -16,14 +16,14 @@ coerced by \code{as.preferences}.}
 }
 \value{
 An \eqn{N} by \eqn{N} matrix, where \eqn{N} is the number of
-alternatives.
+items.
 }
 \description{
 Convert a set of preferences to an adjacency matrix summarising wins
-and losses between pairs of alternatives.
+and losses between pairs of items
 }
 \details{
-For a \code{"preferences"} object with \eqn{N} alternatives, the adjacency
+For a \code{"preferences"} object with \eqn{N} items, the adjacency
 matrix is an \eqn{N} by \eqn{N} matrix, with element \eqn{(i, j)} being the
 number of times item \eqn{i} wins over item \eqn{j}. For example, in the
 preferences \\{1\\} > \\{3, 4\\} > \\{2\\}, item 1 wins over items 2, 3,

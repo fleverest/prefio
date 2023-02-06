@@ -14,7 +14,7 @@
 a \code{"data.frame"} containing the raw PrefLib data.}
 
 \item{...}{Additional arguments passed to \code{\link[=as.aggregated_preferences]{as.aggregated_preferences()}}:
-\code{frequencies}, \code{format} or \code{alternative_names} will be ignored as they are
+\code{frequencies}, \code{format} or \code{item_names} will be ignored as they are
 set automatically.}
 }
 \value{
@@ -22,11 +22,14 @@ An \code{\link[=aggregate.preferences]{"aggregated_preferences"}} object
 containing the PrefLib data.
 }
 \description{
-Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types storing
-ordinal preference data as defined by
-\href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
+Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} files storing
+ordinal preference data format as defined by
+\href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
+into a \code{"preferences"} object.
 }
 \details{
+Note that PrefLib refers to the items being ordered by "alternatives".
+
 The file types supported are
 \describe{
 \item{.soc}{Strict Orders - Complete List}
@@ -39,7 +42,7 @@ The numerically coded orderings and their frequencies are read into a
 data frame, storing the item names as an attribute. The
 \code{as.aggregated_preferences} method converts these to an
 \code{\link[=aggregate.preferences]{"aggregated_preferences"}} object with the
-alternatives labelled by name.
+items labelled by name.
 
 A Preflib file may be corrupt, in the sense that the ordered alternatives do
 not match their names. In this case, the file can be read in as a data
@@ -61,7 +64,7 @@ preflib <- "https://www.preflib.org/static/data/"
 # strict complete orderings of four films on Netflix
 netflix <- read.preflib(file.path(preflib, "netflix/00004-00000101.soc"))
 head(netflix)
-attr(netflix, "ALTERNATIVE NAMES")
+attr(netflix, "item_names")
 
 # strict incomplete orderings of 6 random cities from 36 in total
 cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
