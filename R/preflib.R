@@ -118,11 +118,6 @@ read.preflib <- function(file) {
         )
       ]
     )
-    # Remove each 'ALTERNATIVE NAME X' and replace with a list
-    preflib_attributes[
-      paste("ALTERNATIVE NAME", seq_len(n_alternatives))
-    ] <- NULL
-    preflib_attributes[["ALTERNATIVE NAMES"]] <- alternative_names
 
     # Filter the data lines and 'encourage' them into a csv format
     data_lines <- grep("^[^#]", lines, value = TRUE)
@@ -163,11 +158,12 @@ read.preflib <- function(file) {
     )
     frequencies <- preferences[, 1]
     preferences <- preferences[, -1]
-    attributes(preferences) <- c(attributes(preferences), preflib_attributes)
     preferences <- as.preferences(
       preferences,
       "ordering",
-      alternative_names = attr(preferences, "ALTERNATIVE NAMES")
+      alternative_names = alternative_names
     )
-    aggregate(preferences, frequencies = frequencies)
+    aggregated_prefs <- aggregate(preferences, frequencies = frequencies)
+    attr(aggregated_prefs, "preflib") <- preflib_attributes
+    return(aggregated_prefs)
 }
