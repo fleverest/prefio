@@ -555,7 +555,7 @@ Ops.preferences <- function(x1, x2) {
 # "soc", "soi", "toc", or "toi".
 preftype <- function(prefs) {
   x <- as.matrix(prefs)
-  complete <- anyNA(x)
+  complete <- !anyNA(x)
   ties <- FALSE
   for (i in seq_len(nrow(x))) {
     if (anyDuplicated(x[i, ])) {
