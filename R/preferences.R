@@ -297,29 +297,29 @@ validate_long <- function(data,
   }
 
   # Find duplicated items
-  if (anyDuplicated(paste(data$id, data$item, sep = ":")) && verbose) {
+  if (anyDuplicated(paste(data[["id"]], data[["item"]], sep = ":")) && verbose) {
     message("Duplicated rankings per item detected: ",
             "only the highest ranks will be used.")
   }
 
   # Validate items
   if (is.null(item_names)) {
-    item_names <- sort(unique(data$item))
+    item_names <- sort(unique(data[["item"]]))
   }
-  if (is.character(data$item)) {
-    if (is.null(setdiff(sort(unique(data$item)),
+  if (is.character(data[["item"]])) {
+    if (is.null(setdiff(sort(unique(data[["item"]])),
                         item_names))) {
       stop("Found `item` not in `item_names`.")
     }
-  } else if (is.numeric(data$item)) {
-      if (any(data$item > length(item_names))) {
+  } else if (is.numeric(data[["item"]])) {
+      if (any(data[["item"]] > length(item_names))) {
         stop("`item` index out of bounds.")
       }
-      data$item <- item_names[data$item]
+      data[["item"]] <- item_names[data[["item"]]]
   }
 
   # Validate rank
-  orig_rank <- na.omit(data$rank)
+  orig_rank <- na.omit(data[["rank"]])
   int_rank <- as.integer(orig_rank)
   if (anyNA(int_rank) || any(int_rank != orig_rank)) {
     stop("`rank` must be integer-valued.")
@@ -339,17 +339,17 @@ long_to_ranking <- function(data,
 
   validate_long(data, item_names, verbose)
 
-  data$rank <- as.integer(data$rank)
+  data[["rank"]] <- as.integer(data[["rank"]])
 
   # Process item_names
   if (is.null(item_names)) {
-    item_names <- as.character(sort(unique(data$item)))
+    item_names <- as.character(sort(unique(data[["item"]])))
   }
-  if (is.numeric(data$item)) {
-    data$item <- item_names[data$item]
+  if (is.numeric(data[["item"]])) {
+    data[["item"]] <- item_names[data[["item"]]]
   }
-  data$item <- factor(data$item)
-  levels(data$item) <- item_names
+  data[["item"]] <- factor(data[["item"]])
+  levels(data[["item"]]) <- item_names
 
   # Return the ranking matrix
   return(data %>%
@@ -364,7 +364,7 @@ long_to_ranking <- function(data,
     # Convert long-format rankings to wide rankings
     tidyr::spread("item", "rank", drop = FALSE) %>%
     dplyr::ungroup() %>%
-    dplyr::select(item_names) %>%
+    dplyr::select(dplyr::all_of(item_names)) %>%
     as.matrix()
   )
 }
@@ -694,8 +694,8 @@ rbind.preferences <- function(...) {
     nm <- lapply(preflist, colnames)
     ref <- nm[[1L]]
     ok <- vapply(nm, identical, TRUE, ref)
+    item_names <- sort(unique(unlist(nm)))
     if (any(!ok)) {
-        item_names <- sort(unique(unlist(nm)))
         preflist <- lapply(
           preflist,
           function(x) {
@@ -711,7 +711,9 @@ rbind.preferences <- function(...) {
     # rbind all preferences matrices
     preflist <- do.call("rbind", lapply(preflist, unclass))
     structure(preflist,
-              class = unique(c("preferences", class(preflist))))
+              class = unique(c("preferences", class(preflist))),
+              item_names = item_names,
+              preftype = preftype(preflist))
 }
 
 #' @method as.data.frame preferences

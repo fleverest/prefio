@@ -179,7 +179,7 @@ x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
 # missing item.
 # * Set #5 is not a dense-ranking. It will be converted to be dense and then
 # inferred to be a regular partial ordering with ties.
-split(x, x$ranking)
+split(x, x$rank)
 
 # Creating a preferences object with this data will attempt to resolve these
 # issues automatically, sending warnings when assumptions need to be made.
@@ -197,52 +197,41 @@ colnames(rnk) <- c("apple", "banana", "orange", "pear")
 rnk <- as.preferences(rnk, format = "ranking")
 
 # Convert an existing data.frame of orderings to a preferences object.
+e <- character() # short-hand for empty ranks
 ord <- preferences(
-  data.frame(
-    rank1 = I(list()),
-    rank2 = I(list()),
-    rank3 = I(list()),
-    rank4 = I(list())
+  as.data.frame(
+    rbind(
+      list(1, 2, e, e), # apple, banana
+      list("banana", "orange", "pear", "apple"),
+      list(c("banana", "orange", "pear"), "apple", e, e),
+      list("apple", "banana", "orange", e),
+      list(c("banana", "orange"), "apple", e, e),
+      list("apple", "pear", "orange", e)
+    )
   ),
   format = "ordering",
   item_names = c("apple", "banana", "orange", "pear")
 )
-ord[1,] <- list(1, 2) # apple, banana
-ord[2,] <- list("banana", "orange", "pear", "apple")
-ord[3,] <- list(c("banana", "orange", "pear"), "apple")
-ord[4,] <- list("apple", "banana", "orange")
-ord[5,] <- list(c("banana", "orange"), "apple")
-ord[6,] <- list("apple", "pear", "orange")
-
-# Alternatively, we could have referred to each item by index and
-# passed `item_names = c("apple", "banana", "orange", "pear")`.
-ord <- as.preferences(ord)
 
 # Access the first three sets of preferences
 ord[1:3, ]
 
-# Truncate preferences to the top 2 ranks
+# Truncate preferences to the top 2 ranks and return as data.frame
 ord[, 1:2, by.ordering = TRUE]
 
 # Exclude pear from the rankings
 ord[, -4]
 
-# Get the highest-ranked items from the third preference-set
-ord[3, 1, by.ordering = TRUE]
+# Get the highest-ranked items and return as data.frame
+ord[, 1, by.ordering = TRUE]
 
 # Get the rank of apple in the third preference-set
-ord[3, 1]
-
-# Get all the ranks assiged to apple as a vector
-ord[, 1]
+as.matrix(ord)[3, 1]
 
 # Convert the preferences to a ranking matrix
-as.matrix(ord, format = "ranking")
+as.matrix(ord)
 
-# Convert the preferences to a ordering matrix
-as.matrix(ord, format = "ordering")
-
-# Convert the preferences to a long-format matrix
-as.matrix(ord, format = "long")
+# Get all the ranks assiged to apple as a vector
+as.matrix(ord)[, "apple"]
 
 }
