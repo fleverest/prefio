@@ -1,36 +1,36 @@
 #' Group Preferences
 #'
-#' Create an object of class `"grouped_preferences"` which associates a
-#' group index with an object of class `"preferences"`. This allows the
+#' Create an object of class `grouped_preferences` which associates a
+#' group index with an object of class `preferences`. This allows the
 #' preferences to be linked to covariates with group-specific values.
 #'
 #' @param index A numeric vector of length equal to the number of preferences
-#' specifying the subject for each ranking.
-#' @param x A [`"preferences"`][preferences] object for `group()`; an object
-#' that can be coerced to a `"grouped_preferences"` object for
-#' `as.grouped_preferences()`, otherwise a `"grouped_preferences"` object.
+#' specifying the subject for each set.
+#' @param x A [`preferences`][preferences] object for `group()`; an object
+#' that can be coerced to a `grouped_preferences` object with
+#' `as.grouped_preferences()`; otherwise a `grouped_preferences` object.
 #' @param i Indices specifying groups to extract, may be any data type accepted
 #' by `\link{[}`.
 #' @param j Indices specifying items to extract, as for `\link{[}`.
 #' @param drop If `TRUE`, return single row/column matrices as a vector.
-#' @param as.grouped_preferences If `TRUE` return a `"grouped_preferences"`
+#' @param as.grouped_preferences If `TRUE` return a `grouped_preferences`
 #' object, otherwise return a matrix/vector.
 #' @param max The maximum number of preferences to format per subject.
-#' @param width The maximum width in number of characters to format each
-#' ranking.
+#' @param width The maximum width in number of characters to format the
+#' preferences.
 #' @param ... Additional arguments passed on to `\link{as.preferences}`
 #' by `grouped_preferences` or `as.grouped_preferences`; unused by
 #' `format`.
-#' @return An object of class `"grouped_preferences"`, which is a vector of
+#' @return An object of class `grouped_preferences`, which is a vector of
 #' of group IDs with the following attributes:
-#' \item{preferences}{ The `"preferences"` object.}
-#' \item{index}{ An index match each ranking to each group ID.}
+#' \item{preferences}{ The `preferences` object.}
+#' \item{index}{ An index matching each preference set to each group ID.}
 #' \item{R}{ A matrix with items ordered from last to first place, for each
-#' ranking.}
+#' preference set}
 #' \item{S}{ The preferences matrix with the ranks replaced by the size of the
 #' chosen set for free choices and zero for forced choices.}
 #' \item{id}{ A list with elements of the adjacency matrix that are incremented
-#' by each ranking.}
+#' by each preference set}
 #' @examples
 #'
 #' # ungrouped preferences (5 preference sets, 4 items)
@@ -54,7 +54,7 @@
 #' ## select preferences from group 1
 #' G[1,]
 #'
-#' ## exclude item 3 from ranking
+#' ## exclude item 3 from preferences
 #' G[, -3]
 #'
 #' ## preferences from group 2, excluding item 3
@@ -64,12 +64,6 @@
 #' ## index underlying preferences without creating new grouped_preferences
 #' ## object
 #' G[2, -3, as.grouped_preferences = FALSE]
-#' @export
-group <- function(x, index, ...) {
-    UseMethod("group")
-}
-
-#' @method group preferences
 #' @export
 group.preferences <- function(x, index, ...) {
     if (!(is.vector(index) && length(index) == nrow(x)))
@@ -82,7 +76,7 @@ group.preferences <- function(x, index, ...) {
 }
 
 
-# ranking stats - summaries used in model fitting, compute once for all
+#  stats - summaries used in model fitting, compute once for all
 ranking_stats <- function(preferences) {
     preferences <- unclass(preferences)
     nr <- nrow(preferences)
@@ -120,32 +114,6 @@ ranking_stats <- function(preferences) {
 #' @export
 as.grouped_preferences <- function(x, ...){
     UseMethod("as.grouped_preferences")
-}
-
-#' @rdname group
-#' @method as.grouped_preferences paircomp
-#' @export
-as.grouped_preferences.paircomp <- function(x, ...){
-    if (attr(x, "mscale")[1L] < -1L) {
-        warning("strength of preference ignored")
-        x <- sign(x)
-    }
-    id <- which(!is.na(as.matrix(x)), arr.ind = TRUE)
-    ncomp <- nrow(id)
-    nobj <- length(attr(x, "labels"))
-    pairs <- which(upper.tri(diag(nobj)), arr.ind = TRUE)
-    preferences <- matrix(0L, nrow = ncomp, ncol = nobj,
-                       dimnames = list(NULL, attr(x, "labels")))
-    x <- as.matrix(x)[id]
-    preferences[cbind(seq_len(ncomp), pairs[,1L][id[,2L]])] <-
-        ifelse(x == -1L, 2L, 1L)
-    preferences[cbind(seq_len(ncomp), pairs[,2L][id[,2L]])] <-
-        ifelse(x == 1L, 2L, 1L)
-    preferences <- structure(preferences, class = "preferences")
-    do.call("structure",
-            c(list(seq_len(max(id[,1L])), preferences = preferences, index = id[,1L]),
-              ranking_stats(preferences),
-              list(class = "grouped_preferences")))
 }
 
 #' @rdname group

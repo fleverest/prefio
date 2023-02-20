@@ -3,7 +3,7 @@
 #' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` files storing
 #' ordinal preference data format as defined by
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
-#' into a `"preferences"` object.
+#' into a `preferences` object.
 #'
 #' Note that PrefLib refers to the items being ordered by "alternatives".
 #'
@@ -18,22 +18,22 @@
 #' The numerically coded orderings and their frequencies are read into a
 #' data frame, storing the item names as an attribute. The
 #' `as.aggregated_preferences` method converts these to an
-#' [`"aggregated_preferences"`][aggregate.preferences] object with the
+#' [`aggregated_preferences`][aggregate.preferences] object with the
 #' items labelled by name.
 #'
 #' A Preflib file may be corrupt, in the sense that the ordered alternatives do
 #' not match their names. In this case, the file can be read in as a data
 #' frame (with a warning), but `as.aggregated_preferences` will throw an error.
 #'
-#' @return An [`"aggregated_preferences"`][aggregate.preferences] object
+#' @return An [`aggregated_preferences`][aggregate.preferences] object
 #' containing the PrefLib data.
 #'
 #' @param file A preferential data file, conventionally with extension `.soc`,
 #' `.soi`, `.toc` or `.toi` according to data type.
-#' @param x An object of class `"preflib"`.
+#' @param x An object of class `preflib`.
 #' @param as.aggregated_preferences When `TRUE`, returns an object of class
-#' [`"aggregated_preferences"`][aggregate.preferences]. When `FALSE`, returns
-#' a `"data.frame"` containing the raw PrefLib data.
+#' [`aggregated_preferences`][aggregate.preferences]. When `FALSE`, returns
+#' a `data.frame` containing the raw PrefLib data.
 #' @param ... Additional arguments passed to [as.aggregated_preferences()]:
 #' `frequencies`, `format` or `item_names` will be ignored as they are
 #' set automatically.

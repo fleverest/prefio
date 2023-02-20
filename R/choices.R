@@ -3,11 +3,11 @@
 #' Convert a set of preferences to a list of choices, alternatives, and
 #' preferences.
 #'
-#' @param preferences a `"\link{preferences}"` object, or an object that can be
+#' @param preferences a `\link{preferences}` object, or an object that can be
 #' coerced by \code{as.preferences}.
 #' @param names logical: if \code{TRUE} use the object names in the returned
 #' \code{"choices"} object, else use object indices.
-#' @return A data frame of class `"choices"` with elements:
+#' @return A data frame of class `choices` with elements:
 #' \describe{
 #' \item{choices}{A list where each element represents the items chosen for a
 #' single rank in the preference set.}
@@ -17,7 +17,7 @@
 #' that the choice belongs to.}
 #' }
 #' The list stores the number of choices and the names of the objects as the
-#' attributes `"nchoices"` and `"objects"` respectively.
+#' attributes `nchoices` and `objects` respectively.
 #' @examples
 #' R <- matrix(c(1, 2, 0, 0,
 #'               4, 1, 2, 3,

@@ -7,25 +7,25 @@
 \item{file}{A preferential data file, conventionally with extension \code{.soc},
 \code{.soi}, \code{.toc} or \code{.toi} according to data type.}
 
-\item{x}{An object of class \code{"preflib"}.}
+\item{x}{An object of class \code{preflib}.}
 
 \item{as.aggregated_preferences}{When \code{TRUE}, returns an object of class
-\code{\link[=aggregate.preferences]{"aggregated_preferences"}}. When \code{FALSE}, returns
-a \code{"data.frame"} containing the raw PrefLib data.}
+\code{\link[=aggregate.preferences]{aggregated_preferences}}. When \code{FALSE}, returns
+a \code{data.frame} containing the raw PrefLib data.}
 
 \item{...}{Additional arguments passed to \code{\link[=as.aggregated_preferences]{as.aggregated_preferences()}}:
 \code{frequencies}, \code{format} or \code{item_names} will be ignored as they are
 set automatically.}
 }
 \value{
-An \code{\link[=aggregate.preferences]{"aggregated_preferences"}} object
+An \code{\link[=aggregate.preferences]{aggregated_preferences}} object
 containing the PrefLib data.
 }
 \description{
 Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} files storing
 ordinal preference data format as defined by
 \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
-into a \code{"preferences"} object.
+into a \code{preferences} object.
 }
 \details{
 Note that PrefLib refers to the items being ordered by "alternatives".
@@ -41,7 +41,7 @@ The file types supported are
 The numerically coded orderings and their frequencies are read into a
 data frame, storing the item names as an attribute. The
 \code{as.aggregated_preferences} method converts these to an
-\code{\link[=aggregate.preferences]{"aggregated_preferences"}} object with the
+\code{\link[=aggregate.preferences]{aggregated_preferences}} object with the
 items labelled by name.
 
 A Preflib file may be corrupt, in the sense that the ordered alternatives do

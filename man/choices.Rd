@@ -7,14 +7,14 @@
 choices(preferences, names = FALSE)
 }
 \arguments{
-\item{preferences}{a \code{"\link{preferences}"} object, or an object that can be
+\item{preferences}{a \verb{\link{preferences}} object, or an object that can be
 coerced by \code{as.preferences}.}
 
 \item{names}{logical: if \code{TRUE} use the object names in the returned
 \code{"choices"} object, else use object indices.}
 }
 \value{
-A data frame of class \code{"choices"} with elements:
+A data frame of class \code{choices} with elements:
 \describe{
 \item{choices}{A list where each element represents the items chosen for a
 single rank in the preference set.}
@@ -24,7 +24,7 @@ single rank in the preference set.}
 that the choice belongs to.}
 }
 The list stores the number of choices and the names of the objects as the
-attributes \code{"nchoices"} and \code{"objects"} respectively.
+attributes \code{nchoices} and \code{objects} respectively.
 }
 \description{
 Convert a set of preferences to a list of choices, alternatives, and

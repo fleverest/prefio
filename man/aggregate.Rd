@@ -17,9 +17,9 @@ as.aggregated_preferences(x, ...)
 frequencies(x)
 }
 \arguments{
-\item{x}{A \code{\link[=preferences]{"preferences"}} object for \code{aggregate()}; an
-object that can be coerced to a \code{"aggregated_preferences"} object for
-\code{as.aggregated_preferences()}, otherwise an \code{"aggregated_preferences"}
+\item{x}{A \code{\link{preferences}} object for \code{aggregate()}; an
+object that can be coerced to a \code{aggregated_preferences} object for
+\code{as.aggregated_preferences()}, otherwise an \code{aggregated_preferences}
 object.}
 
 \item{frequencies}{A vector of frequencies for preferences that have been
@@ -34,19 +34,19 @@ previously aggregated.}
 \item{drop}{if \code{TRUE} return single row/column matrices as a vector.}
 
 \item{as.aggregated_preferences}{if \code{TRUE} create an
-\code{"aggregated_preferences"} object from the indexed preferences Otherwise
+\code{aggregated_preferences} object from the indexed preferences Otherwise
 index the underlying matrix of ranks and return in a data frame with the
 corresponding frequencies.}
 }
 \value{
-A data frame of class \code{"aggregated_preferences"}, with columns
-\item{preferences}{A \code{\link[=preferences]{"preferences"}} object of the unique
+A data frame of class \code{aggregated_preferences}, with columns
+\item{preferences}{A \code{\link{preferences}} object of the unique
 preferences}
 \item{frequencies}{The corresponding frequencies.}
 Methods are available for \code{\link[=rbind]{rbind()}} and \code{\link[=as.matrix]{as.matrix()}}.
 }
 \description{
-Aggregate \code{"preferences"}, returning an \code{"aggregated_preferences"} object of
+Aggregate \code{preferences}, returning an \code{aggregated_preferences} object of
 the unique preferences and their frequencies. The frequencies can be
 accessed via the function \code{frequencies()}.
 }
@@ -75,5 +75,5 @@ as.matrix(A)
 }
 \seealso{
 \code{\link[=preflib]{preflib()}} for an object that can be coerced to an
-\code{"aggregated_preferences"} object.
+\code{aggregated_preferences} object.
 }

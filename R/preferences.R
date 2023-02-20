@@ -1,17 +1,17 @@
 #' Preferences Object
 #'
-#' Create a `"preferences"` object for representing Ordinal Preference datasets.
+#' Create a `preferences` object for representing Ordinal Preference datasets.
 #'
 #' Ordinal preferences can order every item, or they can order a subset. Some
 #' ordinal preference datasets will contain ties between items at a given rank.
 #' Hence, there are four distinct types of preferential data:
 #' \describe{
-#' \item{`"soc"`}{Strict Orders - Complete List}
-#' \item{`"soi"`}{Strict Orders - Incomplete List}
-#' \item{`"toc"`}{Orders with Ties - Complete List}
-#' \item{`"toi"`}{Orders with Ties - Incomplete List}
+#' \item{`soc`}{Strict Orders - Complete List}
+#' \item{`soi`}{Strict Orders - Incomplete List}
+#' \item{`toc`}{Orders with Ties - Complete List}
+#' \item{`toi`}{Orders with Ties - Incomplete List}
 #' }
-#' The data type is stored alongside the `"preferences"` as an attribute
+#' The data type is stored alongside the `preferences` as an attribute
 #' `attr(preferences, "preftype")`. The data type is determined automatically.
 #' If every preference ranks every item, then the data type will be
 #' "soc" or "soi". Similarly, if no preference contains a tie the data type
@@ -29,12 +29,12 @@
 #'                        dense, otherwise they will be converted to dense
 #'                        rankings.}
 #' }
-#' When reading `"preferences"` from an `ordering` matrix, the index on the
+#' When reading `preferences` from an `ordering` matrix, the index on the
 #' items is the order passed to the `item_names` parameter. When reading from
 #' a `rankings` matrix, if no `item_names` are provided, the order is inferred
 #' from the named columns.
 #'
-#' A `"preferences"` object can also be read from a long-format matrix, where
+#' A `preferences` object can also be read from a long-format matrix, where
 #' there are three columns: `id`, `item` and `rank`. The `id` variable groups
 #' the rows of the matrix which correspond to a single set of preferences, which
 #' the `item:rank`, pairs indicate how each item is ranked. When reading a
@@ -43,7 +43,7 @@
 #'
 #' @param data A `data.frame` or `matrix` in one of three formats:
 #' \describe{
-#' \item{"ordering"}{Orderings must be a `data.frame` with `"list"`-valued
+#' \item{"ordering"}{Orderings must be a `data.frame` with `list`-valued
 #'                   columns. Each row represents an ordering of the items
 #'                   from first to last, representing ties by a list of
 #'                   vectors corresponding to the items.}
@@ -79,8 +79,8 @@
 #' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
 #'
-#' @return By default, a `"preferences"` object, which is a `data.frame` with
-#' `"list"`-valued columns corresponding to preferences on the items. This may
+#' @return By default, a `preferences` object, which is a `data.frame` with
+#' `list`-valued columns corresponding to preferences on the items. This may
 #' be an ordering on subsets of the items in the case of ties, or a
 #' potentially-partial strict ordering. In the case of partial or tied
 #' preferences, some entries may be empty lists.
@@ -102,7 +102,7 @@
 #' # missing item.
 #' # * Set #5 is not a dense-ranking. It will be converted to be dense and then
 #' # inferred to be a regular partial ordering with ties.
-#' split(x, x$ranking)
+#' split(x, x$rank)
 #'
 #' # Creating a preferences object with this data will attempt to resolve these
 #' # issues automatically, sending warnings when assumptions need to be made.
@@ -120,53 +120,42 @@
 #' rnk <- as.preferences(rnk, format = "ranking")
 #'
 #' # Convert an existing data.frame of orderings to a preferences object.
+#' e <- character() # short-hand for empty ranks
 #' ord <- preferences(
-#'   data.frame(
-#'     rank1 = I(list()),
-#'     rank2 = I(list()),
-#'     rank3 = I(list()),
-#'     rank4 = I(list())
+#'   as.data.frame(
+#'     rbind(
+#'       list(1, 2, e, e), # apple, banana
+#'       list("banana", "orange", "pear", "apple"),
+#'       list(c("banana", "orange", "pear"), "apple", e, e),
+#'       list("apple", "banana", "orange", e),
+#'       list(c("banana", "orange"), "apple", e, e),
+#'       list("apple", "pear", "orange", e)
+#'     )
 #'   ),
 #'   format = "ordering",
 #'   item_names = c("apple", "banana", "orange", "pear")
 #' )
-#' ord[1,] <- list(1, 2) # apple, banana
-#' ord[2,] <- list("banana", "orange", "pear", "apple")
-#' ord[3,] <- list(c("banana", "orange", "pear"), "apple")
-#' ord[4,] <- list("apple", "banana", "orange")
-#' ord[5,] <- list(c("banana", "orange"), "apple")
-#' ord[6,] <- list("apple", "pear", "orange")
-#'
-#' # Alternatively, we could have referred to each item by index and
-#' # passed `item_names = c("apple", "banana", "orange", "pear")`.
-#' ord <- as.preferences(ord)
 #'
 #' # Access the first three sets of preferences
 #' ord[1:3, ]
 #'
-#' # Truncate preferences to the top 2 ranks
+#' # Truncate preferences to the top 2 ranks and return as data.frame
 #' ord[, 1:2, by.ordering = TRUE]
 #'
 #' # Exclude pear from the rankings
 #' ord[, -4]
 #'
-#' # Get the highest-ranked items from the third preference-set
-#' ord[3, 1, by.ordering = TRUE]
+#' # Get the highest-ranked items and return as data.frame
+#' ord[, 1, by.ordering = TRUE]
 #'
 #' # Get the rank of apple in the third preference-set
-#' ord[3, 1]
-#'
-#' # Get all the ranks assiged to apple as a vector
-#' ord[, 1]
+#' as.matrix(ord)[3, 1]
 #'
 #' # Convert the preferences to a ranking matrix
-#' as.matrix(ord, format = "ranking")
+#' as.matrix(ord)
 #'
-#' # Convert the preferences to a ordering matrix
-#' as.matrix(ord, format = "ordering")
-#'
-#' # Convert the preferences to a long-format matrix
-#' as.matrix(ord, format = "long")
+#' # Get all the ranks assiged to apple as a vector
+#' as.matrix(ord)[, "apple"]
 #'
 #' @export
 preferences <- function(data,
@@ -206,9 +195,9 @@ preferences <- function(data,
   } else if (format == "ranking") {
     x <- data
     # Infer item names
-    if (missing(item_names) && colnames(x)) {
+    if (!is.null(colnames(x)) && missing(item_names)) {
       item_names <- colnames(x)
-    } else if (missing(item_names) && !colnames(x)) {
+    } else if (is.null(colnames(x)) && missing(item_names)) {
       message(paste0("Item names could not be inferred from ",
                      "ranked data. Defaulting to the integers 1-", dim(x)[2]))
     }
@@ -239,22 +228,10 @@ validate_ordering <- function(x,
                "\"list\"-valued columns.")
   }
 
-  # Ensure items are either always character or always integer-valued
-  item_types <- unique(rapply(x, typeof))
-  if (length(item_types) != 1L ||
-      !item_types %in% c("character", "numeric", "integer")) {
-    stop("Items must be listed by name everywhere ",
-               "or by index everywhere.")
-  }
-
-  # Warn user if items are listed by index without any item_names
-  if (missing(item_names)) {
-    item_names <- sort(unique(unlist(x)))
-    if (is.numeric(item_names) && verbose) {
-      message("Items listed by index but no `item_names` passed ",
-              "to method. Using numeric names.")
-      item_names <- as.character(item_names)
-    }
+  # Ensure items are only listed by index when item_names is passed
+  item_types <- unique(rapply(x, class))
+  if (missing(item_names) && "numeric" %in% item_types) {
+    stop("Items listed by index but no `item_names` provided to method.")
   }
 }
 
@@ -273,23 +250,30 @@ ordering_to_ranking <- function(data,
     }
   }
   # Convert the ordering data into a matrix of rankings.
-  if (unique(rapply(data[, 1], typeof)) == "character") {
-    data <- rapply(data,
-                   function(a) which(item_names == a),
-                   how = "replace")
-  }
+  data <- rapply(data,
+                 function(a) {
+                   if (!is.numeric(a)) {
+                     return(match(a, item_names))
+                   } else {
+                     return(a)
+                   }
+                 },
+                 how = "replace")
   n_ranks <- ncol(data)
   n_alts <- length(item_names)
   structure(
-    t(apply(
-      data,
-      1L,
-      function(x) {
-        vals <- rep(NA, n_alts)
-        vals[unlist(x)] <- rep(seq_len(n_ranks), sapply(x, length))
-        vals
-      }
-    )),
+    matrix(
+      t(apply(
+        data,
+        1L,
+        function(x) {
+          vals <- rep(NA, n_alts)
+          vals[unlist(x)] <- rep(seq_len(n_ranks), sapply(x, length))
+          vals
+        }
+      )),
+      ncol = length(item_names)
+    ),
     dimnames = list(NULL, item_names)
   )
 }
@@ -395,13 +379,18 @@ validate_ranking <- function(data, item_names, verbose) {
 # A helper to convert a matrix of rankings into ordering format.
 ranking_to_ordering <- function(ranking) {
   max_rank <- max(na.omit(c(as.matrix(ranking))))
-  out <- as.data.frame(t(apply(ranking,
+  out <- as.data.frame(
+    do.call(
+      rbind,
+      apply(ranking,
         1,
         function(r) {
           sapply(seq_len(max_rank),
                  function(x) names(r)[which(r == x)])
         }
-  )))
+      )
+    )
+  )
   colnames(out) <- paste0("Rank", seq_len(max_rank))
   out
 }
@@ -456,9 +445,9 @@ Ops.preferences <- function(x1, x2) {
 #' @param i The index of the preference-set to access.
 #' @param j The rank index to access, or if `by.ordering = TRUE` the
 #' index or name of the item to obtain the ranking for.
-#' @param by.ordering When `FALSE`, returns a `"preferences"` object:
+#' @param by.ordering When `FALSE`, returns a `preferences` object:
 #' internally rows \eqn{i} contain the ranking assigned to each item
-#' in preference \eqn{p_i}. When `TRUE`, returns a `"data.frame"` where
+#' in preference \eqn{p_i}. When `TRUE`, returns a `data.frame` where
 #' rows group the the candidates in order of rank.
 #' @param drop If `TRUE`, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,

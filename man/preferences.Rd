@@ -54,7 +54,7 @@ as.preferences(x, ...)
 \arguments{
 \item{data}{A \code{data.frame} or \code{matrix} in one of three formats:
 \describe{
-\item{"ordering"}{Orderings must be a \code{data.frame} with \code{"list"}-valued
+\item{"ordering"}{Orderings must be a \code{data.frame} with \code{list}-valued
 columns. Each row represents an ordering of the items
 from first to last, representing ties by a list of
 vectors corresponding to the items.}
@@ -104,35 +104,35 @@ index or name of the item to obtain the ranking for.}
 
 \item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
 
-\item{by.ordering}{When \code{FALSE}, returns a \code{"preferences"} object:
+\item{by.ordering}{When \code{FALSE}, returns a \code{preferences} object:
 internally rows \eqn{i} contain the ranking assigned to each item
-in preference \eqn{p_i}. When \code{TRUE}, returns a \code{"data.frame"} where
+in preference \eqn{p_i}. When \code{TRUE}, returns a \code{data.frame} where
 rows group the the candidates in order of rank.}
 
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
 }
 \value{
-By default, a \code{"preferences"} object, which is a \code{data.frame} with
-\code{"list"}-valued columns corresponding to preferences on the items. This may
+By default, a \code{preferences} object, which is a \code{data.frame} with
+\code{list}-valued columns corresponding to preferences on the items. This may
 be an ordering on subsets of the items in the case of ties, or a
 potentially-partial strict ordering. In the case of partial or tied
 preferences, some entries may be empty lists.
 }
 \description{
-Create a \code{"preferences"} object for representing Ordinal Preference datasets.
+Create a \code{preferences} object for representing Ordinal Preference datasets.
 }
 \details{
 Ordinal preferences can order every item, or they can order a subset. Some
 ordinal preference datasets will contain ties between items at a given rank.
 Hence, there are four distinct types of preferential data:
 \describe{
-\item{\code{"soc"}}{Strict Orders - Complete List}
-\item{\code{"soi"}}{Strict Orders - Incomplete List}
-\item{\code{"toc"}}{Orders with Ties - Complete List}
-\item{\code{"toi"}}{Orders with Ties - Incomplete List}
+\item{\code{soc}}{Strict Orders - Complete List}
+\item{\code{soi}}{Strict Orders - Incomplete List}
+\item{\code{toc}}{Orders with Ties - Complete List}
+\item{\code{toi}}{Orders with Ties - Incomplete List}
 }
-The data type is stored alongside the \code{"preferences"} as an attribute
+The data type is stored alongside the \code{preferences} as an attribute
 \code{attr(preferences, "preftype")}. The data type is determined automatically.
 If every preference ranks every item, then the data type will be
 "soc" or "soi". Similarly, if no preference contains a tie the data type
@@ -150,12 +150,12 @@ predefined index on the items. Rankings should be
 dense, otherwise they will be converted to dense
 rankings.}
 }
-When reading \code{"preferences"} from an \code{ordering} matrix, the index on the
+When reading \code{preferences} from an \code{ordering} matrix, the index on the
 items is the order passed to the \code{item_names} parameter. When reading from
 a \code{rankings} matrix, if no \code{item_names} are provided, the order is inferred
 from the named columns.
 
-A \code{"preferences"} object can also be read from a long-format matrix, where
+A \code{preferences} object can also be read from a long-format matrix, where
 there are three columns: \code{id}, \code{item} and \code{rank}. The \code{id} variable groups
 the rows of the matrix which correspond to a single set of preferences, which
 the \code{item:rank}, pairs indicate how each item is ranked. When reading a

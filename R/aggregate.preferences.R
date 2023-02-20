@@ -1,12 +1,12 @@
 #' Aggregate Preferences
 #'
-#' Aggregate `"preferences"`, returning an `"aggregated_preferences"` object of
+#' Aggregate `preferences`, returning an `aggregated_preferences` object of
 #' the unique preferences and their frequencies. The frequencies can be
 #' accessed via the function `frequencies()`.
 #'
-#' @param x A [`"preferences"`][preferences] object for `aggregate()`; an
-#' object that can be coerced to a `"aggregated_preferences"` object for
-#' `as.aggregated_preferences()`, otherwise an `"aggregated_preferences"`
+#' @param x A [`preferences`][preferences] object for `aggregate()`; an
+#' object that can be coerced to a `aggregated_preferences` object for
+#' `as.aggregated_preferences()`, otherwise an `aggregated_preferences`
 #' object.
 #' @param frequencies A vector of frequencies for preferences that have been
 #' previously aggregated.
@@ -14,17 +14,17 @@
 #' @param j indices specifying items to extract, as for `\link{[}`.
 #' @param drop if `TRUE` return single row/column matrices as a vector.
 #' @param as.aggregated_preferences if `TRUE` create an
-#' `"aggregated_preferences"` object from the indexed preferences Otherwise
+#' `aggregated_preferences` object from the indexed preferences Otherwise
 #' index the underlying matrix of ranks and return in a data frame with the
 #' corresponding frequencies.
 #' @param ... Additional arguments, currently unused.
-#' @return A data frame of class `"aggregated_preferences"`, with columns
-#' \item{preferences}{A [`"preferences"`][preferences] object of the unique
+#' @return A data frame of class `aggregated_preferences`, with columns
+#' \item{preferences}{A [`preferences`][preferences] object of the unique
 #' preferences}
 #' \item{frequencies}{The corresponding frequencies.}
 #' Methods are available for [`rbind()`] and [`as.matrix()`].
 #' @seealso [preflib()] for an object that can be coerced to an
-#' `"aggregated_preferences"` object.
+#' `aggregated_preferences` object.
 #' @examples
 #' # create a preferences object with duplicated preferences
 #' R <- matrix(c(1, 2, 0, 0,
