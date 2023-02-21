@@ -24,24 +24,19 @@ ord <- as.data.frame(
   )
 )
 
-test_that("`preferences` can be constructed from matrices in rankings format", {
-  prefs <- preferences(rankings, format = "ranking", item_names = item_names)
-  expect_true(all(as.matrix(prefs) == rankings))
-})
-
-test_that("`preferences` can be constructed from data.frames in long format", {
-  prefs <- preferences(long,
-                       format = "long",
-                       id = "id",
-                       item = "item",
-                       rank = "rank")
-  expect_true(all(as.matrix(prefs) == rankings))
-})
-
-test_that("`preferences` can be constructed from orderings data.frames", {
-  prefs <- preferences(ord,
+test_that("`preferences` can be constructed from all formats and are equal", {
+  p_rank <- preferences(rankings,
+                        format = "ranking",
+                        item_names = item_names)
+  p_long <- preferences(long,
+                        format = "long",
+                        id = "id",
+                        item = "item",
+                        rank = "rank")
+  p_ord <- preferences(ord,
                        format = "ordering")
-  expect_true(all(as.matrix(prefs) == rankings))
+  expect_true(all(p_rank == p_long))
+  expect_true(all(p_rank == p_ord))
 })
 
 test_that("`as.preferences` is equivalent to `preferences`", {
@@ -66,7 +61,11 @@ test_that("`as.preferences` is equivalent to `preferences`", {
   prefs6 <- preferences(rankings,
                         format = "ranking",
                         item_names = item_names)
-  expect_true(identical(prefs1, prefs2, prefs3, prefs4, prefs5, prefs6))
+  expect_true(all(prefs1 == prefs2))
+  expect_true(all(prefs1 == prefs3))
+  expect_true(all(prefs1 == prefs4))
+  expect_true(all(prefs1 == prefs5))
+  expect_true(all(prefs1 == prefs6))
 })
 
 test_that("`preferences` can be joined by rbind", {
@@ -74,4 +73,11 @@ test_that("`preferences` can be joined by rbind", {
   p2 <- preferences(r2, format = "ranking")
   p1 <- preferences(rankings, format = "ranking")
   expect_true(all(rbind(p1, p1) == p2))
+})
+
+test_that("`[.preferences` as orderings is inverse to `as.preferences`", {
+  prefs <- preferences(rankings, format = "ranking")
+  prefs_as_ord <- prefs[, by.ordering = TRUE]
+  prefs_as_ord_as_prefs <- as.preferences(prefs_as_ord, format = "ordering")
+  expect_true(all(prefs == prefs_as_ord_as_prefs))
 })

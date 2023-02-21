@@ -29,7 +29,7 @@ as.preferences(x, ...)
 
 \method{as.preferences}{default}(
   x,
-  format = c("ranking", "long"),
+  format = c("ranking", "long", "ordering"),
   id = NULL,
   item = NULL,
   rank = NULL,

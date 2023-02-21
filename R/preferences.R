@@ -177,7 +177,7 @@ preferences <- function(data,
       frequencies <- NULL
     }
     if (missing(item_names)) {
-      item_names <- sort(unique(data[, item]))
+      item_names <- unique(data[, item])
     }
     ranking <- long_to_ranking(data,
                                id,
@@ -248,7 +248,7 @@ ordering_to_ranking <- function(data,
     if (!is.null(attr(data, "item_names"))) {
       item_names <- attr(data, "item_names")
     } else {
-      item_names <- as.character(sort(unique(unlist(data))))
+      item_names <- as.character(unique(unlist(data)))
     }
   }
   # Convert the ordering data into a matrix of rankings.
@@ -309,10 +309,10 @@ validate_long <- function(data,
 
   # Validate items
   if (is.null(item_names)) {
-    item_names <- sort(unique(data[, "item"]))
+    item_names <- unique(data[, "item"])
   }
   if (is.character(data[, "item"])) {
-    if (is.null(setdiff(sort(unique(data[, "item"])),
+    if (is.null(setdiff(unique(data[, "item"]),
                         item_names))) {
       stop("Found `item` not in `item_names`.")
     }
@@ -348,7 +348,7 @@ long_to_ranking <- function(data,
 
   # Process item_names
   if (is.null(item_names)) {
-    item_names <- as.character(sort(unique(data[["item"]])))
+    item_names <- as.character(unique(data[["item"]]))
   }
   if (is.numeric(data[["item"]])) {
     data[["item"]] <- item_names[data[["item"]]]
@@ -401,22 +401,6 @@ ranking_to_ordering <- function(ranking) {
   out
 }
 
-#' @method identical preferences
-#' @export
-identical.preferences <- function(x1, x2, ...) {
-  # If the items are different return FALSE everywhere
-  if (!all(dim(x1) == dim(x2))) {
-    return(FALSE)
-  }
-  if (!identical(sort(attr(x1, "item_names")),
-                 sort(attr(x2, "item_names")))) {
-    return(FALSE)
-  }
-  # Sort the columns of x2 to be in the same order as x1
-  x2 <- x2[, attr(x1, "item_names")]
-  identical(unclass(x1), unclass(x2))
-}
-
 #' @method Ops preferences
 #' @export
 Ops.preferences <- function(x1, x2) {
@@ -425,12 +409,14 @@ Ops.preferences <- function(x1, x2) {
          `==` = {
            minlen <- min(nrow(x1), nrow(x2))
            maxlen <- max(nrow(x1), nrow(x2))
-           x1_names <- colnames(x1)
-           x2_names <- colnames(x2)
-           if (!identical(x1_names, x2_names)) {
+           x1_names <- names(x1)
+           x2_names <- names(x2)
+           if (!identical(sort(x1_names), sort(x2_names))) {
              return(rep(FALSE, maxlen))
            }
-           cmp <- sapply(seq_len(minlen), function(i) identical(x1[i], x2[i]))
+           x1 <- unclass(x1)
+           x2 <- unclass(x2)[, x1_names]
+           cmp <- sapply(seq_len(minlen), function(i) all(x1[i] == x2[i]))
            if (minlen < maxlen) {
              warning("Objects being compared are not the same length.")
              cmp <- c(cmp, rep(FALSE, maxlen - minlen))
@@ -438,14 +424,7 @@ Ops.preferences <- function(x1, x2) {
            return(cmp)
          },
          `!=` = {
-           minlen <- min(nrow(x1), nrow(x2))
-           maxlen <- max(nrow(x1), nrow(x2))
-           cmp <- sapply(seq_len(minlen), function(i) identical(x1[i], x2[i]))
-           if (minlen < maxlen) {
-             warning("Objects being compared are not the same length.")
-             cmp <- c(cmp, rep(FALSE, maxlen - minlen))
-           }
-           return(!cmp)
+           return(!x1 == x2)
          },
          stop("Undefined operation for \"preferences\"."))
 }
@@ -604,7 +583,7 @@ as.preferences.default <- function(x,
     format <- "ranking"
   }
   if (missing(item_names) && format == "long") {
-    item_names <- sort(unique(x[, item]))
+    item_names <- unique(x[, item])
   }
   x <- as.matrix(x)
   as.preferences.matrix(x,
@@ -643,9 +622,8 @@ as.preferences.matrix <- function(x,
     item_names <- colnames(prefs)
   }
   colnames(prefs) <- item_names
-  prefs <- prefs[, sort(item_names)]
   class(prefs) <- c("preferences", class(prefs))
-  attr(prefs, "item_names") <- sort(item_names)
+  attr(prefs, "item_names") <- item_names
   attr(prefs, "preftype") <- preftype(prefs)
   return(prefs)
 }
@@ -714,7 +692,7 @@ rbind.preferences <- function(...) {
     nm <- lapply(preflist, colnames)
     ref <- nm[[1L]]
     ok <- vapply(nm, identical, TRUE, ref)
-    item_names <- sort(unique(unlist(nm)))
+    item_names <- unique(unlist(nm))
     if (any(!ok)) {
         preflist <- lapply(
           preflist,
@@ -796,4 +774,23 @@ str.preferences <- function(object, ...) {
 #' @export
 rep.preferences <- function(x, ...) {
   x[rep(seq_len(nrow(x)), ...)]
+}
+
+#' @method names preferences
+#' @export
+names.preferences <- function(x, ...) {
+  return(attr(x, "item_names"))
+}
+
+#' @method "names<-" preferences
+#' @export
+"names<-.preferences" <- function(x, value) {
+  if (anyNA(value) ||
+      !identical(unique(value), value) ||
+      length(value) != dim(x)[2]) {
+    stop("Item names must be unique and cannot be empty.")
+  }
+  attr(x, "item_names") <- value
+  colnames(x) <- value
+  x
 }

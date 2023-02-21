@@ -116,14 +116,14 @@ read.preflib <- function(file) {
     }
 
     # Concatenate all the 'ALTERNATIVE NAME X' into a list of names
-    alternative_names <- unlist(
+    alternative_names <- unname(unlist(
       preflib_attributes[
         paste(
           "ALTERNATIVE NAME",
           seq_len(n_alternatives)
         )
       ]
-    )
+    ))
 
     # Filter the data lines and 'encourage' them into a csv format
     data_lines <- grep("^[^#]", lines, value = TRUE)
