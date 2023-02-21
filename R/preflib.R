@@ -73,13 +73,6 @@
 NULL
 
 read.preflib <- function(file) {
-    test  <- tryCatch(file(file, "rt"), silent = TRUE,
-                      warning = function(w) w, error = function(e) e)
-    if (!inherits(test, "connection")) {
-        stop(test$message, call. = FALSE)
-    } else {
-      close(test)
-    }
     # Read the file into memory
     lines <- readLines(file)
 
@@ -93,23 +86,32 @@ read.preflib <- function(file) {
     preflib_attributes <- lapply(metadata, function(x) x[2])
     names(preflib_attributes) <- sapply(metadata, function(x) x[1])
 
-    # Assert that the attributes contain both "NUMBER ALTERNATIVES" and
-    # "ALTERNATIVE NAME X".
+    # Assert that the minimum required attributes are present
+    required_attributes <- c("NUMBER UNIQUE ORDERS",
+                             "NUMBER VOTERS",
+                             "NUMBER ALTERNATIVES")
+
+    if (anyNA(as.integer(unlist(preflib_attributes[required_attributes])))) {
+      stop("PrefLib datafile is corrupt: 'NUMBER UNIQUE ORDERS', ",
+           "'NUMBER VOTERS' and 'NUMBER ALTERNATIVES' must be able to be ",
+           "coerced into integers.")
+    }
     if (!"NUMBER ALTERNATIVES" %in% names(preflib_attributes)) {
       stop(paste0("PrefLib datafile is corrupt: ",
                   "missing 'NUMBER ALTERNATIVES' metadata."))
     }
     n_alternatives <- as.integer(preflib_attributes[["NUMBER ALTERNATIVES"]])
-    if (
-      !all(
-        paste(
-          "ALTERNATIVE NAME",
-          seq_len(n_alternatives)
-        ) %in% names(preflib_attributes)
-      )
-    ) {
+    required_attributes <- c(required_attributes,
+                             paste("ALTERNATIVE NAME",
+                                   seq_len(n_alternatives)))
+    if (any(!required_attributes %in% names(preflib_attributes))) {
       stop(paste0("PrefLib datafile is corrupt: ",
-                  "missing 'ALTERNATIVE NAME X' metadata."))
+                  "missing required metadata (",
+                  paste(required_attributes[
+                      which(!required_attributes %in% names(preflib_attributes))
+                    ]
+                  ),
+                  ")."))
     }
 
     # Concatenate all the 'ALTERNATIVE NAME X' into a list of names
@@ -169,5 +171,28 @@ read.preflib <- function(file) {
     )
     aggregated_prefs <- aggregate(preferences, frequencies = frequencies)
     attr(aggregated_prefs, "preflib") <- preflib_attributes
+
+    # Ensure we have the expected number of unique and total orderings.
+    n_unique_orders <- as.integer(preflib_attributes[["NUMBER UNIQUE ORDERS"]])
+    n_voters <- as.integer(preflib_attributes[["NUMBER VOTERS"]])
+    if (length(aggregated_prefs$preferences) != n_unique_orders) {
+      warning(paste0("Expected ",
+                     n_unique_orders,
+                     " unique orderings but only ",
+                     length(aggregated_prefs$preferences),
+                     " were recovered when reading the PrefLib datafile.",
+                     " The file may be corrupt."
+                      ))
+    }
+    if (sum(aggregated_prefs$frequencies) != n_voters) {
+      warning(paste0("Expected ",
+                     n_voters,
+                     " total orderings but only ",
+                     sum(aggregated_prefs$frequencies),
+                     " were recovered when reading the PrefLib datafile.",
+                     " The file may be corrupt."
+                      ))
+    }
+
     return(aggregated_prefs)
 }

@@ -8,3 +8,23 @@ test_that("`preferences` ordinal type is detected appropriately", {
   expect_equal("soc", attr(soc, "preftype"))
   expect_equal("soi", attr(soi, "preftype"))
 })
+
+test_that("`read.preflib` throws error when 'ALT NAME X' is missing", {
+  expect_error(read.preflib("../corrupt_data/missing_alt.soc"))
+})
+
+test_that("`read.preflib` throws error when 'N ALTS' is missing", {
+  expect_error(read.preflib("../corrupt_data/missing_nalts.soc"))
+})
+
+test_that("`read.preflib` throws error when 'N VTRS' is missing", {
+  expect_error(read.preflib("../corrupt_data/missing_nvoters.soc"))
+})
+
+test_that("`read.preflib` raises warning when 'N VTRS' differs from data", {
+  expect_warning(read.preflib("../corrupt_data/incorrect_n_voters.soc"))
+})
+
+test_that("`read.preflib` raises warning when 'N UNQ ORDS' differs from data", {
+  expect_warning(read.preflib("../corrupt_data/incorrect_n_voters.soc"))
+})
