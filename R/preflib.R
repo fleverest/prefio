@@ -99,7 +99,7 @@ read.preflib <- function(file) {
       stop(paste0("PrefLib datafile is corrupt: ",
                   "missing 'NUMBER ALTERNATIVES' metadata."))
     }
-    n_alternatives <- preflib_attributes[["NUMBER ALTERNATIVES"]]
+    n_alternatives <- as.integer(preflib_attributes[["NUMBER ALTERNATIVES"]])
     if (
       !all(
         paste(
@@ -134,11 +134,12 @@ read.preflib <- function(file) {
       collapse = "\n"
     )
     preferences <- read.csv(text = csv_string,
-                      header = FALSE,
-                      stringsAsFactors = FALSE,
-                      strip.white = TRUE,
-                      quote = "'",
-                      colClasses = rep("character", n_alternatives))
+                            header = FALSE,
+                            stringsAsFactors = FALSE,
+                            strip.white = TRUE,
+                            quote = "'",
+                            col.names = paste0("V", 1:(n_alternatives + 1)),
+                            colClasses = rep("character", n_alternatives))
     # Replace NA with blank ties
     preferences[is.na(preferences)] <- ""
     # Replace character columns with lists

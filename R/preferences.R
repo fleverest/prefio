@@ -176,21 +176,23 @@ preferences <- function(data,
               "`frequencies` parameter is ignored.")
       frequencies <- NULL
     }
+    if (missing(item_names)) {
+      item_names <- sort(unique(data[, item]))
+    }
     ranking <- long_to_ranking(data,
                                id,
                                item,
                                rank,
-                               NULL,
+                               item_names,
                                verbose)
-
-    prefs <- as.preferences.matrix(ranking,
-                                   format = "ranking",
-                                   ..., verbose = verbose)
-  } else if (format == "ordering") {
-    ranking <- ordering_to_ranking(data, item_names, verbose)
     prefs <- as.preferences.matrix(ranking,
                                    format = "ranking",
                                    item_names = item_names,
+                                   ..., verbose = verbose)
+  } else if (format == "ordering") {
+    ranking <- ordering_to_ranking(data, NULL, verbose)
+    prefs <- as.preferences.matrix(ranking,
+                                   format = "ranking",
                                    ..., verbose = verbose)
   } else if (format == "ranking") {
     x <- data
@@ -297,29 +299,32 @@ validate_long <- function(data,
   }
 
   # Find duplicated items
-  if (anyDuplicated(paste(data[["id"]], data[["item"]], sep = ":")) && verbose) {
+  if (
+    anyDuplicated(paste(data[, "id"], data[, "item"], sep = ":"))
+    && verbose
+  ) {
     message("Duplicated rankings per item detected: ",
             "only the highest ranks will be used.")
   }
 
   # Validate items
   if (is.null(item_names)) {
-    item_names <- sort(unique(data[["item"]]))
+    item_names <- sort(unique(data[, "item"]))
   }
-  if (is.character(data[["item"]])) {
-    if (is.null(setdiff(sort(unique(data[["item"]])),
+  if (is.character(data[, "item"])) {
+    if (is.null(setdiff(sort(unique(data[, "item"])),
                         item_names))) {
       stop("Found `item` not in `item_names`.")
     }
-  } else if (is.numeric(data[["item"]])) {
-      if (any(data[["item"]] > length(item_names))) {
+  } else if (is.numeric(data[, "item"])) {
+      if (any(data[, "item"] > length(item_names))) {
         stop("`item` index out of bounds.")
       }
-      data[["item"]] <- item_names[data[["item"]]]
+      data[, "item"] <- item_names[data[, "item"]]
   }
 
   # Validate rank
-  orig_rank <- na.omit(data[["rank"]])
+  orig_rank <- na.omit(data[, "rank"])
   int_rank <- as.integer(orig_rank)
   if (anyNA(int_rank) || any(int_rank != orig_rank)) {
     stop("`rank` must be integer-valued.")
@@ -334,7 +339,7 @@ long_to_ranking <- function(data,
                             item_names = NULL,
                             verbose = TRUE) {
   # Take only required columns
-  data <- data[, c(id, item, rank)]
+  data <- as.data.frame(data[, c(id, item, rank)])
   colnames(data) <- c("id", "item", "rank")
 
   validate_long(data, item_names, verbose)
@@ -362,7 +367,7 @@ long_to_ranking <- function(data,
     dplyr::ungroup(item) %>%
     dplyr::mutate(rank = dplyr::dense_rank(rank)) %>%
     # Convert long-format rankings to wide rankings
-    tidyr::spread("item", "rank", drop = FALSE) %>%
+    tidyr::spread(item, rank, drop = FALSE) %>%
     dplyr::ungroup() %>%
     dplyr::select(dplyr::all_of(item_names)) %>%
     as.matrix()
@@ -386,8 +391,9 @@ ranking_to_ordering <- function(ranking) {
         1,
         function(r) {
           sapply(seq_len(max_rank),
-                 function(x) names(r)[which(r == x)])
-        }
+                 function(x) as.list(names(r)[which(r == x)]))
+        },
+        simplify = FALSE
       )
     )
   )
@@ -419,6 +425,11 @@ Ops.preferences <- function(x1, x2) {
          `==` = {
            minlen <- min(nrow(x1), nrow(x2))
            maxlen <- max(nrow(x1), nrow(x2))
+           x1_names <- colnames(x1)
+           x2_names <- colnames(x2)
+           if (!identical(x1_names, x2_names)) {
+             return(rep(FALSE, maxlen))
+           }
            cmp <- sapply(seq_len(minlen), function(i) identical(x1[i], x2[i]))
            if (minlen < maxlen) {
              warning("Objects being compared are not the same length.")
@@ -437,7 +448,6 @@ Ops.preferences <- function(x1, x2) {
            return(!cmp)
          },
          stop("Undefined operation for \"preferences\"."))
-
 }
 
 #' @rdname preferences
@@ -547,7 +557,7 @@ preftype <- function(prefs) {
   complete <- !anyNA(x)
   ties <- FALSE
   for (i in seq_len(nrow(x))) {
-    if (anyDuplicated(x[i, ])) {
+    if (anyDuplicated(na.omit(x[i, ]))) {
       ties <- TRUE
       break
     }
@@ -577,16 +587,24 @@ as.preferences <- function(x, ...) {
 #' @rdname preferences
 #' @export
 as.preferences.default <- function(x,
-                                   format = c("ranking", "long"),
+                                   format = c("ranking", "long", "ordering"),
                                    id = NULL,
                                    item = NULL,
                                    rank = NULL,
                                    item_names = NULL,
                                    verbose = TRUE) {
+  format <- match.arg(format, c("long", "ordering", "ranking"))
   # Convert orderings data.frames into ranking matrices.
-  if ("data.frame" %in% class(x) && all(sapply(x, typeof) == "list")) {
+  if (
+    format == "ordering" ||
+    "data.frame" %in% class(x) &&
+    all(sapply(x, typeof) == "list")
+  ) {
     x <- ordering_to_ranking(x, item_names, verbose)
     format <- "ranking"
+  }
+  if (missing(item_names) && format == "long") {
+    item_names <- sort(unique(x[, item]))
   }
   x <- as.matrix(x)
   as.preferences.matrix(x,
@@ -621,9 +639,11 @@ as.preferences.matrix <- function(x,
   } else {
     stop("Not implemented.")
   }
-  if (missing(item_names)) {
+  if (is.null(item_names)) {
     item_names <- colnames(prefs)
   }
+  colnames(prefs) <- item_names
+  prefs <- prefs[, sort(item_names)]
   class(prefs) <- c("preferences", class(prefs))
   attr(prefs, "item_names") <- item_names
   attr(prefs, "preftype") <- preftype(prefs)
