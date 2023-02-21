@@ -91,7 +91,8 @@ read.preflib <- function(file) {
                              "NUMBER VOTERS",
                              "NUMBER ALTERNATIVES")
 
-    if (anyNA(as.integer(unlist(preflib_attributes[required_attributes])))) {
+    if (suppressWarnings(
+          anyNA(as.integer(unlist(preflib_attributes[required_attributes]))))) {
       stop("PrefLib datafile is corrupt: 'NUMBER UNIQUE ORDERS', ",
            "'NUMBER VOTERS' and 'NUMBER ALTERNATIVES' must be able to be ",
            "coerced into integers.")

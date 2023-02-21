@@ -26,5 +26,9 @@ test_that("`read.preflib` raises warning when 'N VTRS' differs from data", {
 })
 
 test_that("`read.preflib` raises warning when 'N UNQ ORDS' differs from data", {
-  expect_warning(read.preflib("../corrupt_data/incorrect_n_voters.soc"))
+  expect_warning(read.preflib("../corrupt_data/incorrect_n_unique_orders.soc"))
+})
+
+test_that("`read.preflib` throws error when 'N UNQ ORDS' is not integral", {
+  expect_error(read.preflib("../corrupt_data/non_integer_n_unq_ords.soc"))
 })
