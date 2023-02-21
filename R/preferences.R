@@ -374,13 +374,6 @@ long_to_ranking <- function(data,
   )
 }
 
-# A helper to validate ordinal preferences in ranking format.
-validate_ranking <- function(data, item_names, verbose) {
-  if (!class(data) == "matrix") {
-
-  }
-}
-
 # A helper to convert a matrix of rankings into ordering format.
 ranking_to_ordering <- function(ranking) {
   max_rank <- max(na.omit(c(as.matrix(ranking))))
