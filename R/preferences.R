@@ -466,10 +466,10 @@ Ops.preferences <- function(x1, x2) {
 
   # Accessing rankings
   if (missing(j)) {
+    j <- TRUE
     if (missing(i)) {
       value <- unclass(x)
     } else {
-      j <- TRUE
       # always a vector if picking out elements of rankings matrix
       if (is.matrix(i)) {
         stop("Cannot subset by matrix.")

@@ -73,6 +73,11 @@ test_that("`preferences` can be joined by rbind", {
   p2 <- preferences(r2, format = "ranking")
   p1 <- preferences(rankings, format = "ranking")
   expect_true(all(rbind(p1, p1) == p2))
+
+  # Permute names and rbind.
+  names(p2) <- c("C", "A", "B")
+  p <- rbind(p1, p2)
+  expect_true(all(p[1:3] == p1))
 })
 
 test_that("`[.preferences` as orderings is inverse to `as.preferences`", {
@@ -80,4 +85,28 @@ test_that("`[.preferences` as orderings is inverse to `as.preferences`", {
   prefs_as_ord <- prefs[, by.ordering = TRUE]
   prefs_as_ord_as_prefs <- as.preferences(prefs_as_ord, format = "ordering")
   expect_true(all(prefs == prefs_as_ord_as_prefs))
+})
+
+test_that("`[.preferences` produces valid preferences when subsetting", {
+  prefs <- preferences(rankings, format = "ranking")
+  expect_true(all(prefs[] == prefs))
+  expect_true(all(prefs[1:3] == prefs))
+  expect_true(all(as.preferences(prefs[1:3, by.ordering = TRUE],
+                                 format = "ordering") == prefs))
+  expect_true(all(prefs[, 1] == prefs[, "A"]))
+})
+
+test_that("`preferences` with altered `item_names` are not equal", {
+  prefs <- preferences(rankings, format = "ranking")
+  prefs_new <- prefs
+  names(prefs_new) <- LETTERS[4:6]
+  expect_false(any(prefs == prefs_new))
+})
+
+test_that("Equality and inequality work for `preferences`", {
+  prefs <- preferences(rankings, format = "ranking")
+  prefs_new <- prefs
+  names(prefs_new) <- LETTERS[4:6]
+  expect_false(any(prefs == prefs_new))
+  expect_true(all(prefs != prefs_new))
 })
