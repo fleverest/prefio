@@ -70,7 +70,7 @@ aggregate.preferences <- function(x, frequencies = NULL, ...) {
         }
         x <- do.call("rbind", r_new)
         rownames(x) <- NULL
-        res <- data.frame(preferences = as.preferences(x),
+        res <- data.frame(preferences = as.preferences(x, format = "ranking"),
                           frequencies = frequencies)
         colnames(res) <- c("preferences", "frequencies")
     } else {

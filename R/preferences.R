@@ -645,7 +645,7 @@ as.preferences.matrix <- function(x,
   colnames(prefs) <- item_names
   prefs <- prefs[, sort(item_names)]
   class(prefs) <- c("preferences", class(prefs))
-  attr(prefs, "item_names") <- item_names
+  attr(prefs, "item_names") <- sort(item_names)
   attr(prefs, "preftype") <- preftype(prefs)
   return(prefs)
 }
