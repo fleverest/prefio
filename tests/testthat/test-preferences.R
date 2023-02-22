@@ -136,9 +136,9 @@ test_that("`print.preference` formats correctly", {
 
 test_that("Some valid examples of `preferences` are not `na`", {
   expect_true(
-    !any(is.na(read.preflib("../aspen00016-00000001.toc")$preferences)) &&
-    !any(is.na(read.preflib("../glasgow00008-00000003.soi")$preferences)) &&
-    !any(is.na(read.preflib("../netflix00004-00000101.soc")$preferences)) &&
-    !any(is.na(read.preflib("../berkley00017-00000001.toi")$preferences))
+   !any(is.na(read.preflib("../data/aspen00016-00000001.toc")$preferences)) &&
+   !any(is.na(read.preflib("../data/glasgow00008-00000003.soi")$preferences)) &&
+   !any(is.na(read.preflib("../data/netflix00004-00000101.soc")$preferences)) &&
+   !any(is.na(read.preflib("../data/berkley00017-00000001.toi")$preferences))
   )
 })
