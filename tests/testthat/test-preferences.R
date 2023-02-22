@@ -80,6 +80,19 @@ test_that("`preferences` can be joined by rbind", {
   expect_true(all(p[1:3] == p1))
 })
 
+test_that("Constructing `preferences` with `aggregate=T` aggregates output", {
+  r2 <- rbind(rankings, rankings)
+  apref <- preferences(r2, format = "ranking", aggregate = TRUE)
+  expect_true("aggregated_preferences" %in% class(apref))
+  expect_true(all(apref$frequencies == 2))
+})
+
+test_that("Constructing `preferences` with `frequencies` aggregates output", {
+  apref <- preferences(rankings, format = "ranking", frequencies = rep(2, 3))
+  expect_true("aggregated_preferences" %in% class(apref))
+  expect_true(all(apref$frequencies == 2))
+})
+
 test_that("`[.preferences` as orderings is inverse to `as.preferences`", {
   prefs <- preferences(rankings, format = "ranking")
   prefs_as_ord <- prefs[, by.ordering = TRUE]
@@ -109,4 +122,23 @@ test_that("Equality and inequality work for `preferences`", {
   names(prefs_new) <- LETTERS[4:6]
   expect_false(any(prefs == prefs_new))
   expect_true(all(prefs != prefs_new))
+})
+
+test_that("`print.preference` formats correctly", {
+  prefs <- preferences(rankings, format = "ranking")
+  out <- "[1] \"A > B > C\" \"C > B > A\" \"B > A > C\""
+  expect_output(print(prefs), "A > B > C")
+  expect_output(print(prefs), "C > B > A")
+  expect_output(print(prefs), "B > A > C")
+  expect_output(print(prefs[, 1]), '"A" "A" "A"')
+  expect_output(print(prefs[, c()]), '"blank" "blank" "blank"')
+})
+
+test_that("Some valid examples of `preferences` are not `na`", {
+  expect_true(
+    !any(is.na(read.preflib("../aspen00016-00000001.toc")$preferences)) &&
+    !any(is.na(read.preflib("../glasgow00008-00000003.soi")$preferences)) &&
+    !any(is.na(read.preflib("../netflix00004-00000101.soc")$preferences)) &&
+    !any(is.na(read.preflib("../berkley00017-00000001.toi")$preferences))
+  )
 })

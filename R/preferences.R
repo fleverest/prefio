@@ -214,6 +214,8 @@ preferences <- function(data,
   # Aggregate if necessary.
   if (aggregate) {
     return(aggregate(prefs))
+  } else if (!is.null(frequencies)) {
+    return(as.aggregated_preferences(prefs, frequencies = frequencies))
   } else {
     return(prefs)
   }
@@ -642,7 +644,7 @@ is.na.preferences <- function(x) {
         1L,
         function(x) {
           x_sub <- na.omit(x)
-          all(dplyr::dense_rank(x_sub) == x_sub)
+          identical(dplyr::dense_rank(x_sub), x_sub)
         })
 }
 
