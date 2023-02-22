@@ -6,7 +6,9 @@ Authors@R: c(
   person("Floyd", "Everest", email = "me@floydeverest.com",
          role = c("aut", "cre"), comment = c(ORCID = "0000-0002-2726-6736")),
   person("Heather", "Turner", email = "ht@heatherturner.net",
-         role = c("aut"), comment = c(ORCID = "0000-0002-1256-3375")))
+         role = c("aut"), comment = c(ORCID = "0000-0002-1256-3375")),
+  person("Damjan", "Vukcevic", email = "damjan@vukcevic.net",
+         role = c("aut"), comment = c(ORCID = "0000-0001-7780-9586")))
 Version: 0.0.0.9000
 Depends: R (>= 2.10)
 LazyData: true
@@ -20,6 +22,6 @@ Imports:
     dplyr,
     magrittr,
     tidyr
-Suggests: 
+Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

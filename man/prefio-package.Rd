@@ -22,6 +22,7 @@ Useful links:
 Authors:
 \itemize{
   \item Heather Turner \email{ht@heatherturner.net} (\href{https://orcid.org/0000-0002-1256-3375}{ORCID})
+  \item Damjan Vukcevic \email{damjan@vukcevic.net} (\href{https://orcid.org/0000-0001-7780-9586}{ORCID})
 }
 
 }
