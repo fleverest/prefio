@@ -197,3 +197,74 @@ read.preflib <- function(file) {
 
     return(aggregated_prefs)
 }
+
+#' Write Ordinal Preference Data to PrefLib Formats
+#'
+#' Write `preferences` to `.soc`, `.soi`, `.toc` or `.toi` file types, as
+#' defined by the Preflib specification at
+#' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
+#'
+#'
+#' Note that PrefLib refers to the items being ordered by "alternatives",
+#' so the "alternatives" in the output file are the same as "items" in your
+#' `preferences` object.
+#'
+#' The file types supported are
+#' \describe{
+#' \item{.soc}{Strict Orders - Complete List}
+#' \item{.soi}{Strict Orders - Incomplete List}
+#' \item{.toc}{Orders with Ties - Complete List}
+#' \item{.toi}{Orders with Ties - Incomplete List}
+#' }
+#'
+#' Writing to PrefLib format requires the following additional metadata:
+#' \describe{
+#' \item{TITLE (required)}{
+#'   The title of the data file, for instance the year of the election
+#'   represented in the data file.
+#' }
+#' \item{DESCRIPTION (optional)}{
+#'   A description of the data file, providing additional information about it.
+#' }
+#' \item{RELATES TO (optional)}{
+#'   The name of the data file that the current file relates to, typically the
+#'   source file in case the current file has been derived from another one.
+#' }
+#' \item{RELATED FILES (optional)}{
+#'   The list of all the data files related to this one, comma separated.
+#' }
+#' \item{PUBLICATION DATE (required)}{
+#'   The date at which the data file was published for the first time.
+#' }
+#' \item{MODIFICATION TYPE (required)}{
+#'   The modification type of the data. One of:
+#'   \describe{
+#'   \item{original}{Data that has only been converted into a PrefLib format.}
+#'   \item{induced}{Data that has been induced from another context. For
+#'                  example, computing a pairwise relation from a set of strict
+#'                  total orders. No assumptions have been made to create these
+#'                  files, just a change in the expression language.}
+#'   \item{imbued}{Data that has been imbued with extra information. For
+#'                 example, extending an incomplete partial order by placing
+#'                 all unranked candidates tied at the end.}
+#'   \item{synthetic}{Data that has been generated artificially.}
+#'   }
+#' }
+#' \item{MODIFICATION DATE (optional)}{
+#'   The last time the data was modified.
+#' }
+#'
+#' On top of these fields, some required PrefLib fields will be generated
+#' automatically depending on arguments to `write.preflib` and the attributes
+#' of the `preferences` object being written to file:
+#' \describe{
+#' \item{FILE NAME}{The name of the output file.}
+#' \item{DATA TYPE}{The data type (one of `soc`, `soi`, `toc` or `toi`).}
+#' \item{NUMBER ALTERNATIVES}{The number of items.}
+#' \item{ALTERNATIVE NAME `X`}{The name of each item, where `X` ranges from
+#'                             `0` to `length(items)`.}
+#' \item{NUMBER VOTERS}{The total number of orderings.}
+#' \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
+#' }
+#'
+#'
