@@ -168,7 +168,7 @@ preferences <- function(data,
                         aggregate = FALSE,
                         verbose = TRUE,
                         ...) {
-  format <- match.arg(format, c("long", "ordering", "ranking"))
+  format <- match.arg(format)
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
     if (!missing(frequencies)) {
@@ -567,7 +567,7 @@ as.preferences.default <- function(x,
                                    rank = NULL,
                                    item_names = NULL,
                                    verbose = TRUE) {
-  format <- match.arg(format, c("long", "ordering", "ranking"))
+  format <- match.arg(format)
   # Convert orderings data.frames into ranking matrices.
   if (
     format == "ordering" ||
@@ -599,7 +599,7 @@ as.preferences.matrix <- function(x,
                                   rank = NULL,
                                   item_names = NULL,
                                   verbose = TRUE) {
-  format <- match.arg(format, c("ranking", "long"))
+  format <- match.arg(format)
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
     prefs <- long_to_ranking(x,
