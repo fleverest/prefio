@@ -18,10 +18,12 @@
 #' index the underlying matrix of ranks and return in a data frame with the
 #' corresponding frequencies.
 #' @param ... Additional arguments, currently unused.
-#' @return A data frame of class `aggregated_preferences`, with columns
+#' @return A data frame of class `aggregated_preferences`, with columns:
+#' \describe{
 #' \item{preferences}{A [`preferences`][preferences] object of the unique
 #' preferences}
 #' \item{frequencies}{The corresponding frequencies.}
+#' }
 #' Methods are available for [`rbind()`] and [`as.matrix()`].
 #' @seealso [preflib()] for an object that can be coerced to an
 #' `aggregated_preferences` object.
