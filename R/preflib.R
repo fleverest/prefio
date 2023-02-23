@@ -72,6 +72,8 @@
 #' @name preflib
 NULL
 
+#' @rdname preflib
+#' @export
 read.preflib <- function(file) {
     # Read the file into memory
     lines <- readLines(file)

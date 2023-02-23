@@ -2,7 +2,11 @@
 % Please edit documentation in R/preflib.R
 \name{preflib}
 \alias{preflib}
+\alias{read.preflib}
 \title{Read Ordinal Preference Data From PrefLib}
+\usage{
+read.preflib(file)
+}
 \arguments{
 \item{file}{A preferential data file, conventionally with extension \code{.soc},
 \code{.soi}, \code{.toc} or \code{.toi} according to data type.}
