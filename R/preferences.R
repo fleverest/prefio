@@ -52,7 +52,7 @@
 #'                  should be dense, otherwise they will be converted to dense
 #'                  rankings.}
 #' \item{"long"}{Three columns: an `id` column grouping the rows which
-#'                correspond to a single set of preferences, a
+#'                correspond to a single set of preferences, an
 #'                `item` column specifying (either by index or by
 #'                name) the item each row refers to, and a `rank`
 #'                column specifying the rank for the associated
@@ -100,7 +100,7 @@
 #' # * Some ranks are missing in set #3, a perfectly valid partial ordering
 #' # * Set #4 has inconsistent ranks for two items, and a rank with a
 #' # missing item.
-#' # * Set #5 is not a dense-ranking. It will be converted to be dense and then
+#' # * Set #5 is not a dense ranking. It will be converted to be dense and then
 #' # inferred to be a regular partial ordering with ties.
 #' split(x, x$rank)
 #'
@@ -154,7 +154,7 @@
 #' # Convert the preferences to a ranking matrix
 #' as.matrix(ord)
 #'
-#' # Get all the ranks assiged to apple as a vector
+#' # Get all the ranks assigned to apple as a vector
 #' as.matrix(ord)[, "apple"]
 #'
 #' @export
@@ -639,7 +639,7 @@ length.preferences <- function(x) {
 #' @method is.na preferences
 #' @export
 is.na.preferences <- function(x) {
-  # Valid dense-rankings
+  # Valid dense rankings
   apply(x,
         1L,
         function(x) {

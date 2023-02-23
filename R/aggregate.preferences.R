@@ -5,7 +5,7 @@
 #' accessed via the function `frequencies()`.
 #'
 #' @param x A [`preferences`][preferences] object for `aggregate()`; an
-#' object that can be coerced to a `aggregated_preferences` object for
+#' object that can be coerced to an `aggregated_preferences` object for
 #' `as.aggregated_preferences()`, otherwise an `aggregated_preferences`
 #' object.
 #' @param frequencies A vector of frequencies for preferences that have been
