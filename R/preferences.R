@@ -29,7 +29,7 @@
 #'                        dense, otherwise they will be converted to dense
 #'                        rankings.}
 #' }
-#' When reading `preferences` from an `ordering` matrix, the index on the
+#' When reading preferences from an `ordering` matrix, the index on the
 #' items is the order passed to the `item_names` parameter. When reading from
 #' a `rankings` matrix, if no `item_names` are provided, the order is inferred
 #' from the named columns.
@@ -41,9 +41,9 @@
 #' matrix from this format and no `item_names` parameter is passed, the order is
 #' determined automatically.
 #'
-#' @param data A `data.frame` or `matrix` in one of three formats:
+#' @param data A data frame or matrix in one of three formats:
 #' \describe{
-#' \item{"ordering"}{Orderings must be a `data.frame` with `list`-valued
+#' \item{"ordering"}{Orderings must be a data frame with list-valued
 #'                   columns. Each row represents an ordering of the items
 #'                   from first to last, representing ties by a list of
 #'                   vectors corresponding to the items.}
@@ -56,7 +56,7 @@
 #'                `item` column specifying (either by index or by
 #'                name) the item each row refers to, and a `rank`
 #'                column specifying the rank for the associated
-#'                `item`.}
+#'                item.}
 #' }
 #' @param format The format of the data: one of "ordering", "ranking", or
 #' "long". By default, `data` is assumed to be in `ordering` format.
@@ -79,8 +79,8 @@
 #' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
 #'
-#' @return By default, a `preferences` object, which is a `data.frame` with
-#' `list`-valued columns corresponding to preferences on the items. This may
+#' @return By default, a `preferences` object, which is a data frame with
+#' list-valued columns corresponding to preferences on the items. This may
 #' be an ordering on subsets of the items in the case of ties, or a
 #' potentially-partial strict ordering. In the case of partial or tied
 #' preferences, some entries may be empty lists.
@@ -119,7 +119,7 @@
 #'
 #' rnk <- as.preferences(rnk, format = "ranking")
 #'
-#' # Convert an existing data.frame of orderings to a preferences object.
+#' # Convert an existing data frame of orderings to a preferences object.
 #' e <- character() # short-hand for empty ranks
 #' ord <- preferences(
 #'   as.data.frame(
@@ -139,13 +139,13 @@
 #' # Access the first three sets of preferences
 #' ord[1:3, ]
 #'
-#' # Truncate preferences to the top 2 ranks and return as data.frame
+#' # Truncate preferences to the top 2 ranks and return as a data frame
 #' ord[, 1:2, by.ordering = TRUE]
 #'
 #' # Exclude pear from the rankings
 #' ord[, -4]
 #'
-#' # Get the highest-ranked items and return as data.frame
+#' # Get the highest-ranked items and return as a data frame
 #' ord[, 1, by.ordering = TRUE]
 #'
 #' # Get the rank of apple in the third preference-set
@@ -226,7 +226,7 @@ validate_ordering <- function(x,
                               item_names,
                               verbose = TRUE) {
 
-  # Ensure the object is a data.frame with "list" columns
+  # Ensure the object is a data frame with "list" columns
   if (!is.data.frame(x) || !all(sapply(x, typeof) == "list")) {
     stop("`data` in \"ordering\" format must be a \"data.frame\" with ",
                "\"list\"-valued columns.")
@@ -431,7 +431,7 @@ Ops.preferences <- function(x1, x2) {
 #' index or name of the item to obtain the ranking for.
 #' @param by.ordering When `FALSE`, returns a `preferences` object:
 #' internally rows \eqn{i} contain the ranking assigned to each item
-#' in preference \eqn{p_i}. When `TRUE`, returns a `data.frame` where
+#' in preference \eqn{p_i}. When `TRUE`, returns a data frame where
 #' rows group the the candidates in order of rank.
 #' @param drop If `TRUE`, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,
@@ -568,7 +568,7 @@ as.preferences.default <- function(x,
                                    item_names = NULL,
                                    verbose = TRUE) {
   format <- match.arg(format)
-  # Convert orderings data.frames into ranking matrices.
+  # Convert orderings data frames into ranking matrices.
   if (
     format == "ordering" ||
     "data.frame" %in% class(x) &&
