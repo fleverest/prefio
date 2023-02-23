@@ -22,12 +22,14 @@
 #' preferences in a vector:
 #' \describe{
 #' \item{`ordering`}{The items are listed in order of most preferred to least
-#'                        preferred, allowing for pairs of items in the case of
-#'                        ties.}
-#' \item{`ranking`}{The rank assigned to each item is listed in order of some
-#'                        predefined index on the items. Rankings should be
-#'                        dense, otherwise they will be converted to dense
-#'                        rankings.}
+#'                        preferred, allowing for multiple items being in the
+#'                        same place in the case of ties.}
+#' \item{`ranking`}{A rank is assigned to each item.  Conventionally, ranks are
+#'                        integers in increasing order (with larger values
+#'                        indicating lower preference), but they can be any
+#'                        ordinal values.  Any given rankings will be converted
+#'                        to 'dense' rankings: positive integers from 1 to some
+#'                        maximum rank, with no gaps between ranks.}
 #' }
 #' When reading preferences from an `ordering` matrix, the index on the
 #' items is the order passed to the `item_names` parameter. When reading from
@@ -47,10 +49,9 @@
 #'                   columns. Each row represents an ordering of the items
 #'                   from first to last, representing ties by a list of
 #'                   vectors corresponding to the items.}
-#' \item{"ranking"}{Each row assigns a ranking to each item, each column
-#'                  gives the rankings assigned to a single item. Rankings
-#'                  should be dense, otherwise they will be converted to dense
-#'                  rankings.}
+#' \item{"ranking"}{Each row assigns a rank to each item, with columns
+#'                  representing items.  Note that rankings will be converted
+#'                  to 'dense' rankings in the output (see Details).}
 #' \item{"long"}{Three columns: an `id` column grouping the rows which
 #'                correspond to a single set of preferences, an
 #'                `item` column specifying (either by index or by
@@ -59,7 +60,7 @@
 #'                item.}
 #' }
 #' @param format The format of the data: one of "ordering", "ranking", or
-#' "long". By default, `data` is assumed to be in `ordering` format.
+#' "long" (see above). By default, `data` is assumed to be in `ordering` format.
 #' @param id For `data` in long-format: the column representing the
 #' preference set grouping.
 #' @param item For `data` in long-format: the column representing
