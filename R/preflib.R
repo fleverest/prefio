@@ -203,15 +203,10 @@ read.preflib <- function(file) {
 #' Write Ordinal Preference Data to PrefLib Formats
 #'
 #' Write `preferences` to `.soc`, `.soi`, `.toc` or `.toi` file types, as
-#' defined by the Preflib specification at
+#' defined by the Preflib specification:
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 #'
-#'
-#' Note that PrefLib refers to the items being ordered by "alternatives",
-#' so the "alternatives" in the output file are the same as "items" in your
-#' `preferences` object.
-#'
-#' The file types supported are
+#' @details The file types supported are
 #' \describe{
 #' \item{.soc}{Strict Orders - Complete List}
 #' \item{.soi}{Strict Orders - Incomplete List}
@@ -255,6 +250,7 @@ read.preflib <- function(file) {
 #' \item{MODIFICATION DATE (optional)}{
 #'   The last time the data was modified.
 #' }
+#' }
 #'
 #' On top of these fields, some required PrefLib fields will be generated
 #' automatically depending on arguments to `write.preflib` and the attributes
@@ -269,4 +265,23 @@ read.preflib <- function(file) {
 #' \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
 #' }
 #'
+#' Note that PrefLib refers to the items being ordered by "alternatives",
+#' so the "alternatives" in the output file are the same as "items" in your
+#' `preferences` object.
 #'
+#' @param x Some `aggregated_preferences` to write to file. If `x` is of a
+#' class, it attempts to coerce `x` into an `aggregated_preferences` object via
+#' `as.aggregated_preferences`.
+#' @param file Either a character string naming the a file or a writeable,
+#' open connection. The empty string `""` will write to stdout.
+#' @param as.toc A logical indicating whether or not incomplete orderings
+#' should be converted to complete orderings (with ties) by adding the
+#' unordered items tied as last-place. Both `toi` and `soi` ordinal preferences
+#' can be converted to this representation, but this operation does not make
+#' sence for complete orderings. If `x` is of type `toc` or `soc`, this will
+#' be ignored.
+#'
+#' @export
+write.preflib <- function(x, file = "", as.toc = FALSE) {
+  stop("Not implemented.")
+}
