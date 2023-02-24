@@ -52,26 +52,25 @@ as.preferences(x, ...)
 \method{format}{preferences}(x, width = 40L, ...)
 }
 \arguments{
-\item{data}{A \code{data.frame} or \code{matrix} in one of three formats:
+\item{data}{A data frame or matrix in one of three formats:
 \describe{
-\item{"ordering"}{Orderings must be a \code{data.frame} with \code{list}-valued
+\item{"ordering"}{Orderings must be a data frame with list-valued
 columns. Each row represents an ordering of the items
 from first to last, representing ties by a list of
 vectors corresponding to the items.}
-\item{"ranking"}{Each row assigns a ranking to each item, each column
-gives the rankings assigned to a single item. Rankings
-should be dense, otherwise they will be converted to dense
-rankings.}
+\item{"ranking"}{Each row assigns a rank to each item, with columns
+representing items.  Note that rankings will be converted
+to 'dense' rankings in the output (see Details).}
 \item{"long"}{Three columns: an \code{id} column grouping the rows which
-correspond to a single set of preferences, a
+correspond to a single set of preferences, an
 \code{item} column specifying (either by index or by
 name) the item each row refers to, and a \code{rank}
 column specifying the rank for the associated
-\code{item}.}
+item.}
 }}
 
 \item{format}{The format of the data: one of "ordering", "ranking", or
-"long". By default, \code{data} is assumed to be in \code{ordering} format.}
+"long" (see above). By default, \code{data} is assumed to be in \code{ordering} format.}
 
 \item{id}{For \code{data} in long-format: the column representing the
 preference set grouping.}
@@ -106,15 +105,15 @@ index or name of the item to obtain the ranking for.}
 
 \item{by.ordering}{When \code{FALSE}, returns a \code{preferences} object:
 internally rows \eqn{i} contain the ranking assigned to each item
-in preference \eqn{p_i}. When \code{TRUE}, returns a \code{data.frame} where
+in preference \eqn{p_i}. When \code{TRUE}, returns a data frame where
 rows group the the candidates in order of rank.}
 
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
 }
 \value{
-By default, a \code{preferences} object, which is a \code{data.frame} with
-\code{list}-valued columns corresponding to preferences on the items. This may
+By default, a \code{preferences} object, which is a data frame with
+list-valued columns corresponding to preferences on the items. This may
 be an ordering on subsets of the items in the case of ties, or a
 potentially-partial strict ordering. In the case of partial or tied
 preferences, some entries may be empty lists.
@@ -143,14 +142,16 @@ A set of preferences can be represented either by \code{ranking} or by
 preferences in a vector:
 \describe{
 \item{\code{ordering}}{The items are listed in order of most preferred to least
-preferred, allowing for pairs of items in the case of
-ties.}
-\item{\code{ranking}}{The rank assigned to each item is listed in order of some
-predefined index on the items. Rankings should be
-dense, otherwise they will be converted to dense
-rankings.}
+preferred, allowing for multiple items being in the
+same place in the case of ties.}
+\item{\code{ranking}}{A rank is assigned to each item.  Conventionally, ranks are
+integers in increasing order (with larger values
+indicating lower preference), but they can be any
+ordinal values.  Any given rankings will be converted
+to 'dense' rankings: positive integers from 1 to some
+maximum rank, with no gaps between ranks.}
 }
-When reading \code{preferences} from an \code{ordering} matrix, the index on the
+When reading preferences from an \code{ordering} matrix, the index on the
 items is the order passed to the \code{item_names} parameter. When reading from
 a \code{rankings} matrix, if no \code{item_names} are provided, the order is inferred
 from the named columns.
@@ -177,7 +178,7 @@ x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
 # * Some ranks are missing in set #3, a perfectly valid partial ordering
 # * Set #4 has inconsistent ranks for two items, and a rank with a
 # missing item.
-# * Set #5 is not a dense-ranking. It will be converted to be dense and then
+# * Set #5 is not a dense ranking. It will be converted to be dense and then
 # inferred to be a regular partial ordering with ties.
 split(x, x$rank)
 
@@ -196,7 +197,7 @@ colnames(rnk) <- c("apple", "banana", "orange", "pear")
 
 rnk <- as.preferences(rnk, format = "ranking")
 
-# Convert an existing data.frame of orderings to a preferences object.
+# Convert an existing data frame of orderings to a preferences object.
 e <- character() # short-hand for empty ranks
 ord <- preferences(
   as.data.frame(
@@ -216,13 +217,13 @@ ord <- preferences(
 # Access the first three sets of preferences
 ord[1:3, ]
 
-# Truncate preferences to the top 2 ranks and return as data.frame
+# Truncate preferences to the top 2 ranks and return as a data frame
 ord[, 1:2, by.ordering = TRUE]
 
 # Exclude pear from the rankings
 ord[, -4]
 
-# Get the highest-ranked items and return as data.frame
+# Get the highest-ranked items and return as a data frame
 ord[, 1, by.ordering = TRUE]
 
 # Get the rank of apple in the third preference-set
@@ -231,7 +232,7 @@ as.matrix(ord)[3, 1]
 # Convert the preferences to a ranking matrix
 as.matrix(ord)
 
-# Get all the ranks assiged to apple as a vector
+# Get all the ranks assigned to apple as a vector
 as.matrix(ord)[, "apple"]
 
 }

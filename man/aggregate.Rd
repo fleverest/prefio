@@ -12,13 +12,13 @@
 
 as.aggregated_preferences(x, ...)
 
-\method{[}{aggregated_preferences}(x, i, j, ..., drop = FALSE, as.aggregated_preferences = TRUE)
+\method{[}{aggregated_preferences}(x, i, j, ..., drop = FALSE)
 
 frequencies(x)
 }
 \arguments{
 \item{x}{A \code{\link{preferences}} object for \code{aggregate()}; an
-object that can be coerced to a \code{aggregated_preferences} object for
+object that can be coerced to an \code{aggregated_preferences} object for
 \code{as.aggregated_preferences()}, otherwise an \code{aggregated_preferences}
 object.}
 
@@ -39,10 +39,12 @@ index the underlying matrix of ranks and return in a data frame with the
 corresponding frequencies.}
 }
 \value{
-A data frame of class \code{aggregated_preferences}, with columns
+A data frame of class \code{aggregated_preferences}, with columns:
+\describe{
 \item{preferences}{A \code{\link{preferences}} object of the unique
 preferences}
 \item{frequencies}{The corresponding frequencies.}
+}
 Methods are available for \code{\link[=rbind]{rbind()}} and \code{\link[=as.matrix]{as.matrix()}}.
 }
 \description{
@@ -64,7 +66,10 @@ R <- as.preferences(R)
 # aggregate the preferences
 A <- aggregate(R)
 
-# subsetting applies to the preferences, e.g. first two unique preferences
+# Or pass `aggregate = TRUE` to `as.preferences`
+A <- as.preferences(R, aggregate = TRUE)
+
+# Subsetting applies to the preferences, e.g. first two unique preferences
 A[1:2]
 
 # (partial) preferences projected to items 2-4 only

@@ -84,6 +84,10 @@ aggregate.preferences <- function(x, frequencies = NULL, ...) {
                           frequencies = frequencies)
         colnames(res) <- c("preferences", "frequencies")
     }
+    # Sort by number of preferences
+    res <- res[order(res$frequencies, decreasing = TRUE), ]
+    # Remove row names
+    row.names(res) <- NULL
     structure(res, class = c("aggregated_preferences", class(res)))
 }
 
