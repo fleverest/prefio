@@ -145,14 +145,16 @@ read.preflib <- function(file) {
                             quote = "'",
                             col.names = paste0("V", 1:(n_alternatives + 1)),
                             colClasses = rep("character", n_alternatives))
-    # Replace NA with blank ties
-    preferences[is.na(preferences)] <- ""
     # Replace character columns with lists
     preferences[, seq(2, ncol(preferences))] <- as.data.frame(
-      sapply(
-        preferences[, seq(2, ncol(preferences))],
-        strsplit,
-        split = ","
+      do.call(
+        rbind,
+        apply(
+          preferences[, seq(2, ncol(preferences))],
+          1L,
+          strsplit,
+          split = ","
+        )
       )
     )
     # Convert all data in the output to integer-valued vectors
@@ -328,15 +330,15 @@ write.preflib <- function(x,
          "\"imbued\" or \"synthetic\".")
   }
 
-  if (file == "") {
+  if (is.character(file) && file == "") {
     file <- stdout()
-    file_name <- "stdout"
+    file_name <- "NA"
   } else if (is.character(file)) {
-    file_name <- file
+    file_name <- basename(file)
     file <- file(file, "w")
   } else {
-    warning("File name could not be determined. Check output.")
     file_name <- "NA"
+    warning("File name could not be determined. Check output.")
   }
 
   if (!inherits(file, "connection")) {
@@ -386,7 +388,7 @@ write.preflib <- function(x,
   lines <- c(lines, paste0(x$frequencies, ": ", orderings))
 
   writeLines(lines, file, sep = "\n")
-  if (!file_name == "stdout") {
+  if (file_name != "NA") {
     close(file)
   }
 }

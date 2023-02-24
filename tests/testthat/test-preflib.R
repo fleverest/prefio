@@ -10,26 +10,90 @@ test_that("`preferences` ordinal type is detected appropriately", {
 })
 
 test_that("`read.preflib` throws error when 'ALT NAME X' is missing", {
-  expect_error(read.preflib("../data/corrupt_data/missing_alt.soc"))
+  expect_error(read.preflib("../data/corrupt/missing_alt.soc"))
 })
 
 test_that("`read.preflib` throws error when 'N ALTS' is missing", {
-  expect_error(read.preflib("../data/corrupt_data/missing_nalts.soc"))
+  expect_error(read.preflib("../data/corrupt/missing_nalts.soc"))
 })
 
 test_that("`read.preflib` throws error when 'N VTRS' is missing", {
-  expect_error(read.preflib("../data/corrupt_data/missing_nvoters.soc"))
+  expect_error(read.preflib("../data/corrupt/missing_nvoters.soc"))
 })
 
 test_that("`read.preflib` raises warning when 'N VTRS' differs from data", {
-  expect_warning(read.preflib("../data/corrupt_data/incorrect_n_voters.soc"))
+  expect_warning(read.preflib("../data/corrupt/incorrect_n_voters.soc"))
 })
 
 test_that("`read.preflib` raises warning when 'N UNQ ORDS' differs from data", {
   expect_warning(
-    read.preflib("../data/corrupt_data/incorrect_n_unique_orders.soc"))
+    read.preflib("../data/corrupt/incorrect_n_unique_orders.soc"))
 })
 
 test_that("`read.preflib` throws error when 'N UNQ ORDS' is not integral", {
-  expect_error(read.preflib("../data/corrupt_data/non_integer_n_unq_ords.soc"))
+  expect_error(read.preflib("../data/corrupt/non_integer_n_unq_ords.soc"))
+})
+
+toc <- read.preflib("../data/aspen00016-00000001.toc")
+toi <- read.preflib("../data/berkley00017-00000001.toi")
+soc <- read.preflib("../data/netflix00004-00000101.soc")
+soi <- read.preflib("../data/glasgow00008-00000003.soi")
+today <- format(Sys.time(), "%Y-%m-%d")
+
+test_that("`write.preflib` writes to stdout for all test datasets", {
+  expect_output(write.preflib(toc,
+                              title = "test toc",
+                              modification_type = "imbued",
+                              publication_date = today,
+                              modification_date = today),
+                "# TITLE: test toc")
+  expect_output(write.preflib(toi,
+                              title = "test toi",
+                              modification_type = "imbued",
+                              publication_date = today,
+                              modification_date = today),
+                "# TITLE: test toi")
+  expect_output(write.preflib(soc,
+                              title = "test soc",
+                              modification_type = "imbued",
+                              publication_date = today,
+                              modification_date = today),
+                "# TITLE: test soc")
+  expect_output(write.preflib(soi,
+                              title = "test soi",
+                              modification_type = "imbued",
+                              publication_date = today,
+                              modification_date = today),
+                "# TITLE: test soi")
+})
+
+test_that("`write.preflib` produces a file which reads to identical object", {
+  pfile <- testthat::capture_output(
+    write.preflib(toc,
+                  title = "test toc tempfile",
+                  modification_type = "imbued",
+                  publication_date = today,
+                  modification_date = today)
+  )
+  expect_true(all(read.preflib(textConnection(pfile)) == toc))
+})
+
+test_that("`write.preflib` and `read.preflib` work with single preferences", {
+  onepref <- preferences(
+    matrix(c(1, 2, NA, NA),
+           nrow = 1,
+           dimnames = list(NULL, LETTERS[1:4])),
+    format = "ranking",
+    aggregate = TRUE
+  )
+  print(onepref)
+  t <- tempfile()
+  write.preflib(onepref,
+                t,
+                title = "test toc tempfile",
+                modification_type = "imbued",
+                modification_date = today,
+                publication_date = today)
+  onepref_from_t <- read.preflib(t)
+  expect_true(all(onepref == onepref_from_t))
 })
