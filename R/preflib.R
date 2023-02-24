@@ -386,7 +386,9 @@ write.preflib <- function(x,
   lines <- c(lines, paste0(x$frequencies, ": ", orderings))
 
   writeLines(lines, file, sep = "\n")
-  close(file)
+  if (!file_name == "stdout") {
+    close(file)
+  }
 }
 
 # Helper function for formatting list of items at equal rank

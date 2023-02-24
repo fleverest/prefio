@@ -45,3 +45,7 @@ docs/
 ### R.Bookdown Stack ###
 # R package: bookdown caching files
 /*_files/
+
+# prefio datafiles not in tests/
+*.[st]o[ci]
+!/tests/*.[st]o[ci]
