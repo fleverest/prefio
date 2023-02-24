@@ -99,6 +99,12 @@ as.aggregated_preferences.preferences <- function(x, ...) {
   return(aggregate(x, ...))
 }
 
+#' @method as.aggregated_preferences aggregated_preferences
+#' @export
+as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
+  return(aggregate(x, ...))
+}
+
 #' @rdname aggregate
 #' @method [ aggregated_preferences
 #' @export

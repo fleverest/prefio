@@ -274,14 +274,126 @@ read.preflib <- function(file) {
 #' `as.aggregated_preferences`.
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
-#' @param as.toc A logical indicating whether or not incomplete orderings
-#' should be converted to complete orderings (with ties) by adding the
-#' unordered items tied as last-place. Both `toi` and `soi` ordinal preferences
-#' can be converted to this representation, but this operation does not make
-#' sence for complete orderings. If `x` is of type `toc` or `soc`, this will
-#' be ignored.
+#' @param title The title of the data file, for instance the name of the
+#' election represented in the data file.
+#' @param description A description of the data file, providing additional
+#' information about it.
+#' @param publication_date The date at which the data file was published for the
+#' first time.
+#' @param modification_type The modification type of the data: one of
+#' `original`, `induced`, `imbued` or `synthetic`. See `Details`.
+#' @param modification_date The last time the data was modified.
+#' @param relates_to The name of the data file that the current file relates to,
+#' typically the source file in case the current file has been derived from
+#' another one.
+#' @param related_files The list of all the data files related to this one,
+#' comma separated.
 #'
 #' @export
-write.preflib <- function(x, file = "", as.toc = FALSE) {
-  stop("Not implemented.")
+write.preflib <- function(x,
+                          file = "",
+                          title,
+                          publication_date,
+                          modification_type,
+                          modification_date,
+                          description = NULL,
+                          relates_to = NULL,
+                          related_files = NULL) {
+  if (missing(title)) {
+    stop("Missing `title`: the PrefLib format requires a ",
+         "title to be specified.")
+  }
+
+  if (missing(publication_date)) {
+    publication_date <- format(Sys.time(), "%Y-%m-%d")
+    warning("Missing `publication_date`, using today's date(",
+            publication_date,
+            ").")
+  }
+  if (missing(modification_date)) {
+    modification_date <- format(Sys.time(), "%Y-%m-%d")
+    warning("Missing `modification_date`, using today's date(",
+            modification_date,
+            ").")
+  }
+
+  modification_type <- try(match.arg(modification_type,
+                                     c("original",
+                                       "induced",
+                                       "imbued",
+                                       "synthetic")),
+                           silent = TRUE)
+  if (inherits(modification_type, "try-error")) {
+    stop("`modification_type` must be one of \"original\", \"induced\",",
+         "\"imbued\" or \"synthetic\".")
+  }
+
+  if (file == "") {
+    file <- stdout()
+    file_name <- "stdout"
+  } else if (is.character(file)) {
+    file_name <- file
+    file <- file(file, "w")
+  } else {
+    warning("File name could not be determined. Check output.")
+    file_name <- "NA"
+  }
+
+  if (!inherits(file, "connection")) {
+    stop("'file' must be a character string.")
+  }
+
+  # Coerce into aggregated_preferences
+  x <- as.aggregated_preferences(x)
+
+  # Prepare lines for file
+  lines <- c(
+    # Required metadata
+    paste("#", "FILE NAME:", file_name),
+    paste("#", "TITLE:", title),
+    paste("#", "DESCRIPTION:", description),
+    paste("#", "DATA TYPE:", preftype(x$preferences)),
+    paste("#", "PUBLICATION DATE:", publication_date),
+    paste("#", "MODIFICATION TYPE:", modification_type),
+    paste("#", "MODIFICATION DATE:", modification_date),
+    paste("#", "RELATES TO:", paste(relates_to, collapse = ",")),
+    paste("#", "RELATED FILES:", paste(related_files, collapse = ",")),
+    # Derived metadata
+    paste("#", "NUMBER ALTERNATIVES:", length(names(x$preferences))),
+    paste("#", "NUMBER VOTERS:", sum(x$frequencies)),
+    paste("#", "NUMBER UNIQUE ORDERS:", length(x$preferences))
+  )
+
+  items <- attr(x$preferences, "item_names")
+  lines <- c(
+    lines,
+    sapply(
+      seq_along(items),
+      function(i) paste0("# ALTERNATIVE NAME ", i, ": ", items[i])
+    )
+  )
+
+  # Format orders as strings
+  orderings <- apply(
+    as.matrix(x$preferences),
+    1L,
+    function(item_ranks) {
+      paste0(sapply(seq_len(max(na.omit(item_ranks))),
+                    function(ri) fmt_eql_items(which(ri == item_ranks))),
+             collapse = ",")
+    }
+  )
+  lines <- c(lines, paste0(x$frequencies, ": ", orderings))
+
+  writeLines(lines, file, sep = "\n")
+  close(file)
+}
+
+# Helper function for formatting list of items at equal rank
+fmt_eql_items <- function(items) {
+  if (length(items) > 1) {
+    paste0("{", paste0(items, collapse = ","), "}")
+  } else {
+    as.character(items)
+  }
 }

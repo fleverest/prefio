@@ -4,7 +4,17 @@
 \alias{write.preflib}
 \title{Write Ordinal Preference Data to PrefLib Formats}
 \usage{
-write.preflib(x, file = "", as.toc = FALSE)
+write.preflib(
+  x,
+  file = "",
+  title,
+  publication_date,
+  modification_type,
+  modification_date,
+  description = NULL,
+  relates_to = NULL,
+  related_files = NULL
+)
 }
 \arguments{
 \item{x}{Some \code{aggregated_preferences} to write to file. If \code{x} is of a
@@ -14,12 +24,26 @@ class, it attempts to coerce \code{x} into an \code{aggregated_preferences} obje
 \item{file}{Either a character string naming the a file or a writeable,
 open connection. The empty string \code{""} will write to stdout.}
 
-\item{as.toc}{A logical indicating whether or not incomplete orderings
-should be converted to complete orderings (with ties) by adding the
-unordered items tied as last-place. Both \code{toi} and \code{soi} ordinal preferences
-can be converted to this representation, but this operation does not make
-sence for complete orderings. If \code{x} is of type \code{toc} or \code{soc}, this will
-be ignored.}
+\item{title}{The title of the data file, for instance the name of the
+election represented in the data file.}
+
+\item{publication_date}{The date at which the data file was published for the
+first time.}
+
+\item{modification_type}{The modification type of the data: one of
+\code{original}, \code{induced}, \code{imbued} or \code{synthetic}. See \code{Details}.}
+
+\item{modification_date}{The last time the data was modified.}
+
+\item{description}{A description of the data file, providing additional
+information about it.}
+
+\item{relates_to}{The name of the data file that the current file relates to,
+typically the source file in case the current file has been derived from
+another one.}
+
+\item{related_files}{The list of all the data files related to this one,
+comma separated.}
 }
 \description{
 Write \code{preferences} to \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types, as
@@ -27,10 +51,6 @@ defined by the Preflib specification:
 \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 }
 \details{
-Note that PrefLib refers to the items being ordered by "alternatives",
-so the "alternatives" in the output file are the same as "items" in your
-\code{preferences} object.
-
 The file types supported are
 \describe{
 \item{.soc}{Strict Orders - Complete List}
@@ -89,4 +109,8 @@ of the \code{preferences} object being written to file:
 \item{NUMBER VOTERS}{The total number of orderings.}
 \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
 }
+
+Note that PrefLib refers to the items being ordered by "alternatives",
+so the "alternatives" in the output file are the same as "items" in your
+\code{preferences} object.
 }
