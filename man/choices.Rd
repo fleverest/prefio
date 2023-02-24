@@ -17,10 +17,10 @@ coerced by \code{as.preferences}.}
 A data frame of class \code{choices} with elements:
 \describe{
 \item{choices}{A list where each element represents the items chosen for a
-single rank in the preference set.}
+single rank in the ordering.}
 \item{alternatives}{A list where each element represents the alternatives
 (i.e. the set of remaining items to choose from) for a single rank.}
-\item{preference_set}{A list where each element represents the preference set
+\item{ordering}{A list where each element represents the ordering
 that the choice belongs to.}
 }
 The list stores the number of choices and the names of the objects as the

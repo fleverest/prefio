@@ -86,7 +86,6 @@ test_that("`write.preflib` and `read.preflib` work with single preferences", {
     format = "ranking",
     aggregate = TRUE
   )
-  print(onepref)
   t <- tempfile()
   write.preflib(onepref,
                 t,

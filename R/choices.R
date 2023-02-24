@@ -10,10 +10,10 @@
 #' @return A data frame of class `choices` with elements:
 #' \describe{
 #' \item{choices}{A list where each element represents the items chosen for a
-#' single rank in the preference set.}
+#' single rank in the ordering.}
 #' \item{alternatives}{A list where each element represents the alternatives
 #' (i.e. the set of remaining items to choose from) for a single rank.}
-#' \item{preference_set}{A list where each element represents the preference set
+#' \item{ordering}{A list where each element represents the ordering
 #' that the choice belongs to.}
 #' }
 #' The list stores the number of choices and the names of the objects as the
@@ -52,7 +52,7 @@ choices <- function(preferences, names = FALSE) {
         opt <- onames
     }
     choices <- alternatives <- list()
-    preference_set <- c()
+    ordering <- c()
     for (j in seq_len(max(J))) {
         ## j-th choices
         cho <- apply((preferences == j)[J >= j, , drop = FALSE], 1L,
@@ -68,14 +68,14 @@ choices <- function(preferences, names = FALSE) {
             alt <- unname(split(alt, col(alt)))
         }
         alternatives <- c(alternatives, alt)
-        preference_set <- c(preference_set, which(J >= j))
+        ordering <- c(ordering, which(J >= j))
     }
-    ii <- order(preference_set)
+    ii <- order(ordering)
     nchoices <- length(choices)
     out <- data.frame(matrix(NA, nrow = nchoices, ncol = 0))
     out$choices <- choices[ii]
     out$alternatives <- alternatives[ii]
-    out$preference_set <- preference_set[ii]
+    out$ordering <- ordering[ii]
     attr(out, "nchoices") <- nchoices
     attr(out, "objects") <- onames
     class(out) <- c("choices", class(out))
@@ -86,7 +86,7 @@ choices <- function(preferences, names = FALSE) {
 #' @method print choices
 #' @export
 print.choices <- function(x, ...) {
-    preferences <- x$preference_set
+    preferences <- x$ordering
     for (i in unique(preferences)) {
         cat("Preference Set:", i, "\n")
         cat("-------------- \n")
