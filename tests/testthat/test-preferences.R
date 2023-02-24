@@ -142,3 +142,11 @@ test_that("Some valid examples of `preferences` are not `na`", {
    !any(is.na(read.preflib("../data/berkley00017-00000001.toi")$preferences))
   )
 })
+
+toc <- preferences(matrix(c(1, 2, NA, NA),
+                          nrow = 1,
+                          dimnames = list(NULL, LETTERS[1:4])),
+                   format = "ranking")
+test_that("Incomplete preferences equal themselves despite containing NAs", {
+  expect_true(toc == toc)
+})

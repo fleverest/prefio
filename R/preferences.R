@@ -402,16 +402,23 @@ Ops.preferences <- function(x1, x2) {
   op <- .Generic[[1]]
   switch(op,
          `==` = {
-           minlen <- min(nrow(x1), nrow(x2))
-           maxlen <- max(nrow(x1), nrow(x2))
+           minlen <- min(length(x1), length(x2))
+           maxlen <- max(length(x1), length(x2))
            x1_names <- names(x1)
            x2_names <- names(x2)
            if (!identical(sort(x1_names), sort(x2_names))) {
              return(rep(FALSE, maxlen))
            }
            x1 <- unclass(x1)
-           x2 <- unclass(x2)[, x1_names]
-           cmp <- sapply(seq_len(minlen), function(i) all(x1[i] == x2[i]))
+           x2 <- unclass(x2)[, x1_names, drop = FALSE]
+           if (anyNA(x1)) {
+             x1[is.na(x1)] <- 0
+           }
+           if (anyNA(x2)) {
+             x2[is.na(x2)] <- 0
+           }
+           cmp <- rowSums(x1[seq_len(minlen), , drop = FALSE] ==
+                          x2[seq_len(minlen), , drop = FALSE]) >= 1
            if (minlen < maxlen) {
              warning("Objects being compared are not the same length.")
              cmp <- c(cmp, rep(FALSE, maxlen - minlen))
