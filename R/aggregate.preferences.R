@@ -41,7 +41,10 @@
 #' # aggregate the preferences
 #' A <- aggregate(R)
 #'
-#' # subsetting applies to the preferences, e.g. first two unique preferences
+#' # Or pass `aggregate = TRUE` to `as.preferences`
+#' A <- as.preferences(R, aggregate = TRUE)
+#'
+#' # Subsetting applies to the preferences, e.g. first two unique preferences
 #' A[1:2]
 #'
 #' # (partial) preferences projected to items 2-4 only
@@ -110,17 +113,9 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
 #' @rdname aggregate
 #' @method [ aggregated_preferences
 #' @export
-"[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE,
-                                    as.aggregated_preferences = TRUE) {
-    preferences <-  x$preferences[i, j, ..., drop = drop,
-                          as.preferences = as.aggregated_preferences]
-    if (as.aggregated_preferences) {
-        aggregate(preferences, frequencies = x$frequencies[i])
-    } else {
-        if (!is.null(dim(i))) i <- i[, 1]
-        data.frame(preferences = preferences, frequencies = x$frequencies[i])
-        colnames(res) <- c("preferences", "frequencies")
-    }
+"[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
+    preferences <-  x$preferences[i, j, ..., drop = drop]
+    aggregate(preferences, frequencies = x$frequencies[i])
 }
 
 #' @rdname aggregate

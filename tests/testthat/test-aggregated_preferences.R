@@ -47,3 +47,10 @@ test_that("`rbind` on `aggregated_preferences` adds the frequencies", {
   aprefs <- aggregate(prefs, frequencies = rep(2, 3))
   expect_true(identical(frequencies(rbind(aprefs, aprefs)), rep(4, 3)))
 })
+
+test_that("`[.aggregated_preferences` produces valid preferences", {
+  prefs <- preferences(rankings, format = "ranking", aggregate = TRUE)
+  expect_true(all(prefs[] == prefs))
+  expect_true(all(prefs[1:3] == prefs))
+  expect_true(all(prefs[, 1] == prefs[, "A"]))
+})
