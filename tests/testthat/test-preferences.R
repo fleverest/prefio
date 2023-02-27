@@ -150,3 +150,21 @@ toc <- preferences(matrix(c(1, 2, NA, NA),
 test_that("Incomplete preferences equal themselves despite containing NAs", {
   expect_true(toc == toc)
 })
+
+test_that("Loading preferences from long format doesn't permute item names", {
+  longdf <- data.frame(id = c(rep(1:4, each = 4)),
+                       item = c("B", "A", "C", "D",
+                                "C", "B", "A", "D",
+                                "A", "B", "C", "D",
+                                "D", "B", "C", "A"),
+                       rank = rep(1:4, 4))
+  prefs <- preferences(longdf,
+                       format = "long",
+                       id = "id",
+                       item = "item",
+                       rank = "rank")
+  expect_true(all(prefs[1, by.ordering = TRUE] == c("B", "A", "C", "D")))
+  expect_true(all(prefs[2, by.ordering = TRUE] == c("C", "B", "A", "D")))
+  expect_true(all(prefs[3, by.ordering = TRUE] == c("A", "B", "C", "D")))
+  expect_true(all(prefs[4, by.ordering = TRUE] == c("D", "B", "C", "A")))
+})

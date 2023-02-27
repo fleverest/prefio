@@ -357,7 +357,6 @@ long_to_ranking <- function(data,
     data[["item"]] <- item_names[data[["item"]]]
   }
   data[["item"]] <- factor(data[["item"]])
-  levels(data[["item"]]) <- item_names
 
   # Return the ranking matrix
   return(data %>%
