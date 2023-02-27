@@ -254,9 +254,9 @@ read.preflib <- function(file) {
 #' }
 #' }
 #'
-#' On top of these fields, some required PrefLib fields will be generated
-#' automatically depending on arguments to `write.preflib` and the attributes
-#' of the `preferences` object being written to file:
+#' In addition to these fields, some required PrefLib fields will be generated
+#' automatically depending on arguments to `write.preflib()` and the attributes
+#' of the `aggregated_preferences` object being written to file:
 #' \describe{
 #' \item{FILE NAME}{The name of the output file.}
 #' \item{DATA TYPE}{The data type (one of `soc`, `soi`, `toc` or `toi`).}
@@ -267,13 +267,13 @@ read.preflib <- function(file) {
 #' \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
 #' }
 #'
-#' Note that PrefLib refers to the items being ordered by "alternatives",
-#' so the "alternatives" in the output file are the same as "items" in your
-#' `preferences` object.
+#' Note that PrefLib refers to the items as "alternatives".
+#' The "alternatives" in the output file will be the same as the "items" in the
+#' `aggregated_preferences` object.
 #'
-#' @param x Some `aggregated_preferences` to write to file. If `x` is of a
-#' class, it attempts to coerce `x` into an `aggregated_preferences` object via
-#' `as.aggregated_preferences`.
+#' @param x An `aggregated_preferences` object to write to file. If `x` is of a
+#' different class, it attempts to coerce `x` into an `aggregated_preferences`
+#' object via `as.aggregated_preferences()`.
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
 #' @param title The title of the data file, for instance the name of the
