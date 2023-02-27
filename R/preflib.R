@@ -21,7 +21,7 @@
 #' [`aggregated_preferences`][aggregate.preferences] object with the
 #' items labelled by name.
 #'
-#' A Preflib file may be corrupt, in the sense that the ordered alternatives do
+#' A PrefLib file may be corrupt, in the sense that the ordered alternatives do
 #' not match their names. In this case, the file can be read in as a data
 #' frame (with a warning), but `as.aggregated_preferences` will throw an error.
 #'
@@ -205,7 +205,7 @@ read.preflib <- function(file) {
 #' Write Ordinal Preference Data to PrefLib Formats
 #'
 #' Write `preferences` to `.soc`, `.soi`, `.toc` or `.toi` file types, as
-#' defined by the Preflib specification:
+#' defined by the PrefLib specification:
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 #'
 #' @details The file types supported are
