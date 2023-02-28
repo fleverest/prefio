@@ -7,10 +7,10 @@
 write.preflib(
   x,
   file = "",
-  title,
-  publication_date,
-  modification_type,
-  modification_date,
+  title = NULL,
+  publication_date = NULL,
+  modification_type = NULL,
+  modification_date = NULL,
   description = NULL,
   relates_to = NULL,
   related_files = NULL
@@ -25,25 +25,34 @@ object via \code{as.aggregated_preferences()}.}
 open connection. The empty string \code{""} will write to stdout.}
 
 \item{title}{The title of the data file, for instance the name of the
-election represented in the data file.}
+election represented in the data file. If not provided, we check for the
+presence of \code{attr(x, "preflib")}, and if it exists we check for \code{TITLE}.}
 
 \item{publication_date}{The date at which the data file was published for the
-first time.}
+first time. If not provided, we check for the presence of
+\code{attr(x, "preflib")}, and if it exists we check for \verb{PUBLICATION DATE}.}
 
 \item{modification_type}{The modification type of the data: one of
-\code{original}, \code{induced}, \code{imbued} or \code{synthetic}. See \code{Details}.}
+\code{original}, \code{induced}, \code{imbued} or \code{synthetic} (see \code{Details}). If not
+provided, we check for the presence of \code{attr(x, "preflib")}, and if it exists
+we check for \verb{MODIFICATION TYPE}.}
 
-\item{modification_date}{The last time the data was modified.}
+\item{modification_date}{The last time the data was modified. If not
+provided, we check for the presence of \code{attr(x, "preflib")}, and if it exists
+we check for \verb{MODIFICATION DATE}.}
 
 \item{description}{A description of the data file, providing additional
-information about it.}
+information about it. If not provided, we check for the presence of
+\code{attr(x, "preflib")}, and if it exists we check for \code{DESCRIPTION}.}
 
 \item{relates_to}{The name of the data file that the current file relates to,
 typically the source file in case the current file has been derived from
-another one.}
+another one. If not provided, we check for the presence of
+\code{attr(x, "preflib")}, and if it exists we check for \verb{RELATES TO}.}
 
 \item{related_files}{The list of all the data files related to this one,
-comma separated.}
+comma separated. If not provided, we check for the presence of
+\code{attr(x, "preflib")}, and if it exists we check for \verb{RELATED FILES}.}
 }
 \description{
 Write \code{preferences} to \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types, as
