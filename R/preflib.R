@@ -67,7 +67,6 @@
 #' cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
 #' }
 #' @importFrom utils read.csv
-#' @name preflib
 #' @export
 read.preflib <- function(file, from_preflib = FALSE) {
   if (from_preflib) {
