@@ -21,7 +21,7 @@
 #' [`aggregated_preferences`][aggregate.preferences] object with the
 #' items labelled by name.
 #'
-#' A Preflib file may be corrupt, in the sense that the ordered alternatives do
+#' A PrefLib file may be corrupt, in the sense that the ordered alternatives do
 #' not match their names. In this case, the file can be read in as a data
 #' frame (with a warning), but `as.aggregated_preferences` will throw an error.
 #'
@@ -205,7 +205,7 @@ read.preflib <- function(file) {
 #' Write Ordinal Preference Data to PrefLib Formats
 #'
 #' Write `preferences` to `.soc`, `.soi`, `.toc` or `.toi` file types, as
-#' defined by the Preflib specification:
+#' defined by the PrefLib specification:
 #' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 #'
 #' @details The file types supported are
@@ -254,9 +254,9 @@ read.preflib <- function(file) {
 #' }
 #' }
 #'
-#' On top of these fields, some required PrefLib fields will be generated
-#' automatically depending on arguments to `write.preflib` and the attributes
-#' of the `preferences` object being written to file:
+#' In addition to these fields, some required PrefLib fields will be generated
+#' automatically depending on arguments to `write.preflib()` and the attributes
+#' of the `aggregated_preferences` object being written to file:
 #' \describe{
 #' \item{FILE NAME}{The name of the output file.}
 #' \item{DATA TYPE}{The data type (one of `soc`, `soi`, `toc` or `toi`).}
@@ -267,13 +267,13 @@ read.preflib <- function(file) {
 #' \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
 #' }
 #'
-#' Note that PrefLib refers to the items being ordered by "alternatives",
-#' so the "alternatives" in the output file are the same as "items" in your
-#' `preferences` object.
+#' Note that PrefLib refers to the items as "alternatives".
+#' The "alternatives" in the output file will be the same as the "items" in the
+#' `aggregated_preferences` object.
 #'
-#' @param x Some `aggregated_preferences` to write to file. If `x` is of a
-#' class, it attempts to coerce `x` into an `aggregated_preferences` object via
-#' `as.aggregated_preferences`.
+#' @param x An `aggregated_preferences` object to write to file. If `x` is of a
+#' different class, it attempts to coerce `x` into an `aggregated_preferences`
+#' object via `as.aggregated_preferences()`.
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
 #' @param title The title of the data file, for instance the name of the
