@@ -126,12 +126,11 @@ test_that("Equality and inequality work for `preferences`", {
 
 test_that("`print.preference` formats correctly", {
   prefs <- preferences(rankings, format = "ranking")
-  out <- "[1] \"A > B > C\" \"C > B > A\" \"B > A > C\""
   expect_output(print(prefs), "A > B > C")
   expect_output(print(prefs), "C > B > A")
   expect_output(print(prefs), "B > A > C")
   expect_output(print(prefs[, 1]), '"A" "A" "A"')
-  expect_output(print(prefs[, c()]), '"blank" "blank" "blank"')
+  expect_output(print(prefs[, NULL]), '"blank" "blank" "blank"')
 })
 
 test_that("Some valid examples of `preferences` are not `na`", {
