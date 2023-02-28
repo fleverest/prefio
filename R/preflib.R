@@ -276,57 +276,101 @@ preflib_url <- "https://www.preflib.org/static/data"
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
 #' @param title The title of the data file, for instance the name of the
-#' election represented in the data file.
+#' election represented in the data file. If not provided, we check for the
+#' presence of `attr(x, "preflib")`, and if it exists we check for `TITLE`.
 #' @param description A description of the data file, providing additional
-#' information about it.
+#' information about it. If not provided, we check for the presence of
+#' `attr(x, "preflib")`, and if it exists we check for `DESCRIPTION`.
 #' @param publication_date The date at which the data file was published for the
-#' first time.
+#' first time. If not provided, we check for the presence of
+#' `attr(x, "preflib")`, and if it exists we check for `PUBLICATION DATE`.
 #' @param modification_type The modification type of the data: one of
-#' `original`, `induced`, `imbued` or `synthetic`. See `Details`.
-#' @param modification_date The last time the data was modified.
+#' `original`, `induced`, `imbued` or `synthetic` (see `Details`). If not
+#' provided, we check for the presence of `attr(x, "preflib")`, and if it exists
+#' we check for `MODIFICATION TYPE`.
+#' @param modification_date The last time the data was modified. If not
+#' provided, we check for the presence of `attr(x, "preflib")`, and if it exists
+#' we check for `MODIFICATION DATE`.
 #' @param relates_to The name of the data file that the current file relates to,
 #' typically the source file in case the current file has been derived from
-#' another one.
+#' another one. If not provided, we check for the presence of
+#' `attr(x, "preflib")`, and if it exists we check for `RELATES TO`.
 #' @param related_files The list of all the data files related to this one,
-#' comma separated.
+#' comma separated. If not provided, we check for the presence of
+#' `attr(x, "preflib")`, and if it exists we check for `RELATED FILES`.
 #'
 #' @export
 write.preflib <- function(x,
                           file = "",
-                          title,
-                          publication_date,
-                          modification_type,
-                          modification_date,
+                          title = NULL,
+                          publication_date = NULL,
+                          modification_type = NULL,
+                          modification_date = NULL,
                           description = NULL,
                           relates_to = NULL,
                           related_files = NULL) {
+  pl_attr <- NULL
+  if ("preflib" %in% names(attributes(x))) {
+    pl_attr <- attributes(x)$preflib
+  }
+
   if (missing(title)) {
-    stop("Missing `title`: the PrefLib format requires a ",
-         "title to be specified.")
+    if (is.list(pl_attr) && "TITLE" %in% names(pl_attr)) {
+      title <- pl_attr[["TITLE"]]
+      message("`title` inferred from attributes of `x`: ",
+              title)
+    } else {
+      title <- NA
+      warning("Missing `title`: the PrefLib format requires a ",
+              "title to be specified. Using `NA`.")
+    }
   }
 
   if (missing(publication_date)) {
-    publication_date <- format(Sys.time(), "%Y-%m-%d")
-    warning("Missing `publication_date`, using today's date(",
-            publication_date,
-            ").")
-  }
-  if (missing(modification_date)) {
-    modification_date <- format(Sys.time(), "%Y-%m-%d")
-    warning("Missing `modification_date`, using today's date(",
-            modification_date,
-            ").")
+    if (is.list(pl_attr) && "PUBLICATION DATE" %in% names(pl_attr)) {
+      publication_date <- pl_attr[["PUBLICATION DATE"]]
+      message("`publication_date` inferred from attributes of `x`: ",
+              publication_date)
+    } else {
+      publication_date <- format(Sys.time(), "%Y-%m-%d")
+      warning("Missing `publication_date`, using today's date(",
+              publication_date,
+              ").")
+    }
   }
 
-  modification_type <- try(match.arg(modification_type,
-                                     c("original",
-                                       "induced",
-                                       "imbued",
-                                       "synthetic")),
-                           silent = TRUE)
-  if (inherits(modification_type, "try-error")) {
-    stop("`modification_type` must be one of \"original\", \"induced\",",
-         "\"imbued\" or \"synthetic\".")
+  if (missing(modification_date)) {
+    if (is.list(pl_attr) && "MODIFICATION DATE" %in% names(pl_attr)) {
+      modification_date <- pl_attr[["MODIFICATION DATE"]]
+      message("`modification_date` inferred from attributes of `x`: ",
+              modification_date)
+    } else {
+      modification_date <- format(Sys.time(), "%Y-%m-%d")
+      warning("Missing `modification_date`, using today's date(",
+              modification_date,
+              ").")
+    }
+  }
+
+  if (missing(modification_type)) {
+    if (is.list(pl_attr) && "MODIFICATION TYPE" %in% names(pl_attr)) {
+      modification_type <- pl_attr[["MODIFICATION TYPE"]]
+      message("`modification_type` inferred from attributes of `x`: ",
+              modification_type)
+    } else {
+      modification_type <- NA
+    }
+  } else {
+    modification_type <- try(match.arg(modification_type,
+                                       c("original",
+                                         "induced",
+                                         "imbued",
+                                         "synthetic")),
+                             silent = TRUE)
+    if (inherits(modification_type, "try-error")) {
+      stop("`modification_type` must be one of \"original\", \"induced\",",
+           "\"imbued\" or \"synthetic\".")
+    }
   }
 
   if (is.character(file) && file == "") {
@@ -354,11 +398,11 @@ write.preflib <- function(x,
     paste("#", "TITLE:", title),
     paste("#", "DESCRIPTION:", description),
     paste("#", "DATA TYPE:", preftype(x$preferences)),
-    paste("#", "PUBLICATION DATE:", publication_date),
     paste("#", "MODIFICATION TYPE:", modification_type),
-    paste("#", "MODIFICATION DATE:", modification_date),
     paste("#", "RELATES TO:", paste(relates_to, collapse = ",")),
     paste("#", "RELATED FILES:", paste(related_files, collapse = ",")),
+    paste("#", "PUBLICATION DATE:", publication_date),
+    paste("#", "MODIFICATION DATE:", modification_date),
     # Derived metadata
     paste("#", "NUMBER ALTERNATIVES:", length(names(x$preferences))),
     paste("#", "NUMBER VOTERS:", sum(x$frequencies)),
