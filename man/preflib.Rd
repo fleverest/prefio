@@ -48,7 +48,7 @@ data frame, storing the item names as an attribute. The
 \code{\link[=aggregate.preferences]{aggregated_preferences}} object with the
 items labelled by name.
 
-A Preflib file may be corrupt, in the sense that the ordered alternatives do
+A PrefLib file may be corrupt, in the sense that the ordered alternatives do
 not match their names. In this case, the file can be read in as a data
 frame (with a warning), but \code{as.aggregated_preferences} will throw an error.
 }

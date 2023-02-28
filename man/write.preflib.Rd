@@ -17,9 +17,9 @@ write.preflib(
 )
 }
 \arguments{
-\item{x}{Some \code{aggregated_preferences} to write to file. If \code{x} is of a
-class, it attempts to coerce \code{x} into an \code{aggregated_preferences} object via
-\code{as.aggregated_preferences}.}
+\item{x}{An \code{aggregated_preferences} object to write to file. If \code{x} is of a
+different class, it attempts to coerce \code{x} into an \code{aggregated_preferences}
+object via \code{as.aggregated_preferences()}.}
 
 \item{file}{Either a character string naming the a file or a writeable,
 open connection. The empty string \code{""} will write to stdout.}
@@ -47,7 +47,7 @@ comma separated.}
 }
 \description{
 Write \code{preferences} to \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types, as
-defined by the Preflib specification:
+defined by the PrefLib specification:
 \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
 }
 \details{
@@ -97,9 +97,9 @@ The last time the data was modified.
 }
 }
 
-On top of these fields, some required PrefLib fields will be generated
-automatically depending on arguments to \code{write.preflib} and the attributes
-of the \code{preferences} object being written to file:
+In addition to these fields, some required PrefLib fields will be generated
+automatically depending on arguments to \code{write.preflib()} and the attributes
+of the \code{aggregated_preferences} object being written to file:
 \describe{
 \item{FILE NAME}{The name of the output file.}
 \item{DATA TYPE}{The data type (one of \code{soc}, \code{soi}, \code{toc} or \code{toi}).}
@@ -110,7 +110,7 @@ of the \code{preferences} object being written to file:
 \item{NUMBER UNIQUE ORDERS}{The number of distinct orderings.}
 }
 
-Note that PrefLib refers to the items being ordered by "alternatives",
-so the "alternatives" in the output file are the same as "items" in your
-\code{preferences} object.
+Note that PrefLib refers to the items as "alternatives".
+The "alternatives" in the output file will be the same as the "items" in the
+\code{aggregated_preferences} object.
 }
