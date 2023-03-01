@@ -48,7 +48,8 @@ docs/
 
 # prefio datafiles not in tests/
 *.[st]o[ci]
-!/tests/*.[st]o[ci]
+!/tests/data/*.[st]o[ci]
+!/tests/data/corrupt/*.[st]o[ci]
 
 # Ignore html preview of README
 README.html
