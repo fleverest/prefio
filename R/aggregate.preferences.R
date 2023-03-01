@@ -91,6 +91,7 @@ aggregate.preferences <- function(x, frequencies = NULL, ...) {
     structure(res, class = c("aggregated_preferences", class(res)))
 }
 
+#' @method aggregate aggregated_preferences
 #' @export
 aggregate.aggregated_preferences <- function(x, ...) {
     aggregate(x$preferences, x$frequencies)
