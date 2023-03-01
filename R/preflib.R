@@ -359,6 +359,9 @@ write_preflib <- function(x,
               modification_type)
     } else {
       modification_type <- NA
+      warning("Missing `modification_type`: the PrefLib format requires ",
+              "this to be specified. Using `NA`.")
+
     }
   } else {
     modification_type <- try(match.arg(modification_type,
