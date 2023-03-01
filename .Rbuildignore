@@ -1,0 +1,4 @@
+^\.github$
+^LICENSE$
+^README\.(Rmd|md|html)$
+^readme.bib$

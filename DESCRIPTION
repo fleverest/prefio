@@ -21,7 +21,8 @@ BugReports: https://github.com/fleverest/prefio/issues/
 Imports:
     dplyr,
     magrittr,
-    tidyr
+    tidyr,
+    stats
 Suggests:
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

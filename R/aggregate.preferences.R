@@ -25,8 +25,6 @@
 #' \item{frequencies}{The corresponding frequencies.}
 #' }
 #' Methods are available for [`rbind()`] and [`as.matrix()`].
-#' @seealso [preflib()] for an object that can be coerced to an
-#' `aggregated_preferences` object.
 #' @examples
 #' # create a preferences object with duplicated preferences
 #' R <- matrix(c(1, 2, 0, 0,
@@ -52,12 +50,13 @@
 #'
 #' # convert to a matrix
 #' as.matrix(A)
-#' @name aggregate
+#' @name aggregate.preferences
 NULL
 
 #' @method aggregate preferences
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
+#' @importFrom stats aggregate
 aggregate.preferences <- function(x, frequencies = NULL, ...) {
     if (getRversion() < "3.6.0") {
         r <- lapply(seq_len(nrow(x)), function(i) x[i, ])
@@ -91,12 +90,13 @@ aggregate.preferences <- function(x, frequencies = NULL, ...) {
     structure(res, class = c("aggregated_preferences", class(res)))
 }
 
+#' @method aggregate aggregated_preferences
 #' @export
 aggregate.aggregated_preferences <- function(x, ...) {
     aggregate(x$preferences, x$frequencies)
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
 as.aggregated_preferences <- function(x, ...) {
     UseMethod("as.aggregated_preferences")
@@ -114,7 +114,7 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
   return(aggregate(x, ...))
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @method [ aggregated_preferences
 #' @export
 "[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
@@ -122,7 +122,7 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
     aggregate(preferences, frequencies = x$frequencies[i])
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
 frequencies <- function(x) {
     if (is.list(x)) {
