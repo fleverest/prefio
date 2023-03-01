@@ -378,21 +378,36 @@ long_to_ranking <- function(data,
 
 # A helper to convert a matrix of rankings into ordering format.
 ranking_to_ordering <- function(ranking) {
-  max_rank <- max(na.omit(c(as.matrix(ranking))))
-  out <- as.data.frame(
-    do.call(
-      rbind,
-      apply(ranking,
-        1,
-        function(r) {
-          sapply(seq_len(max_rank),
-                 function(x) as.list(names(r)[which(r == x)]))
-        },
-        simplify = FALSE
+  max_rank <- max(c(0, na.omit(c(as.matrix(ranking)))))
+  if (getRversion() < "4.1.0") {
+    out <- as.data.frame(
+      do.call(
+        rbind,
+        lapply(seq_len(dim(ranking)[1]),
+               function(i) {
+                 r <- ranking[i, ]
+                 sapply(seq_len(max_rank),
+                        function(x) list(names(r)[which(r == x)]))
+               })
       )
     )
-  )
-  colnames(out) <- paste0("Rank", seq_len(max_rank))
+  } else {
+    out <- as.data.frame(
+      do.call(
+        rbind,
+        apply(ranking,
+              1L,
+              function(r) {
+                sapply(seq_len(max_rank),
+                       function(x) as.list(names(r)[which(r == x)]))
+              },
+              simplify = FALSE)
+      )
+    )
+  }
+  if (ncol(out) > 0) {
+    colnames(out) <- paste0("Rank", seq_len(max_rank))
+  }
   out
 }
 
@@ -492,11 +507,18 @@ Ops.preferences <- function(x1, x2) {
       i <- TRUE
     }
     # Subset and convert to dense rank again.
-    value <- do.call(rbind,
-                     apply(.subset(x, i, j, drop = FALSE),
-                           1L,
-                           dplyr::dense_rank,
-                           simplify = FALSE))
+    if (getRversion() < "4.1.0") {
+      value <- .subset(x, i, j, drop = FALSE)
+      value <- do.call(rbind,
+                       lapply(seq_len(dim(value)[1]),
+                              function(i) dplyr::dense_rank(value[i, ])))
+    } else {
+      value <- do.call(rbind,
+                       apply(.subset(x, i, j, drop = FALSE),
+                             1L,
+                             dplyr::dense_rank,
+                             simplify = FALSE))
+    }
   }
   items <- attr(x, "item_names")
 
