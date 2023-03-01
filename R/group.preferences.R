@@ -4,8 +4,8 @@
 #' group index with an object of class `preferences`. This allows the
 #' preferences to be linked to covariates with group-specific values.
 #'
-#' @param index A numeric vector of length equal to the number of preferences
-#' specifying the subject for each set.
+#' @param index A numeric vector or a factor with length equal to the number of
+#' preferences specifying the subject for each set.
 #' @param x A [`preferences`][preferences] object for `group()`; an object
 #' that can be coerced to a `grouped_preferences` object with
 #' `as.grouped_preferences()`; otherwise a `grouped_preferences` object.
@@ -67,20 +67,33 @@ group <- function(x, ...) {
 #' @method group preferences
 #' @export
 group.preferences <- function(x, index, ...) {
-  if (!(is.vector(index) && length(index) == nrow(x))) {
-    stop("index must be a vector with length equal to preferences")
+  if (!((is.vector(index) || is.factor(index))
+         && length(index) == length(x))) {
+    stop("index must be a vector or factor with length equal to preferences")
+  }
+  if (is.factor(index)) {
+    group_names <- levels(index)
+  } else {
+    group_names <- NULL
   }
   index <- as.numeric(index)
-  do.call("structure",
-          c(list(seq_len(max(index)), preferences = x, index = index),
-            list(class = "grouped_preferences")))
+  structure(seq_len(max(index)),
+            preferences = x,
+            index = index,
+            group_names = group_names,
+            class = "grouped_preferences")
 }
 
 #' @rdname group
 #' @method [ grouped_preferences
 #' @export
 "[.grouped_preferences" <- function(x, i, j, ..., drop = TRUE) {
+  group_names <- attr(x, "group_names")
   if (!missing(i)) {
+    if (is.character(i)) {
+      i <- match(i, group_names)
+    }
+    group_names <- group_names[i]
     if (missing(j)) {
       j <- TRUE
     }
@@ -111,7 +124,11 @@ group.preferences <- function(x, index, ...) {
   # now subset preferences matrix
   preferences <- attr(x, "preferences")[i, j]
   # convert preferences matrix to grouped_preferences
-  group(as.preferences(preferences), index)
+  if (!is.null(group_names)) {
+    group(as.preferences(preferences), as.factor(group_names[index]))
+  } else {
+    group(as.preferences(preferences), index)
+  }
 }
 
 
@@ -122,6 +139,9 @@ as.data.frame.grouped_preferences <-
   function(x, row.names = NULL, optional = FALSE, ...,
            nm = paste(deparse(substitute(x), width.cutoff = 20L),
                       collapse = " ")) {
+  if (is.null(row.names)) {
+    row.names <- attr(x, "group_names")
+  }
   value <- list(x)
   if (!optional) {
     names(value) <- nm
@@ -178,6 +198,10 @@ format.grouped_preferences <- function(x, max = 2L, width = 20L, ...) {
   # add ... if more than max preferences
   trunc <- tab > max & !is.na(value)
   value[trunc] <- paste0(value[trunc], ", ...")
+  group_names <- attr(x, "group_names")
+  if (!is.null(group_names)) {
+    names(value) <- group_names
+  }
   value
 }
 
