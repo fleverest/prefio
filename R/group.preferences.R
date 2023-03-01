@@ -6,19 +6,17 @@
 #'
 #' @param index A numeric vector or a factor with length equal to the number of
 #' preferences specifying the subject for each set.
-#' @param x A [`preferences`][preferences] object for `group()`; an object
-#' that can be coerced to a `grouped_preferences` object with
-#' `as.grouped_preferences()`; otherwise a `grouped_preferences` object.
+#' @param x A [`preferences`][preferences] object for `group()`; otherwise a
+#' `grouped_preferences` object.
 #' @param i Indices specifying groups to extract, may be any data type accepted
 #' by `\link{[}`.
 #' @param j Indices specifying items to extract, as for `\link{[}`.
-#' @param as.grouped_preferences If `TRUE` return a `grouped_preferences`
 #' object, otherwise return a matrix/vector.
 #' @param max The maximum number of preferences to format per subject.
 #' @param width The maximum width in number of characters to format the
 #' preferences.
 #' @param ... Additional arguments passed on to `\link{as.preferences}`
-#' by `grouped_preferences` or `as.grouped_preferences`; unused by
+#' by `grouped_preferences`; unused by
 #' `format`.
 #' @return An object of class `grouped_preferences`, which is a vector of
 #' of group IDs with the following attributes:
@@ -97,7 +95,7 @@ group.preferences <- function(x, index, ...) {
 #' @rdname group
 #' @method [ grouped_preferences
 #' @export
-"[.grouped_preferences" <- function(x, i, j, ..., drop = TRUE) {
+"[.grouped_preferences" <- function(x, i, j, ...) {
   group_names <- attr(x, "group_names")
   if (!missing(i)) {
     if (is.character(i)) {

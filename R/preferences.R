@@ -79,6 +79,8 @@
 #' occurences of each preference. If provided, the method will return a
 #' `\link{aggregated_preferences}` object with the corresponding
 #' frequencies.
+#' @param verbose If `TRUE`, diagnostic messages will be sent to stdout.
+#' @param ... Unused.
 #'
 #' @return By default, a `preferences` object, which is a data frame with
 #' list-valued columns corresponding to preferences on the items. This may
@@ -178,7 +180,7 @@ preferences <- function(data,
       frequencies <- NULL
     }
     if (missing(item_names)) {
-      item_names <- unique(data[, item])
+      item_names <- na.omit(unique(data[, item]))
     }
     ranking <- long_to_ranking(data,
                                id,
@@ -189,12 +191,16 @@ preferences <- function(data,
     prefs <- as.preferences.matrix(ranking,
                                    format = "ranking",
                                    item_names = item_names,
-                                   ..., verbose = verbose)
+                                   ...,
+                                   aggregate = FALSE,
+                                   verbose = verbose)
   } else if (format == "ordering") {
     ranking <- ordering_to_ranking(data, NULL, verbose)
     prefs <- as.preferences.matrix(ranking,
                                    format = "ranking",
-                                   ..., verbose = verbose)
+                                   ...,
+                                   aggregate = FALSE,
+                                   verbose = verbose)
   } else if (format == "ranking") {
     x <- data
     # Infer item names
@@ -207,7 +213,9 @@ preferences <- function(data,
     prefs <- as.preferences.matrix(data,
                                    format = "ranking",
                                    item_names = item_names,
-                                   ..., verbose = verbose)
+                                   ...,
+                                   aggregate = FALSE,
+                                   verbose = verbose)
   } else {
     stop("Format '", format, "' not implemented: Must be one ",
                 "of 'ordering', 'ranking' or 'long'.")
@@ -351,7 +359,7 @@ long_to_ranking <- function(data,
 
   # Process item_names
   if (is.null(item_names)) {
-    item_names <- as.character(unique(data[["item"]]))
+    item_names <- as.character(na.omit(unique(data[["item"]])))
   }
   if (is.numeric(data[["item"]])) {
     data[["item"]] <- item_names[data[["item"]]]
@@ -413,27 +421,27 @@ ranking_to_ordering <- function(ranking) {
 
 #' @method Ops preferences
 #' @export
-Ops.preferences <- function(x1, x2) {
+Ops.preferences <- function(e1, e2) {
   op <- .Generic[[1]]
   switch(op,
          `==` = {
-           minlen <- min(length(x1), length(x2))
-           maxlen <- max(length(x1), length(x2))
-           x1_names <- names(x1)
-           x2_names <- names(x2)
-           if (!identical(sort(x1_names), sort(x2_names))) {
+           minlen <- min(length(e1), length(e2))
+           maxlen <- max(length(e1), length(e2))
+           e1_names <- names(e1)
+           e2_names <- names(e2)
+           if (!identical(sort(e1_names), sort(e2_names))) {
              return(rep(FALSE, maxlen))
            }
-           x1 <- unclass(x1)
-           x2 <- unclass(x2)[, x1_names, drop = FALSE]
-           if (anyNA(x1)) {
-             x1[is.na(x1)] <- 0
+           e1 <- unclass(e1)
+           e2 <- unclass(e2)[, e1_names, drop = FALSE]
+           if (anyNA(e1)) {
+             e1[is.na(e1)] <- 0
            }
-           if (anyNA(x2)) {
-             x2[is.na(x2)] <- 0
+           if (anyNA(e2)) {
+             e2[is.na(e2)] <- 0
            }
-           cmp <- rowSums(x1[seq_len(minlen), , drop = FALSE] ==
-                          x2[seq_len(minlen), , drop = FALSE]) >= 1
+           cmp <- rowSums(e1[seq_len(minlen), , drop = FALSE] ==
+                          e2[seq_len(minlen), , drop = FALSE]) >= 1
            if (minlen < maxlen) {
              warning("Objects being compared are not the same length.")
              cmp <- c(cmp, rep(FALSE, maxlen - minlen))
@@ -441,13 +449,14 @@ Ops.preferences <- function(x1, x2) {
            return(cmp)
          },
          `!=` = {
-           return(!x1 == x2)
+           return(!e1 == e2)
          },
          stop("Undefined operation for \"preferences\"."))
 }
 
 #' @rdname preferences
 #' @method [ preferences
+#' @param x The `preferences` object to subset.
 #' @param i The index of the preference-set to access.
 #' @param j The rank index to access, or if `by.ordering = TRUE` the
 #' index or name of the item to obtain the ranking for.
@@ -593,6 +602,7 @@ as.preferences <- function(x, ...) {
 #' @export
 as.preferences.grouped_preferences <- function(x,
                                                aggregate = FALSE,
+                                               verbose = TRUE,
                                                ...) {
   prefs <- attr(x, "preferences")
   if (aggregate) {
@@ -612,7 +622,8 @@ as.preferences.default <- function(x,
                                    rank = NULL,
                                    item_names = NULL,
                                    aggregate = FALSE,
-                                   verbose = TRUE) {
+                                   verbose = TRUE,
+                                   ...) {
   format <- match.arg(format)
   # Convert orderings data frames into ranking matrices.
   if (
@@ -627,18 +638,14 @@ as.preferences.default <- function(x,
     item_names <- unique(x[, item])
   }
   x <- as.matrix(x)
-  prefs <- as.preferences.matrix(x,
-                                 format,
-                                 id,
-                                 item,
-                                 rank,
-                                 item_names,
-                                 verbose)
-  if (aggregate) {
-    aggregate(prefs)
-  } else {
-    prefs
-  }
+  as.preferences.matrix(x,
+                        format,
+                        id,
+                        item,
+                        rank,
+                        item_names,
+                        aggregate,
+                        verbose)
 }
 
 #' @rdname preferences
@@ -651,7 +658,8 @@ as.preferences.matrix <- function(x,
                                   rank = NULL,
                                   item_names = NULL,
                                   aggregate = FALSE,
-                                  verbose = TRUE) {
+                                  verbose = TRUE,
+                                  ...) {
   format <- match.arg(format)
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
@@ -683,9 +691,9 @@ as.preferences.matrix <- function(x,
 #' @rdname preferences
 #' @method as.preferences aggregated_preferences
 #' @export
-as.preferences.aggregated_preferences <- function(aggregated_preferences, ...) {
-  return(rep(aggregated_preferences$preferences,
-             aggregated_preferences$frequencies))
+as.preferences.aggregated_preferences <- function(x, ...) {
+  return(rep(x$preferences,
+             x$frequencies))
 }
 
 #' @method length preferences

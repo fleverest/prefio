@@ -25,8 +25,6 @@
 #' \item{frequencies}{The corresponding frequencies.}
 #' }
 #' Methods are available for [`rbind()`] and [`as.matrix()`].
-#' @seealso [preflib()] for an object that can be coerced to an
-#' `aggregated_preferences` object.
 #' @examples
 #' # create a preferences object with duplicated preferences
 #' R <- matrix(c(1, 2, 0, 0,
@@ -58,6 +56,7 @@ NULL
 #' @method aggregate preferences
 #' @rdname aggregate.preferences
 #' @export
+#' @importFrom stats aggregate
 aggregate.preferences <- function(x, frequencies = NULL, ...) {
     if (getRversion() < "3.6.0") {
         r <- lapply(seq_len(nrow(x)), function(i) x[i, ])

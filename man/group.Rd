@@ -11,17 +11,16 @@ group(x, ...)
 
 \method{group}{preferences}(x, index, ...)
 
-\method{[}{grouped_preferences}(x, i, j, ..., drop = TRUE)
+\method{[}{grouped_preferences}(x, i, j, ...)
 
 \method{format}{grouped_preferences}(x, max = 2L, width = 20L, ...)
 }
 \arguments{
-\item{x}{A \code{\link{preferences}} object for \code{group()}; an object
-that can be coerced to a \code{grouped_preferences} object with
-\code{as.grouped_preferences()}; otherwise a \code{grouped_preferences} object.}
+\item{x}{A \code{\link{preferences}} object for \code{group()}; otherwise a
+\code{grouped_preferences} object.}
 
 \item{...}{Additional arguments passed on to \verb{\link{as.preferences}}
-by \code{grouped_preferences} or \code{as.grouped_preferences}; unused by
+by \code{grouped_preferences}; unused by
 \code{format}.}
 
 \item{index}{A numeric vector or a factor with length equal to the number of
@@ -30,15 +29,13 @@ preferences specifying the subject for each set.}
 \item{i}{Indices specifying groups to extract, may be any data type accepted
 by \verb{\link{[}}.}
 
-\item{j}{Indices specifying items to extract, as for \verb{\link{[}}.}
+\item{j}{Indices specifying items to extract, as for \verb{\link{[}}.
+object, otherwise return a matrix/vector.}
 
 \item{max}{The maximum number of preferences to format per subject.}
 
 \item{width}{The maximum width in number of characters to format the
 preferences.}
-
-\item{as.grouped_preferences}{If \code{TRUE} return a \code{grouped_preferences}
-object, otherwise return a matrix/vector.}
 }
 \value{
 An object of class \code{grouped_preferences}, which is a vector of

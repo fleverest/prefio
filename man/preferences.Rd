@@ -28,7 +28,7 @@ preferences(
 
 as.preferences(x, ...)
 
-\method{as.preferences}{grouped_preferences}(x, aggregate = FALSE, ...)
+\method{as.preferences}{grouped_preferences}(x, aggregate = FALSE, verbose = TRUE, ...)
 
 \method{as.preferences}{default}(
   x,
@@ -38,7 +38,8 @@ as.preferences(x, ...)
   rank = NULL,
   item_names = NULL,
   aggregate = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 
 \method{as.preferences}{matrix}(
@@ -49,10 +50,11 @@ as.preferences(x, ...)
   rank = NULL,
   item_names = NULL,
   aggregate = FALSE,
-  verbose = TRUE
+  verbose = TRUE,
+  ...
 )
 
-\method{as.preferences}{aggregated_preferences}(aggregated_preferences, ...)
+\method{as.preferences}{aggregated_preferences}(x, ...)
 
 \method{format}{preferences}(x, width = 40L, ...)
 }
@@ -100,6 +102,12 @@ frequencies.}
 \item{aggregate}{If \code{TRUE}, aggregate the preferences via
 \verb{\link{aggregate.preferences}} before returning. This returns a
 \verb{\link{aggregated_preferences}} object.}
+
+\item{verbose}{If \code{TRUE}, diagnostic messages will be sent to stdout.}
+
+\item{...}{Unused.}
+
+\item{x}{The \code{preferences} object to subset.}
 
 \item{i}{The index of the preference-set to access.}
 

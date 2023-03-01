@@ -77,7 +77,3 @@ A[, 2:4]
 # convert to a matrix
 as.matrix(A)
 }
-\seealso{
-\code{\link[=preflib]{preflib()}} for an object that can be coerced to an
-\code{aggregated_preferences} object.
-}
