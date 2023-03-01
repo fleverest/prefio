@@ -4,7 +4,11 @@
 \alias{read_preflib}
 \title{Read Ordinal Preference Data From PrefLib}
 \usage{
-read_preflib(file, from_preflib = FALSE)
+read_preflib(
+  file,
+  from_preflib = FALSE,
+  preflib_url = "https://www.preflib.org/static/data"
+)
 }
 \arguments{
 \item{file}{A preferential data file, conventionally with extension \code{.soc},
@@ -13,9 +17,8 @@ read_preflib(file, from_preflib = FALSE)
 \item{from_preflib}{A logical which, when \code{TRUE} will attempt to source
 the file from PrefLib by adding the database \code{HTTP} prefix.}
 
-\item{...}{Additional arguments passed to \code{\link[=as.aggregated_preferences]{as.aggregated_preferences()}}:
-\code{frequencies}, \code{format} or \code{item_names} will be ignored as they are
-set automatically.}
+\item{preflib_url}{The URL which will be preprended to \code{file}, if
+\code{from_preflib} is \code{TRUE}.}
 }
 \value{
 An \code{\link[=aggregate.preferences]{aggregated_preferences}} object
@@ -57,17 +60,14 @@ data sets require a citation for re-use.
 
 # Can take a little while depending on speed of internet connection
 
-\dontrun{
-# url for preflib data in the "Election Data" category
-preflib <- "https://www.preflib.org/static/data/"
-
+\donttest{
 # strict complete orderings of four films on Netflix
-netflix <- read_preflib(file.path(preflib, "netflix/00004-00000101.soc"))
+netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
 head(netflix)
-attr(netflix, "item_names")
+names(netflix$preferences)
 
 # strict incomplete orderings of 6 random cities from 36 in total
-cities <- read_preflib(file.path(preflib, "cities/00034-00000001.soi"))
+cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
 }
 }
 \references{

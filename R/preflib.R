@@ -32,9 +32,8 @@
 #' `.soi`, `.toc` or `.toi` according to data type.
 #' @param from_preflib A logical which, when `TRUE` will attempt to source
 #' the file from PrefLib by adding the database `HTTP` prefix.
-#' @param ... Additional arguments passed to [as.aggregated_preferences()]:
-#' `frequencies`, `format` or `item_names` will be ignored as they are
-#' set automatically.
+#' @param preflib_url The URL which will be preprended to `file`, if
+#' `from_preflib` is `TRUE`.
 #' @note The Netflix and cities datasets used in the examples are from
 #' Caragiannis et al (2017) and Bennet and Lanning (2007) respectively. These
 #' data sets require a citation for re-use.
@@ -54,21 +53,21 @@
 #'
 #' # Can take a little while depending on speed of internet connection
 #'
-#' \dontrun{
-#' # url for preflib data in the "Election Data" category
-#' preflib <- "https://www.preflib.org/static/data/"
-#'
+#' \donttest{
 #' # strict complete orderings of four films on Netflix
-#' netflix <- read_preflib(file.path(preflib, "netflix/00004-00000101.soc"))
+#' netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
 #' head(netflix)
-#' attr(netflix, "item_names")
+#' names(netflix$preferences)
 #'
 #' # strict incomplete orderings of 6 random cities from 36 in total
-#' cities <- read_preflib(file.path(preflib, "cities/00034-00000001.soi"))
+#' cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
 #' }
 #' @importFrom utils read.csv
 #' @export
-read_preflib <- function(file, from_preflib = FALSE) {
+read_preflib <- function(file,
+                         from_preflib = FALSE,
+                         preflib_url = "https://www.preflib.org/static/data") {
+
   if (from_preflib) {
     file <- file.path(preflib_url, file)
   }
@@ -198,8 +197,6 @@ read_preflib <- function(file, from_preflib = FALSE) {
 
   return(aggregated_prefs)
 }
-
-preflib_url <- "https://www.preflib.org/static/data"
 
 #' Write Ordinal Preference Data to PrefLib Formats
 #'
