@@ -138,3 +138,23 @@ specifying the same preferences) is the following:
 ```{r}
 print(netflix$preferences[1], width = 100)
 ```
+
+
+#### Writing to Preflib formats
+
+**prefio** provides a convenient interface for writing preferential datasets to
+PrefLib formats. To aid the user, the `preferences()` function automatically
+calculates metrics of the dataset which are required for producing valid PrefLib
+files. For example, we can write our `prefs` from earlier:
+
+```{r}
+write_preflib(prefs)
+```
+
+Note that this produces four warnings. Each warning corresponds to a field which
+is required by the official PrefLib format, but may not be necessary for
+internal use-cases. If your goal is to publish some data to PrefLib, these
+warnings must be resolved.
+
+
+## References

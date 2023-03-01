@@ -156,6 +156,53 @@ print(netflix$preferences[1], width = 100)
 
     ## [1] "Beverly Hills Cop > Mean Girls > Mission: Impossible II > The Mummy Returns"
 
+#### Writing to Preflib formats
+
+**prefio** provides a convenient interface for writing preferential
+datasets to PrefLib formats. To aid the user, the `preferences()`
+function automatically calculates metrics of the dataset which are
+required for producing valid PrefLib files. For example, we can write
+our `prefs` from earlier:
+
+``` r
+write_preflib(prefs)
+```
+
+    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.
+
+    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-03-01).
+
+    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-03-01).
+
+    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using
+    ## `NA`.
+
+    ## # FILE NAME: NA
+    ## # TITLE: NA
+    ## # DESCRIPTION: 
+    ## # DATA TYPE: soc
+    ## # MODIFICATION TYPE: NA
+    ## # RELATES TO: 
+    ## # RELATED FILES: 
+    ## # PUBLICATION DATE: 2023-03-01
+    ## # MODIFICATION DATE: 2023-03-01
+    ## # NUMBER ALTERNATIVES: 3
+    ## # NUMBER VOTERS: 3
+    ## # NUMBER UNIQUE ORDERS: 3
+    ## # ALTERNATIVE NAME 1: A
+    ## # ALTERNATIVE NAME 2: B
+    ## # ALTERNATIVE NAME 3: C
+    ## 1: 1,2,3
+    ## 1: 3,2,1
+    ## 1: 2,1,3
+
+Note that this produces four warnings. Each warning corresponds to a
+field which is required by the official PrefLib format, but may not be
+necessary for internal use-cases. If your goal is to publish some data
+to PrefLib, these warnings must be resolved.
+
+## References
+
 <div id="refs" class="references csl-bib-body hanging-indent">
 
 <div id="ref-Bennett2007" class="csl-entry">
