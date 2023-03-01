@@ -11,7 +11,7 @@ rankings <- matrix(c(
 colnames(rankings) <- item_names
 
 test_that("`aggregate.preferences` is inverse to `as.preferences`", {
-  netflix <- read.preflib("../data/netflix00004-00000101.soc")
+  netflix <- read_preflib("../data/netflix00004-00000101.soc")
   expect_true(all(netflix == aggregate(as.preferences(netflix))))
 })
 

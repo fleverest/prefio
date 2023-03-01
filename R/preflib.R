@@ -59,16 +59,16 @@
 #' preflib <- "https://www.preflib.org/static/data/"
 #'
 #' # strict complete orderings of four films on Netflix
-#' netflix <- read.preflib(file.path(preflib, "netflix/00004-00000101.soc"))
+#' netflix <- read_preflib(file.path(preflib, "netflix/00004-00000101.soc"))
 #' head(netflix)
 #' attr(netflix, "item_names")
 #'
 #' # strict incomplete orderings of 6 random cities from 36 in total
-#' cities <- read.preflib(file.path(preflib, "cities/00034-00000001.soi"))
+#' cities <- read_preflib(file.path(preflib, "cities/00034-00000001.soi"))
 #' }
 #' @importFrom utils read.csv
 #' @export
-read.preflib <- function(file, from_preflib = FALSE) {
+read_preflib <- function(file, from_preflib = FALSE) {
   if (from_preflib) {
     file <- file.path(preflib_url, file)
   }
@@ -254,7 +254,7 @@ preflib_url <- "https://www.preflib.org/static/data"
 #' }
 #'
 #' In addition to these fields, some required PrefLib fields will be generated
-#' automatically depending on arguments to `write.preflib()` and the attributes
+#' automatically depending on arguments to `write_preflib()` and the attributes
 #' of the `aggregated_preferences` object being written to file:
 #' \describe{
 #' \item{FILE NAME}{The name of the output file.}
@@ -300,7 +300,7 @@ preflib_url <- "https://www.preflib.org/static/data"
 #' `attr(x, "preflib")`, and if it exists we check for `RELATED FILES`.
 #'
 #' @export
-write.preflib <- function(x,
+write_preflib <- function(x,
                           file = "",
                           title = NULL,
                           publication_date = NULL,
