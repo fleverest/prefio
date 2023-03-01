@@ -24,8 +24,8 @@ that can be coerced to a \code{grouped_preferences} object with
 by \code{grouped_preferences} or \code{as.grouped_preferences}; unused by
 \code{format}.}
 
-\item{index}{A numeric vector of length equal to the number of preferences
-specifying the subject for each set.}
+\item{index}{A numeric vector or a factor with length equal to the number of
+preferences specifying the subject for each set.}
 
 \item{i}{Indices specifying groups to extract, may be any data type accepted
 by \verb{\link{[}}.}
@@ -80,4 +80,14 @@ G[, -3]
 ## preferences from group 2, excluding item 3
 ## - note group 2 becomes the first group
 G[2, -3]
+
+# Group preferences by a factor
+G <- group(R, factor(c("G1", "G1", "G1", "G2", "G2")))
+
+G
+print(G, max = 1)
+
+## select preferences from group G1
+G["G1"]
+
 }
