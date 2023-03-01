@@ -52,11 +52,11 @@
 #'
 #' # convert to a matrix
 #' as.matrix(A)
-#' @name aggregate
+#' @name aggregate.preferences
 NULL
 
 #' @method aggregate preferences
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
 aggregate.preferences <- function(x, frequencies = NULL, ...) {
     if (getRversion() < "3.6.0") {
@@ -96,7 +96,7 @@ aggregate.aggregated_preferences <- function(x, ...) {
     aggregate(x$preferences, x$frequencies)
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
 as.aggregated_preferences <- function(x, ...) {
     UseMethod("as.aggregated_preferences")
@@ -114,7 +114,7 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
   return(aggregate(x, ...))
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @method [ aggregated_preferences
 #' @export
 "[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
@@ -122,7 +122,7 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
     aggregate(preferences, frequencies = x$frequencies[i])
 }
 
-#' @rdname aggregate
+#' @rdname aggregate.preferences
 #' @export
 frequencies <- function(x) {
     if (is.list(x)) {
