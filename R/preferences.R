@@ -587,7 +587,23 @@ as.preferences <- function(x, ...) {
   UseMethod("as.preferences")
 }
 
+
 #' @rdname preferences
+#' @method as.preferences grouped_preferences
+#' @export
+as.preferences.grouped_preferences <- function(x,
+                                               aggregate = FALSE,
+                                               ...) {
+  prefs <- attr(x, "preferences")
+  if (aggregate) {
+    aggregate(prefs)
+  } else {
+    prefs
+  }
+}
+
+#' @rdname preferences
+#' @method as.preferences default
 #' @export
 as.preferences.default <- function(x,
                                    format = c("ranking", "long", "ordering"),
@@ -595,6 +611,7 @@ as.preferences.default <- function(x,
                                    item = NULL,
                                    rank = NULL,
                                    item_names = NULL,
+                                   aggregate = FALSE,
                                    verbose = TRUE) {
   format <- match.arg(format)
   # Convert orderings data frames into ranking matrices.
@@ -610,16 +627,22 @@ as.preferences.default <- function(x,
     item_names <- unique(x[, item])
   }
   x <- as.matrix(x)
-  as.preferences.matrix(x,
-                        format,
-                        id,
-                        item,
-                        rank,
-                        item_names,
-                        verbose)
+  prefs <- as.preferences.matrix(x,
+                                 format,
+                                 id,
+                                 item,
+                                 rank,
+                                 item_names,
+                                 verbose)
+  if (aggregate) {
+    aggregate(prefs)
+  } else {
+    prefs
+  }
 }
 
 #' @rdname preferences
+#' @method as.preferences matrix
 #' @export
 as.preferences.matrix <- function(x,
                                   format = c("ranking", "long"),
@@ -627,6 +650,7 @@ as.preferences.matrix <- function(x,
                                   item = NULL,
                                   rank = NULL,
                                   item_names = NULL,
+                                  aggregate = FALSE,
                                   verbose = TRUE) {
   format <- match.arg(format)
   # First we reformat the data into a matrix of rankings.
@@ -649,10 +673,15 @@ as.preferences.matrix <- function(x,
   class(prefs) <- c("preferences", class(prefs))
   attr(prefs, "item_names") <- item_names
   attr(prefs, "preftype") <- preftype(prefs)
-  return(prefs)
+  if (aggregate) {
+    aggregate(prefs)
+  } else {
+    prefs
+  }
 }
 
 #' @rdname preferences
+#' @method as.preferences aggregated_preferences
 #' @export
 as.preferences.aggregated_preferences <- function(aggregated_preferences, ...) {
   return(rep(aggregated_preferences$preferences,

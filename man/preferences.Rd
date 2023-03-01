@@ -4,6 +4,7 @@
 \alias{preferences}
 \alias{[.preferences}
 \alias{as.preferences}
+\alias{as.preferences.grouped_preferences}
 \alias{as.preferences.default}
 \alias{as.preferences.matrix}
 \alias{as.preferences.aggregated_preferences}
@@ -27,6 +28,8 @@ preferences(
 
 as.preferences(x, ...)
 
+\method{as.preferences}{grouped_preferences}(x, aggregate = FALSE, ...)
+
 \method{as.preferences}{default}(
   x,
   format = c("ranking", "long", "ordering"),
@@ -34,6 +37,7 @@ as.preferences(x, ...)
   item = NULL,
   rank = NULL,
   item_names = NULL,
+  aggregate = FALSE,
   verbose = TRUE
 )
 
@@ -44,6 +48,7 @@ as.preferences(x, ...)
   item = NULL,
   rank = NULL,
   item_names = NULL,
+  aggregate = FALSE,
   verbose = TRUE
 )
 
