@@ -53,6 +53,16 @@
 #' ## preferences from group 2, excluding item 3
 #' ## - note group 2 becomes the first group
 #' G[2, -3]
+#'
+#' # Group preferences by a factor
+#' G <- group(R, factor(c("G1", "G1", "G1", "G2", "G2")))
+#'
+#' G
+#' print(G, max = 1)
+#'
+#' ## select preferences from group G1
+#' G["G1"]
+#'
 #' @name group
 #' @export
 NULL
