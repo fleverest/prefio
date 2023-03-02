@@ -4,6 +4,8 @@ on:
     workflows: [Lint-Style-Document]
     types:
       - completed
+  push:
+    branches: [main]
 
 name: test-coverage
 
