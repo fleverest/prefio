@@ -3,7 +3,6 @@
 on:
   workflow_run:
     workflows: [Lint-Style-Document]
-    branches: ["!gh-pages"]
     types: [completed]
 
 name: R-CMD-check
