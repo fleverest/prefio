@@ -3,7 +3,8 @@
 on:
   workflow_run:
     workflows: [Lint-Style-Document]
-    types: [completed]
+    types:
+      - completed
 
 name: R-CMD-check
 
