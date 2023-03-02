@@ -33,9 +33,11 @@ If \code{weights} is specified, the values in the adjacency matrix are the
 weighted counts.
 }
 \examples{
-X <- matrix(c(2, 1, 2, 1, 2,
-              3, 2, 0, 0, 1,
-              1, 0, 2, 2, 3), nrow = 3, byrow = TRUE)
+X <- matrix(c(
+  2, 1, 2, 1, 2,
+  3, 2, 0, 0, 1,
+  1, 0, 2, 2, 3
+), nrow = 3, byrow = TRUE)
 X <- as.preferences(X)
 adjacency(X)
 

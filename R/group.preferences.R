@@ -25,11 +25,13 @@
 #' @examples
 #'
 #' # ungrouped preferences (5 preference sets, 4 items)
-#' R <- as.preferences(matrix(c(1, 2, 0, 0,
-#'                              0, 2, 1, 0,
-#'                              0, 0, 1, 2,
-#'                              2, 1, 0, 0,
-#'                              0, 1, 2, 3), ncol = 4, byrow = TRUE))
+#' R <- as.preferences(matrix(c(
+#'   1, 2, 0, 0,
+#'   0, 2, 1, 0,
+#'   0, 0, 1, 2,
+#'   2, 1, 0, 0,
+#'   0, 1, 2, 3
+#' ), ncol = 4, byrow = TRUE))
 #' length(R)
 #' R
 #'
@@ -43,7 +45,7 @@
 #' print(G, max = 1)
 #'
 #' ## select preferences from group 1
-#' G[1,]
+#' G[1, ]
 #'
 #' ## exclude item 3 from preferences
 #' G[, -3]
@@ -75,8 +77,8 @@ group <- function(x, ...) {
 #' @method group preferences
 #' @export
 group.preferences <- function(x, index, ...) {
-  if (!((is.vector(index) || is.factor(index))
-         && length(index) == length(x))) {
+  if (!((is.vector(index) || is.factor(index)) &&
+    length(index) == length(x))) {
     stop("index must be a vector or factor with length equal to preferences")
   }
   if (is.factor(index)) {
@@ -86,10 +88,11 @@ group.preferences <- function(x, index, ...) {
   }
   index <- as.numeric(index)
   structure(seq_len(max(index)),
-            preferences = x,
-            index = index,
-            group_names = group_names,
-            class = "grouped_preferences")
+    preferences = x,
+    index = index,
+    group_names = group_names,
+    class = "grouped_preferences"
+  )
 }
 
 #' @rdname group
@@ -107,10 +110,10 @@ group.preferences <- function(x, index, ...) {
     }
     # always a vector if picking out elements of preferences matrix
     if (is.matrix(i)) {
-        r <- split(seq_along(attr(x, "index")), attr(x, "index"))
-        i1 <- unlist(r[i[, 1L]])
-        i2 <- rep(i[, 2L], lengths(r))
-        return(.subset(attr(x, "preferences"), cbind(i1, i2)))
+      r <- split(seq_along(attr(x, "index")), attr(x, "index"))
+      i1 <- unlist(r[i[, 1L]])
+      i2 <- rep(i[, 2L], lengths(r))
+      return(.subset(attr(x, "preferences"), cbind(i1, i2)))
     }
     # convert index of groups to index of preferences
     g <- .subset(x, i)
@@ -143,39 +146,45 @@ group.preferences <- function(x, index, ...) {
 
 #' @method as.data.frame grouped_preferences
 #' @export
+# nolint start
 as.data.frame.grouped_preferences <-
   function(x, row.names = NULL, optional = FALSE, ...,
            nm = paste(deparse(substitute(x), width.cutoff = 20L),
-                      collapse = " ")) {
-  if (is.null(row.names)) {
-    row.names <- attr(x, "group_names")
-  }
-  value <- list(x)
-  if (!optional) {
-    names(value) <- nm
-  }
-  if (is.null(row.names) && !is.null(rownames(x))) {
-    row.names <- rownames(x)
-  }
-  if (is.null(row.names)) {
-    row.names <- .set_row_names(length(x))
-  } else {
-    if (is.object(row.names) || !is.integer(row.names)) {
-      row.names <- as.character(row.names)
+             collapse = " "
+           )) {
+    if (is.null(row.names)) {
+      row.names <- attr(x, "group_names")
     }
-    if (anyNA(row.names)) {
-      stop("row names contain missing values")
+    value <- list(x)
+    if (!optional) {
+      names(value) <- nm
     }
-    if (anyDuplicated(row.names)) {
-      stop(paste("duplicate row.names: ",
-                 paste(unique(row.names[duplicated(row.names)]),
-                       collapse = ", ")))
+    if (is.null(row.names) && !is.null(rownames(x))) {
+      row.names <- rownames(x)
     }
+    if (is.null(row.names)) {
+      row.names <- .set_row_names(length(x))
+    } else {
+      if (is.object(row.names) || !is.integer(row.names)) {
+        row.names <- as.character(row.names)
+      }
+      if (anyNA(row.names)) {
+        stop("row names contain missing values")
+      }
+      if (anyDuplicated(row.names)) {
+        stop(paste(
+          "duplicate row.names: ",
+          paste(unique(row.names[duplicated(row.names)]),
+            collapse = ", "
+          )
+        ))
+      }
+    }
+    attr(value, "row.names") <- row.names
+    class(value) <- "data.frame"
+    value
   }
-  attr(value, "row.names") <- row.names
-  class(value) <- "data.frame"
-  value
-}
+# nolint end
 
 #' @method print grouped_preferences
 #' @export
@@ -195,14 +204,18 @@ format.grouped_preferences <- function(x, max = 2L, width = 20L, ...) {
   } else {
     j <- NULL
   }
-  R <- attr(x, "preferences")[rep <= max, j]
-  char <- format.preferences(R, width = width)
-  value <- vapply(split(char, attr(x, "index")[rep <= max]),
-                  function(x) {
-                    if (all(is.na(x))) return(NA_character_)
-                    paste(x, collapse = ", ")
-                  },
-                  "a")
+  r <- attr(x, "preferences")[rep <= max, j]
+  char <- format.preferences(r, width = width)
+  value <- vapply(
+    split(char, attr(x, "index")[rep <= max]),
+    function(x) {
+      if (all(is.na(x))) {
+        return(NA_character_)
+      }
+      paste(x, collapse = ", ")
+    },
+    "a"
+  )
   # add ... if more than max preferences
   trunc <- tab > max & !is.na(value)
   value[trunc] <- paste0(value[trunc], ", ...")
@@ -231,17 +244,18 @@ na.omit.grouped_preferences <- function(object, ...) {
   names(omit) <- nm[omit]
   attr(omit, "class") <- "omit"
   structure(unique(index),
-            preferences = attr(object, "preferences")[-omit, , drop = FALSE],
-            index = index,
-            na.action = omit,
-            class = "grouped_preferences")
+    preferences = attr(object, "preferences")[-omit, , drop = FALSE],
+    index = index,
+    na.action = omit,
+    class = "grouped_preferences"
+  )
 }
 
 #' @method na.exclude grouped_preferences
 #' @importFrom stats na.exclude
 na.exclude.grouped_preferences <- function(object, ...) {
-  out  <- na.omit(object)
-  class(attr(out, "na.action")) <- "na.exclude"
+  out <- na.omit(object)
+  class(attr(out, "na.action")) <- "na.exclude" # nolint: object_name_linter
   out
 }
 

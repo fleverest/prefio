@@ -27,12 +27,14 @@
 #' Methods are available for [`rbind()`] and [`as.matrix()`].
 #' @examples
 #' # create a preferences object with duplicated preferences
-#' R <- matrix(c(1, 2, 0, 0,
-#'               0, 1, 2, 3,
-#'               2, 1, 1, 0,
-#'               1, 2, 0, 0,
-#'               2, 1, 1, 0,
-#'               1, 0, 3, 2), nrow = 6, byrow = TRUE)
+#' R <- matrix(c(
+#'   1, 2, 0, 0,
+#'   0, 1, 2, 3,
+#'   2, 1, 1, 0,
+#'   1, 2, 0, 0,
+#'   2, 1, 1, 0,
+#'   1, 0, 3, 2
+#' ), nrow = 6, byrow = TRUE)
 #' colnames(R) <- c("apple", "banana", "orange", "pear")
 #' R <- as.preferences(R)
 #'
@@ -58,48 +60,52 @@ NULL
 #' @export
 #' @importFrom stats aggregate
 aggregate.preferences <- function(x, frequencies = NULL, ...) {
-    if (getRversion() < "3.6.0") {
-        r <- lapply(seq_len(nrow(x)), function(i) x[i, ])
+  if (getRversion() < "3.6.0") {
+    r <- lapply(seq_len(nrow(x)), function(i) x[i, ])
+  } else {
+    r <- asplit(unclass(x), 1L)
+  }
+  dup <- duplicated(r)
+  if (any(dup)) {
+    r_new <- r[!dup]
+    r_id <- match(r, r_new)
+    if (!is.null(frequencies)) {
+      frequencies <- as.vector(rowsum(frequencies, r_id))
     } else {
-      r <- asplit(unclass(x), 1L)
+      frequencies <- tabulate(r_id)
     }
-    dup <- duplicated(r)
-    if (any(dup)) {
-        r_new <- r[!dup]
-        r_id <- match(r, r_new)
-        if (!is.null(frequencies)) {
-            frequencies <- as.vector(rowsum(frequencies, r_id))
-        } else {
-          frequencies <- tabulate(r_id)
-        }
-        x <- do.call("rbind", r_new)
-        rownames(x) <- NULL
-        res <- data.frame(preferences = as.preferences(x, format = "ranking"),
-                          frequencies = frequencies)
-        colnames(res) <- c("preferences", "frequencies")
-    } else {
-        if (is.null(frequencies)) frequencies <- rep.int(1, length(r))
-        res <- data.frame(preferences = x,
-                          frequencies = frequencies)
-        colnames(res) <- c("preferences", "frequencies")
-    }
-    # Sort by number of preferences
-    res <- res[order(res$frequencies, decreasing = TRUE), ]
-    # Remove row names
-    row.names(res) <- NULL
-    structure(res, class = c("aggregated_preferences", class(res)))
+    x <- do.call("rbind", r_new)
+    rownames(x) <- NULL
+    res <- data.frame(
+      preferences = as.preferences(x, format = "ranking"),
+      frequencies = frequencies
+    )
+    colnames(res) <- c("preferences", "frequencies")
+  } else {
+    if (is.null(frequencies)) frequencies <- rep.int(1, length(r))
+    res <- data.frame(
+      preferences = x,
+      frequencies = frequencies
+    )
+    colnames(res) <- c("preferences", "frequencies")
+  }
+  # Sort by number of preferences
+  res <- res[order(res$frequencies, decreasing = TRUE), ]
+  # Remove row names
+  row.names(res) <- NULL
+  structure(res, class = c("aggregated_preferences", class(res)))
 }
 
 #' @method aggregate aggregated_preferences
 #' @export
 aggregate.aggregated_preferences <- function(x, ...) {
-    aggregate(x$preferences, x$frequencies)
+  aggregate(x$preferences, x$frequencies)
 }
 
 #' @rdname aggregate.preferences
 #' @export
-as.aggregated_preferences <- function(x, ...) {
-    UseMethod("as.aggregated_preferences")
+as.aggregated_preferences <- function(x, ...) { # nolint: object_name_linter
+  UseMethod("as.aggregated_preferences")
 }
 
 #' @method as.aggregated_preferences preferences
@@ -118,32 +124,34 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
 #' @method [ aggregated_preferences
 #' @export
 "[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
-    preferences <-  x$preferences[i, j, ..., drop = drop]
-    aggregate(preferences, frequencies = x$frequencies[i])
+  preferences <- x$preferences[i, j, ..., drop = drop]
+  aggregate(preferences, frequencies = x$frequencies[i])
 }
 
 #' @rdname aggregate.preferences
 #' @export
 frequencies <- function(x) {
-    if (is.list(x)) {
-      x[["frequencies"]]
-    } else {
-      NULL
-    }
+  if (is.list(x)) {
+    x[["frequencies"]]
+  } else {
+    NULL
+  }
 }
 
 #' @method as.matrix aggregated_preferences
 #' @export
 as.matrix.aggregated_preferences <- function(x, ...) {
-    res <- cbind(x$preferences, frequencies = x$frequencies)
-    rownames(res) <- NULL
-    res
+  res <- cbind(x$preferences, frequencies = x$frequencies)
+  rownames(res) <- NULL
+  res
 }
 
 #' @method rbind aggregated_preferences
 #' @export
 rbind.aggregated_preferences <- function(...) {
-    x <- list(...)
-    aggregate(do.call("rbind", lapply(x, `[[`, "preferences")),
-              unlist(lapply(x, `[[`, "frequencies")))
+  x <- list(...)
+  aggregate(
+    do.call("rbind", lapply(x, `[[`, "preferences")),
+    unlist(lapply(x, `[[`, "frequencies"))
+  )
 }

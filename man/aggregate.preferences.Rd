@@ -53,12 +53,14 @@ accessed via the function \code{frequencies()}.
 }
 \examples{
 # create a preferences object with duplicated preferences
-R <- matrix(c(1, 2, 0, 0,
-              0, 1, 2, 3,
-              2, 1, 1, 0,
-              1, 2, 0, 0,
-              2, 1, 1, 0,
-              1, 0, 3, 2), nrow = 6, byrow = TRUE)
+R <- matrix(c(
+  1, 2, 0, 0,
+  0, 1, 2, 3,
+  2, 1, 1, 0,
+  1, 2, 0, 0,
+  2, 1, 1, 0,
+  1, 0, 3, 2
+), nrow = 6, byrow = TRUE)
 colnames(R) <- c("apple", "banana", "orange", "pear")
 R <- as.preferences(R)
 

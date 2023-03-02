@@ -51,11 +51,13 @@ preferences to be linked to covariates with group-specific values.
 \examples{
 
 # ungrouped preferences (5 preference sets, 4 items)
-R <- as.preferences(matrix(c(1, 2, 0, 0,
-                             0, 2, 1, 0,
-                             0, 0, 1, 2,
-                             2, 1, 0, 0,
-                             0, 1, 2, 3), ncol = 4, byrow = TRUE))
+R <- as.preferences(matrix(c(
+  1, 2, 0, 0,
+  0, 2, 1, 0,
+  0, 0, 1, 2,
+  2, 1, 0, 0,
+  0, 1, 2, 3
+), ncol = 4, byrow = TRUE))
 length(R)
 R
 
@@ -69,7 +71,7 @@ G
 print(G, max = 1)
 
 ## select preferences from group 1
-G[1,]
+G[1, ]
 
 ## exclude item 3 from preferences
 G[, -3]

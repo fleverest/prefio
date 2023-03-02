@@ -31,20 +31,22 @@ Convert a set of preferences to a list of choices, alternatives, and
 preferences.
 }
 \examples{
-R <- matrix(c(1, 2, 0, 0,
-              4, 1, 2, 3,
-              2, 1, 1, 1,
-              1, 2, 3, 0,
-              2, 1, 1, 0,
-              1, 0, 3, 2), nrow = 6, byrow = TRUE)
+R <- matrix(c(
+  1, 2, 0, 0,
+  4, 1, 2, 3,
+  2, 1, 1, 1,
+  1, 2, 3, 0,
+  2, 1, 1, 0,
+  1, 0, 3, 2
+), nrow = 6, byrow = TRUE)
 colnames(R) <- c("apple", "banana", "orange", "pear")
 
 actual_choices <- choices(R, names = TRUE)
-actual_choices[1:6,]
+actual_choices[1:6, ]
 
 coded_choices <- choices(R, names = FALSE)
-coded_choices[1:2,]
-as.data.frame(coded_choices)[1:2,]
+coded_choices[1:2, ]
+as.data.frame(coded_choices)[1:2, ]
 attr(coded_choices, "objects")
 
 }

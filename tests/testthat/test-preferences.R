@@ -1,9 +1,10 @@
 item_names <- c("A", "B", "C")
 
-rankings <- matrix(c(
-  1, 2, 3,
-  3, 2, 1,
-  2, 1, 3
+rankings <- matrix(
+  c(
+    1, 2, 3,
+    3, 2, 1,
+    2, 1, 3
   ),
   nrow = 3,
   byrow = TRUE
@@ -26,41 +27,50 @@ ord <- as.data.frame(
 
 test_that("`preferences` can be constructed from all formats and are equal", {
   p_rank <- preferences(rankings,
-                        format = "ranking",
-                        item_names = item_names)
+    format = "ranking",
+    item_names = item_names
+  )
   p_long <- preferences(long,
-                        format = "long",
-                        id = "id",
-                        item = "item",
-                        rank = "rank")
+    format = "long",
+    id = "id",
+    item = "item",
+    rank = "rank"
+  )
   p_ord <- preferences(ord,
-                       format = "ordering")
+    format = "ordering"
+  )
   expect_true(all(p_rank == p_long))
   expect_true(all(p_rank == p_ord))
 })
 
 test_that("`as.preferences` is equivalent to `preferences`", {
   prefs1 <- as.preferences(ord,
-                           format = "ordering") # Without item_names
+    format = "ordering"
+  ) # Without item_names
   prefs2 <- preferences(ord,
-                        format = "ordering",
-                        item_names = item_names)
+    format = "ordering",
+    item_names = item_names
+  )
   prefs3 <- as.preferences(long,
-                           format = "long",
-                           id = "id",
-                           rank = "rank",
-                           item = "item") # Without item_names
+    format = "long",
+    id = "id",
+    rank = "rank",
+    item = "item"
+  ) # Without item_names
   prefs4 <- preferences(long,
-                        format = "long",
-                        id = "id",
-                        rank = "rank",
-                        item = "item",
-                        item_names = item_names)
+    format = "long",
+    id = "id",
+    rank = "rank",
+    item = "item",
+    item_names = item_names
+  )
   prefs5 <- as.preferences(rankings,
-                           format = "ranking") # Without item_names
+    format = "ranking"
+  ) # Without item_names
   prefs6 <- preferences(rankings,
-                        format = "ranking",
-                        item_names = item_names)
+    format = "ranking",
+    item_names = item_names
+  )
   expect_true(all(prefs1 == prefs2))
   expect_true(all(prefs1 == prefs3))
   expect_true(all(prefs1 == prefs4))
@@ -105,7 +115,8 @@ test_that("`[.preferences` produces valid preferences when subsetting", {
   expect_true(all(prefs[] == prefs))
   expect_true(all(prefs[1:3] == prefs))
   expect_true(all(as.preferences(prefs[1:3, by.ordering = TRUE],
-                                 format = "ordering") == prefs))
+    format = "ordering"
+  ) == prefs))
   expect_true(all(prefs[, 1] == prefs[, "A"]))
 })
 
@@ -135,33 +146,49 @@ test_that("`print.preference` formats correctly", {
 
 test_that("Some valid examples of `preferences` are not `na`", {
   expect_true(
-   !any(is.na(read_preflib("../data/aspen00016-00000001.toc")$preferences)) &&
-   !any(is.na(read_preflib("../data/glasgow00008-00000003.soi")$preferences)) &&
-   !any(is.na(read_preflib("../data/netflix00004-00000101.soc")$preferences)) &&
-   !any(is.na(read_preflib("../data/berkley00017-00000001.toi")$preferences))
+    !any(is.na(
+      read_preflib("../data/aspen00016-00000001.toc")$preferences
+    )) &&
+      !any(is.na(
+        read_preflib("../data/glasgow00008-00000003.soi")$preferences
+      )) &&
+      !any(is.na(
+        read_preflib("../data/netflix00004-00000101.soc")$preferences
+      )) &&
+      !any(is.na(
+        read_preflib("../data/berkley00017-00000001.toi")$preferences
+      ))
   )
 })
 
-toc <- preferences(matrix(c(1, 2, NA, NA),
-                          nrow = 1,
-                          dimnames = list(NULL, LETTERS[1:4])),
-                   format = "ranking")
+toc <- preferences(
+  matrix(c(1, 2, NA, NA),
+    nrow = 1,
+    dimnames = list(NULL, LETTERS[1:4])
+  ),
+  format = "ranking"
+)
 test_that("Incomplete preferences equal themselves despite containing NAs", {
   expect_true(toc == toc)
 })
 
 test_that("Loading preferences from long format doesn't permute item names", {
-  longdf <- data.frame(id = c(rep(1:4, each = 4)),
-                       item = c("B", "A", "C", "D",
-                                "C", "B", "A", "D",
-                                "A", "B", "C", "D",
-                                "D", "B", "C", "A"),
-                       rank = rep(1:4, 4))
+  longdf <- data.frame(
+    id = c(rep(1:4, each = 4)),
+    item = c(
+      "B", "A", "C", "D",
+      "C", "B", "A", "D",
+      "A", "B", "C", "D",
+      "D", "B", "C", "A"
+    ),
+    rank = rep(1:4, 4)
+  )
   prefs <- preferences(longdf,
-                       format = "long",
-                       id = "id",
-                       item = "item",
-                       rank = "rank")
+    format = "long",
+    id = "id",
+    item = "item",
+    rank = "rank"
+  )
   expect_true(all(prefs[1, by.ordering = TRUE] == c("B", "A", "C", "D")))
   expect_true(all(prefs[2, by.ordering = TRUE] == c("C", "B", "A", "D")))
   expect_true(all(prefs[3, by.ordering = TRUE] == c("A", "B", "C", "D")))

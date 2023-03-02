@@ -21,9 +21,11 @@
 #' items.
 #'
 #' @examples
-#' X <- matrix(c(2, 1, 2, 1, 2,
-#'               3, 2, 0, 0, 1,
-#'               1, 0, 2, 2, 3), nrow = 3, byrow = TRUE)
+#' X <- matrix(c(
+#'   2, 1, 2, 1, 2,
+#'   3, 2, 0, 0, 1,
+#'   1, 0, 2, 2, 3
+#' ), nrow = 3, byrow = TRUE)
 #' X <- as.preferences(X)
 #' adjacency(X)
 #'
@@ -31,27 +33,27 @@
 #'
 #' @export
 adjacency <- function(object, weights = NULL, ...) {
-    if (!inherits(object, "preferences")) {
-      object <- as.preferences(object)
+  if (!inherits(object, "preferences")) {
+    object <- as.preferences(object)
+  }
+  n <- ncol(object)
+  if (is.null(weights)) {
+    weights <- rep.int(1L, nrow(object))
+  } else {
+    stopifnot(length(weights) == nrow(object))
+  }
+  nset <- apply(object, 1L, function(x) max(na.omit(x)))
+  m <- max(nset)
+  nm <- colnames(object)
+  x <- matrix(0.0, nrow = n, ncol = n, dimnames = list(nm, nm))
+  for (i in seq_len(m)) {
+    r <- which(nset >= (i + 1L))
+    for (j in r) {
+      # > gives rest; == i + 1 gives next best
+      one <- which(unclass(object[j, ]) == i)
+      two <- which(unclass(object[j, ]) > i)
+      x[one, two] <- x[one, two] + weights[j]
     }
-    N <- ncol(object)
-    if (is.null(weights)) {
-        weights <- rep.int(1L, nrow(object))
-    } else {
-      stopifnot(length(weights) == nrow(object))
-    }
-    nset <- apply(object, 1L, function(x) max(na.omit(x)))
-    m <- max(nset)
-    nm <- colnames(object)
-    X <- matrix(0.0, nrow = N, ncol = N, dimnames = list(nm, nm))
-    for (i in seq_len(m)){
-        r <- which(nset >= (i + 1L))
-        for (j in r) {
-            # > gives rest; == i + 1 gives next best
-            one <- which(unclass(object[j, ]) == i)
-            two <- which(unclass(object[j, ]) > i)
-            X[one, two] <- X[one, two] + weights[j]
-        }
-    }
-    structure(X, class = c("adjacency", "matrix"))
+  }
+  structure(x, class = c("adjacency", "matrix"))
 }
