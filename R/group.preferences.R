@@ -174,9 +174,7 @@ as.data.frame.grouped_preferences <-
       if (anyDuplicated(row.names)) {
         stop(paste(
           "duplicate row.names: ",
-          paste(unique(row.names[duplicated(row.names)]),
-            collapse = ", "
-          )
+          toString(unique(row.names[duplicated(row.names)]))
         ))
       }
     }
@@ -199,7 +197,7 @@ format.grouped_preferences <- function(x, max = 2L, width = 20L, ...) {
   tab <- tabulate(attr(x, "index"))
   rep <- numeric(length(attr(x, "index")))
   rep[order(attr(x, "index"))] <- sequence(tab)
-  if (ncol(attr(x, "preferences")) > 0) {
+  if (ncol(attr(x, "preferences")) > 0L) {
     j <- TRUE
   } else {
     j <- NULL
@@ -212,7 +210,7 @@ format.grouped_preferences <- function(x, max = 2L, width = 20L, ...) {
       if (all(is.na(x))) {
         return(NA_character_)
       }
-      paste(x, collapse = ", ")
+      toString(x)
     },
     "a"
   )
@@ -262,7 +260,7 @@ na.exclude.grouped_preferences <- function(object, ...) {
 #' @method is.na grouped_preferences
 #' @export
 is.na.grouped_preferences <- function(x) {
-  out <- tapply(attr(x, "preferences"), attr(x, "index"), sum) == 0
+  out <- tapply(attr(x, "preferences"), attr(x, "index"), sum) == 0L
   names(out) <- names(x)
   out
 }
