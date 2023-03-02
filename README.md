@@ -5,7 +5,7 @@
 
 [![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
-coverage](https://codecov.io/gh/./branch/main/graph/badge.svg)](https://app.codecov.io/gh/.?branch=main)
+coverage](https://codecov.io/gh/fleverest/prefio/branch/main/graph/badge.svg)](https://app.codecov.io/gh/fleverest/prefio?branch=main)
 <!-- badges: end -->
 
 ## Overview
@@ -26,7 +26,8 @@ datasets.
 
 <!--
 The package may be installed from CRAN via
-&#10;
+
+
 ```r
 install.packages("prefio")
 ```
@@ -216,9 +217,9 @@ to PrefLib, these warnings must be resolved.
 
 <div id="ref-Bennett2007" class="csl-entry">
 
-Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In
-*<span class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*,
-3–6. ACM.
+Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *<span
+class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*, 3–6.
+ACM.
 
 </div>
 
