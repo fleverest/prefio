@@ -1,0 +1,66 @@
+on:
+  pull_request:
+    branches: [main]
+
+name: Lint-Style-Document
+
+jobs:
+  Lint-Style-Document:
+    name: Lint-Style-Document
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: r-lib/actions/pr-fetch@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: r-lib/actions/setup-pandoc@v2
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: |
+            any::roxygen2
+            any::styler
+            any::lintr
+            any::devtools
+
+      - name: Lint
+        run: lintr::lint_package()
+        shell: Rscript {0}
+
+      - name: Style
+        run: styler::style_pkg()
+        shell: Rscript {0}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Styled R code with `styler`"
+          commit_user_name: "$GITHUB_ACTOR"
+          commit_user_email: "$GITHUB_ACTOR@users.noreply.github.com"
+          file_pattern: '*.R'
+
+      - name: Document
+        run: roxygen2::roxygenise()
+        shell: Rscript {0}
+
+      - name: Build README
+        run: devtools::build_readme()
+        shell: Rscript {0}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Generated roxygen documentation and built README"
+          commit_user_name: "$GITHUB_ACTOR"
+          commit_user_email: "$GITHUB_ACTOR@users.noreply.github.com"
+          file_pattern: 'man/* NAMESPACE README*'
+
+      - uses: r-lib/actions/pr-push@v2
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
