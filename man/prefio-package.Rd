@@ -12,6 +12,7 @@ Convenient structures for creating, sourcing, reading, writing and manipulating 
 Useful links:
 \itemize{
   \item \url{https://github.com/fleverest/prefio/}
+  \item \url{https://fleverest.github.io/prefio/}
   \item Report bugs at \url{https://github.com/fleverest/prefio/issues/}
 }
 
