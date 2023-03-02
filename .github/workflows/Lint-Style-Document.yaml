@@ -40,12 +40,12 @@ jobs:
         run: styler::style_pkg()
         shell: Rscript {0}
 
-      - name: commit
-        run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add \*.R
-          git commit -m 'Lint and Style'
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Styled R code with `styler`"
+          commit_user_name: "$GITHUB_ACTOR"
+          commit_user_email: "$GITHUB_ACTOR@users.noreply.github.com"
+          file_pattern: '*.R'
 
       - name: Document
         run: roxygen2::roxygenise()
@@ -55,12 +55,12 @@ jobs:
         run: devtools::build_readme()
         shell: Rscript {0}
 
-      - name: Commit documentation
-        run: |
-          git config --local user.name "$GITHUB_ACTOR"
-          git config --local user.email "$GITHUB_ACTOR@users.noreply.github.com"
-          git add man/\* NAMESPACE
-          git commit -m 'Document roxygen and build README'
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: "Generated roxygen documentation and built README"
+          commit_user_name: "$GITHUB_ACTOR"
+          commit_user_email: "$GITHUB_ACTOR@users.noreply.github.com"
+          file_pattern: 'man/* NAMESPACE README*'
 
       - uses: r-lib/actions/pr-push@v2
         with:
