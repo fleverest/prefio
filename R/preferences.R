@@ -185,9 +185,15 @@ preferences <- function(data,
       "of 'ordering', 'ranking' or 'long'."
     )
   } else if (fmt == "long") {
+    if (missing(id) || missing(item) || missing(rank)) {
+      stop(
+        "When creating \"preferences\" from long-format data, ",
+        "`id`, `item` and `rank` must all specify columns in the data."
+      )
+    }
     if (!missing(frequencies)) {
       warning(
-        "When creating \"preferences\" from long-format data,",
+        "When creating \"preferences\" from long-format data, ",
         "`frequencies` parameter is ignored."
       )
       frequencies <- NULL
@@ -224,7 +230,7 @@ preferences <- function(data,
     if (!is.null(colnames(x)) && missing(item_names)) {
       item_names <- colnames(x)
     } else if (is.null(colnames(x)) && missing(item_names)) {
-      message(
+      warning(
         "Item names could not be inferred from ",
         "ranked data. Defaulting to the integers 1-", dim(x)[2L]
       )
@@ -345,10 +351,10 @@ validate_long <- function(data,
     item_names <- unique(data[, "item"])
   }
   if (is.character(data[, "item"])) {
-    if (is.null(setdiff(
+    if (length(setdiff(
       unique(data[, "item"]),
       item_names
-    ))) {
+    )) > 0L) {
       stop("Found `item` not in `item_names`.")
     }
   } else if (is.numeric(data[, "item"])) {
