@@ -19,6 +19,8 @@ test_that("Can construct `grouped_preferences` from `preferences`", {
   gprefs <- group(prefs, rep(1:3, each = 2))
   expect_true(length(gprefs) == 3)
   expect_true(all(attr(gprefs[1], "preferences") == prefs[1:2]))
+  # None are NA
+  expect_true(all(gprefs == na.omit(gprefs)))
 })
 
 test_that("`preferences` can be grouped by a factor and accessed by name", {
