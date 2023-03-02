@@ -194,3 +194,17 @@ test_that("Loading preferences from long format doesn't permute item names", {
   expect_true(all(prefs[3, by.ordering = TRUE] == c("A", "B", "C", "D")))
   expect_true(all(prefs[4, by.ordering = TRUE] == c("D", "B", "C", "A")))
 })
+
+test_that("Using `frequencies` argument with long-format data yields warning", {
+  expect_warning(
+    preferences(long, format = "long", frequencies = rep(2, 6))
+  )
+})
+
+test_that("Loading \"ranking\" format with no names yields warning", {
+  expect_warning(preferences(unname(rankings), format = "ranking"))
+})
+
+test_that("Calling `preferences` with nonsense format raises error", {
+  expect_error(preferences(rankings, format = "nonsense"))
+})
