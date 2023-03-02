@@ -18,8 +18,8 @@ reference:
   description: |
     Aggregate duplicate `preferences` and group by factor or index.
   contents:
-  - aggregate
-  - group
+  - aggregate.preferences
+  - group.preferences
 - title: Summaries of `preferences`
   description: |
     Compute summaries such as adjacency or break each preference down into

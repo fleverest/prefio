@@ -1,9 +1,12 @@
 
 # prefio
 
-<!--
-Package website: https://fleverest.github.io/prefio/.
--->
+Package website: <https://fleverest.github.io/prefio/>.
+
+<!-- badges: start -->
+
+[![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
+<!-- badges: end -->
 
 ## Overview
 
@@ -170,12 +173,11 @@ write_preflib(prefs)
 
     ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.
 
-    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-03-01).
+    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-03-02).
 
-    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-03-01).
+    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-03-02).
 
-    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using
-    ## `NA`.
+    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using `NA`.
 
     ## # FILE NAME: NA
     ## # TITLE: NA
@@ -184,8 +186,8 @@ write_preflib(prefs)
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2023-03-01
-    ## # MODIFICATION DATE: 2023-03-01
+    ## # PUBLICATION DATE: 2023-03-02
+    ## # MODIFICATION DATE: 2023-03-02
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
