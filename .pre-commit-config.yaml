@@ -1,26 +1,19 @@
 # All available hooks: https://pre-commit.com/hooks.html
 # R specific hooks: https://github.com/lorenzwalthert/precommit
-
 repos:
-  - repo: https://github.com/lorenzwalthert/precommit
+-   repo: https://github.com/lorenzwalthert/precommit
     rev: v0.3.2.9007
     hooks:
-      - id: style-files
-      - id: lintr
-        additional_dependencies:
-          - r-lib/lintr
+    -   id: style-files
+        args: [--style_pkg=styler, --style_fun=tidyverse_style]
+    -   id: roxygenize
+    # codemeta must be above use-tidy-description when both are used
+    # -   id: codemeta-description-updated
+    -   id: use-tidy-description
+    -   id: spell-check
         exclude: >
           (?x)^(
-          inst/.*|
-          man/.*|
-          tests/.*|
-          vignettes/.*|
-          )$
-      - id: roxygenize
-      - id: use-tidy-description
-      - id: spell-check
-        exclude: >
-          (?x)^(
+          tests/data/.*|
           .*\.[rR]|
           .*\.feather|
           .*\.jpeg|
@@ -32,9 +25,6 @@ repos:
           .*\.Rds|
           .*\.Rproj|
           .*\.sh|
-          .*\.cpp|
-          .*\.hpp|
-          .*\.h|
           (.*/|)\.gitignore|
           (.*/|)\.gitlab-ci\.yml|
           (.*/|)\.lintr|
@@ -48,41 +38,37 @@ repos:
           (.*/|)renv/settings\.dcf|
           (.*/|)renv\.lock|
           (.*/|)WORDLIST|
-          (.*/|)CRAN-SUBMISSION|
           \.github/workflows/.*|
           data/.*|
           )$
-      - id: readme-rmd-rendered
-      - id: parsable-R
-      - id: pkgdown
-      - id: deps-in-desc
-  - repo: https://github.com/pre-commit/pre-commit-hooks
+    -   id: lintr
+    -   id: readme-rmd-rendered
+    -   id: parsable-R
+    -   id: no-browser-statement
+    -   id: no-debug-statement
+    -   id: deps-in-desc
+-   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
-      - id: check-added-large-files
-        args: ["--maxkb=200"]
-      - id: check-yaml
-      - id: mixed-line-ending
-      - id: file-contents-sorter
-        files: "\\.Rbuildignore$"
-      - id: end-of-file-fixer
-        exclude: >
-          (?x)^(
-          \.Rd|
-          )$
-  - repo: https://github.com/lorenzwalthert/gitignore-tidy
-    rev: 475bf5d96927a1887ce2863ff3075b1d7240bc51
+    -   id: check-added-large-files
+        args: ['--maxkb=200']
+    -   id: file-contents-sorter
+        files: '^\.Rbuildignore$'
+    -   id: end-of-file-fixer
+        exclude: '\.Rd'
+-   repo: https://github.com/pre-commit-ci/pre-commit-ci-config
+    rev: v1.5.1
     hooks:
-      - id: tidy-gitignore
-  - repo: local
+    # Only reuiqred when https://pre-commit.ci is used for config validation
+    -   id: check-pre-commit-ci-config
+-   repo: local
     hooks:
-      - id: forbid-to-commit
+    -   id: forbid-to-commit
         name: Don't commit common R artifacts
         entry: Cannot commit .Rhistory, .RData, .Rds or .rds.
         language: fail
-        files: '\.Rhistory|\.RData|\.Rds|\.rds$'
-        # `exclude: <regex>` to allow committing specific files.
+        files: '\.(Rhistory|RData|Rds|rds)$'
+        # `exclude: <regex>` to allow committing specific files
 
 ci:
-  skip: [pkgdown]
-  autoupdate_schedule: monthly
+    autoupdate_schedule: monthly
