@@ -127,11 +127,11 @@ of group IDs with the following attributes:</p>
 <span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>,</span></span>
 <span class="r-in"><span>  <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span></span>
 <span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span></span></span>
-<span class="r-in"><span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">4</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">4</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
 <span class="r-in"><span><span class="va">R</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "blank" "blank" "blank" "blank" "blank"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A &gt; B"     "C &gt; B"     "C &gt; D"     "B &gt; A"     "B &gt; C &gt; D"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># group preferences (first three in group 1, next two in group 2)</span></span></span>
 <span class="r-in"><span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu">group</span><span class="op">(</span><span class="va">R</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -141,42 +141,42 @@ of group IDs with the following attributes:</p>
 <span class="r-in"><span><span class="co">## by default up to 2 preference sets are shown per group, "..." indicates if</span></span></span>
 <span class="r-in"><span><span class="co">## there are further preferences</span></span></span>
 <span class="r-in"><span><span class="va">G</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   1                   2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank, ..."      "blank, blank" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                   1                                   2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, A = D &gt; C &gt; B, ..."      "C = D &gt; B &gt; A, A &gt; B &gt; C &gt; D" </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">G</span>, max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>            1            2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, ..." "blank, ..." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                    1                    2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, ..." "C = D &gt; B &gt; A, ..." </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## select preferences from group 1</span></span></span>
 <span class="r-in"><span><span class="va">G</span><span class="op">[</span><span class="fl">1</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank, ..." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                   1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, A = D &gt; C &gt; B, ..." </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## exclude item 3 from preferences</span></span></span>
 <span class="r-in"><span><span class="va">G</span><span class="op">[</span>, <span class="op">-</span><span class="fl">3</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                   1                   2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank, ..."      "blank, blank" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                           1                           2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "D &gt; A &gt; B, A = D &gt; B, ..."      "D &gt; B &gt; A, A &gt; B &gt; D" </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## preferences from group 2, excluding item 3</span></span></span>
 <span class="r-in"><span><span class="co">## - note group 2 becomes the first group</span></span></span>
 <span class="r-in"><span><span class="va">G</span><span class="op">[</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">3</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "D &gt; B &gt; A, A &gt; B &gt; D" </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Group preferences by a factor</span></span></span>
 <span class="r-in"><span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu">group</span><span class="op">(</span><span class="va">R</span>, <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"G1"</span>, <span class="st">"G1"</span>, <span class="st">"G1"</span>, <span class="st">"G2"</span>, <span class="st">"G2"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">G</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  G1                  G2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank, ..."      "blank, blank" </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  G1                                  G2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, A = D &gt; C &gt; B, ..."      "C = D &gt; B &gt; A, A &gt; B &gt; C &gt; D" </span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">G</span>, max <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>           G1           G2 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, ..." "blank, ..." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   G1                   G2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, ..." "C = D &gt; B &gt; A, ..." </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## select preferences from group G1</span></span></span>
 <span class="r-in"><span><span class="va">G</span><span class="op">[</span><span class="st">"G1"</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  G1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> "blank, blank, ..." </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                  G1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D &gt; A &gt; B, A = D &gt; C &gt; B, ..." </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
