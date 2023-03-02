@@ -29,7 +29,9 @@ jobs:
           needs: roxygen2
 
       - name: Document
-        run: roxygen2::roxygenise()
+        run: |
+          roxygen2::roxygenise()
+          devtools::build_readme()
         shell: Rscript {0}
 
       - name: Commit and push changes

@@ -1,11 +1,11 @@
 
-# prefio
-
-Package website: <https://fleverest.github.io/prefio/>.
+# [prefio](https://fleverest.github.io/prefio/)
 
 <!-- badges: start -->
 
 [![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/./branch/main/graph/badge.svg)](https://app.codecov.io/gh/.?branch=main)
 <!-- badges: end -->
 
 ## Overview
@@ -77,10 +77,11 @@ long <- data.frame(
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 prefs <- preferences(long,
-                     format = "long",
-                     id = "ID",
-                     item = "ItemName",
-                     rank = "Rank")
+  format = "long",
+  id = "ID",
+  item = "ItemName",
+  rank = "Rank"
+)
 print(prefs)
 ```
 
@@ -102,17 +103,19 @@ This data can be converted from a `data.frame` into a `preferences`
 object:
 
 ``` r
-rankings <- matrix(c(
-  1, 2, 3,
-  3, 2, 1,
-  2, 1, 3
+rankings <- matrix(
+  c(
+    1, 2, 3,
+    3, 2, 1,
+    2, 1, 3
   ),
   nrow = 3,
   byrow = TRUE
 )
 colnames(rankings) <- LETTERS[1:3]
 prefs <- preferences(rankings,
-                     format = "ranking")
+  format = "ranking"
+)
 print(prefs)
 ```
 
@@ -171,13 +174,17 @@ our `prefs` from earlier:
 write_preflib(prefs)
 ```
 
-    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.
+    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a
+    ## title to be specified. Using `NA`.
 
-    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-03-02).
+    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's
+    ## date(2023-03-02).
 
-    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-03-02).
+    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's
+    ## date(2023-03-02).
 
-    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using `NA`.
+    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib
+    ## format requires this to be specified. Using `NA`.
 
     ## # FILE NAME: NA
     ## # TITLE: NA
