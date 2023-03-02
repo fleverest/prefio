@@ -5,6 +5,8 @@ on:
     workflows: [R-CMD-check]
     types:
       - completed
+  push:
+    branches: [main]
   release:
     types:
       - published
