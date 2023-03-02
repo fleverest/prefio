@@ -8,9 +8,7 @@ library(prefio)
 knitr::opts_chunk$set(fig.path = "man/figures/")
 ```
 
-# prefio
-
-Package website: https://fleverest.github.io/prefio/.
+# [prefio](https://fleverest.github.io/prefio/)
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
