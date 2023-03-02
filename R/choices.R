@@ -45,7 +45,7 @@ choices <- function(preferences, names = FALSE) {
   }
   # treat as matrix for faster indexing
   preferences <- unclass(preferences)
-  preferences[is.na(preferences)] <- 0
+  preferences[is.na(preferences)] <- 0L
   n <- ncol(preferences)
   j <- apply(preferences, 1L, max)
   onames <- colnames(preferences)
@@ -54,7 +54,7 @@ choices <- function(preferences, names = FALSE) {
     opt <- onames
   }
   choices <- alternatives <- list()
-  ordering <- c()
+  ordering <- NULL
   for (i in seq_len(max(j))) {
     ## j-th choices
     cho <- apply(
@@ -78,7 +78,7 @@ choices <- function(preferences, names = FALSE) {
   }
   ii <- order(ordering)
   nchoices <- length(choices)
-  out <- data.frame(matrix(NA, nrow = nchoices, ncol = 0))
+  out <- data.frame(matrix(NA, nrow = nchoices, ncol = 0L))
   out$choices <- choices[ii]
   out$alternatives <- alternatives[ii]
   out$ordering <- ordering[ii]
@@ -99,8 +99,8 @@ print.choices <- function(x, ...) {
     ccho <- x$choices[preferences == i]
     calt <- x$alternatives[preferences == i]
     for (j in seq_along(ccho)) {
-      ch <- paste0("{", paste(ccho[[j]], collapse = ", "), "}")
-      al <- paste0("{", paste(calt[[j]], collapse = ", "), "}")
+      ch <- paste0("{", toString(ccho[[j]]), "}")
+      al <- paste0("{", toString(calt[[j]]), "}")
       cat(ch, "from", al, "\n")
     }
     cat("============== \n")
