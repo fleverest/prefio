@@ -2,3 +2,6 @@
 ^LICENSE$
 ^README\.(Rmd|md|html)$
 ^readme.bib$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

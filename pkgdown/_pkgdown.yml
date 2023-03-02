@@ -1,0 +1,29 @@
+url: https://fleverest.github.io/prefio/
+template:
+  bootstrap: 5
+reference:
+- title: Importing and Exporting Data
+  description: |
+    Importing public datasets from PrefLib; writing to PrefLib formats.
+  contents:
+  - read_preflib
+  - write_preflib
+- title: Processing Data
+  description: |
+    Coercing data to `preferences` from various formats.
+  contents:
+  - preferences
+  - as.preferences
+- title: Grouping and Aggregating `preferences`
+  description: |
+    Aggregate duplicate `preferences` and group by factor or index.
+  contents:
+  - aggregate.preferences
+  - group.preferences
+- title: Summaries of `preferences`
+  description: |
+    Compute summaries such as adjacency or break each preference down into
+    a set of choices.
+  contents:
+  - choices
+  - adjacency
