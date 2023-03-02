@@ -92,10 +92,14 @@
 #' # create rankings from data in long form
 #'
 #' # Example long-form data
-#' x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
-#'                 item = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
-#'                            LETTERS[3:5]),
-#'                 rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3))
+#' x <- data.frame(
+#'   id = c(rep(1:4, each = 4), 5, 5, 5),
+#'   item = c(
+#'     LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
+#'     LETTERS[3:5]
+#'   ),
+#'   rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3)
+#' )
 #'
 #' # * Set #1 has two different ranks for the same item (item C
 #' # has rank 1 and 2). This item will be excluded from the preferences.
@@ -112,12 +116,14 @@
 #' preferences(x, id = "id", item = "item", rank = "rank")
 #'
 #' # Convert an existing matrix of rankings to a preferences object.
-#' rnk <- matrix(c(1, 2, 0, 0,
-#'                 4, 1, 2, 3,
-#'                 2, 1, 1, 1,
-#'                 1, 2, 3, 0,
-#'                 2, 1, 1, 0,
-#'                 1, 0, 3, 2), nrow = 6, byrow = TRUE)
+#' rnk <- matrix(c(
+#'   1, 2, 0, 0,
+#'   4, 1, 2, 3,
+#'   2, 1, 1, 1,
+#'   1, 2, 3, 0,
+#'   2, 1, 1, 0,
+#'   1, 0, 3, 2
+#' ), nrow = 6, byrow = TRUE)
 #' colnames(rnk) <- c("apple", "banana", "orange", "pear")
 #'
 #' rnk <- as.preferences(rnk, format = "ranking")
@@ -175,50 +181,61 @@ preferences <- function(data,
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
     if (!missing(frequencies)) {
-      warning("When creating \"preferences\" from long-format data,",
-              "`frequencies` parameter is ignored.")
+      warning(
+        "When creating \"preferences\" from long-format data,",
+        "`frequencies` parameter is ignored."
+      )
       frequencies <- NULL
     }
     if (missing(item_names)) {
       item_names <- na.omit(unique(data[, item]))
     }
-    ranking <- long_to_ranking(data,
-                               id,
-                               item,
-                               rank,
-                               item_names,
-                               verbose)
+    ranking <- long_to_ranking(
+      data,
+      id,
+      item,
+      rank,
+      item_names,
+      verbose
+    )
     prefs <- as.preferences.matrix(ranking,
-                                   format = "ranking",
-                                   item_names = item_names,
-                                   ...,
-                                   aggregate = FALSE,
-                                   verbose = verbose)
+      format = "ranking",
+      item_names = item_names,
+      ...,
+      aggregate = FALSE,
+      verbose = verbose
+    )
   } else if (format == "ordering") {
     ranking <- ordering_to_ranking(data, NULL, verbose)
     prefs <- as.preferences.matrix(ranking,
-                                   format = "ranking",
-                                   ...,
-                                   aggregate = FALSE,
-                                   verbose = verbose)
+      format = "ranking",
+      ...,
+      aggregate = FALSE,
+      verbose = verbose
+    )
   } else if (format == "ranking") {
     x <- data
     # Infer item names
     if (!is.null(colnames(x)) && missing(item_names)) {
       item_names <- colnames(x)
     } else if (is.null(colnames(x)) && missing(item_names)) {
-      message(paste0("Item names could not be inferred from ",
-                     "ranked data. Defaulting to the integers 1-", dim(x)[2]))
+      message(paste0(
+        "Item names could not be inferred from ",
+        "ranked data. Defaulting to the integers 1-", dim(x)[2]
+      ))
     }
     prefs <- as.preferences.matrix(data,
-                                   format = "ranking",
-                                   item_names = item_names,
-                                   ...,
-                                   aggregate = FALSE,
-                                   verbose = verbose)
+      format = "ranking",
+      item_names = item_names,
+      ...,
+      aggregate = FALSE,
+      verbose = verbose
+    )
   } else {
-    stop("Format '", format, "' not implemented: Must be one ",
-                "of 'ordering', 'ranking' or 'long'.")
+    stop(
+      "Format '", format, "' not implemented: Must be one ",
+      "of 'ordering', 'ranking' or 'long'."
+    )
   }
   # Aggregate if necessary.
   if (aggregate) {
@@ -234,11 +251,12 @@ preferences <- function(data,
 validate_ordering <- function(x,
                               item_names,
                               verbose = TRUE) {
-
   # Ensure the object is a data frame with "list" columns
   if (!is.data.frame(x) || !all(sapply(x, typeof) == "list")) {
-    stop("`data` in \"ordering\" format must be a \"data.frame\" with ",
-               "\"list\"-valued columns.")
+    stop(
+      "`data` in \"ordering\" format must be a \"data.frame\" with ",
+      "\"list\"-valued columns."
+    )
   }
 
   # Ensure items are only listed by index when item_names is passed
@@ -252,7 +270,6 @@ validate_ordering <- function(x,
 ordering_to_ranking <- function(data,
                                 item_names,
                                 verbose = TRUE) {
-
   validate_ordering(data, item_names, verbose)
 
   if (is.null(item_names)) {
@@ -264,14 +281,15 @@ ordering_to_ranking <- function(data,
   }
   # Convert the ordering data into a matrix of rankings.
   data <- rapply(data,
-                 function(a) {
-                   if (!is.numeric(a)) {
-                     return(match(a, item_names))
-                   } else {
-                     return(a)
-                   }
-                 },
-                 how = "replace")
+    function(a) {
+      if (!is.numeric(a)) {
+        return(match(a, item_names))
+      } else {
+        return(a)
+      }
+    },
+    how = "replace"
+  )
   n_ranks <- ncol(data)
   n_alts <- length(item_names)
   structure(
@@ -295,11 +313,12 @@ ordering_to_ranking <- function(data,
 validate_long <- function(data,
                           item_names,
                           verbose = TRUE) {
-
   # Raise error if `id`, `item` or `rank` are invalid.
   if (ncol(data) != 3L) {
-    stop("When using long-format, `id`, `item` and `rank` ",
-               "must all specify names of columns in `data`.")
+    stop(
+      "When using long-format, `id`, `item` and `rank` ",
+      "must all specify names of columns in `data`."
+    )
   }
 
   # Show warning if any columns contain NA
@@ -311,11 +330,13 @@ validate_long <- function(data,
 
   # Find duplicated items
   if (
-    anyDuplicated(paste(data[, "id"], data[, "item"], sep = ":"))
-    && verbose
+    anyDuplicated(paste(data[, "id"], data[, "item"], sep = ":")) &&
+      verbose
   ) {
-    message("Duplicated rankings per item detected: ",
-            "only the highest ranks will be used.")
+    message(
+      "Duplicated rankings per item detected: ",
+      "only the highest ranks will be used."
+    )
   }
 
   # Validate items
@@ -323,15 +344,17 @@ validate_long <- function(data,
     item_names <- unique(data[, "item"])
   }
   if (is.character(data[, "item"])) {
-    if (is.null(setdiff(unique(data[, "item"]),
-                        item_names))) {
+    if (is.null(setdiff(
+      unique(data[, "item"]),
+      item_names
+    ))) {
       stop("Found `item` not in `item_names`.")
     }
   } else if (is.numeric(data[, "item"])) {
-      if (any(data[, "item"] > length(item_names))) {
-        stop("`item` index out of bounds.")
-      }
-      data[, "item"] <- item_names[data[, "item"]]
+    if (any(data[, "item"] > length(item_names))) {
+      stop("`item` index out of bounds.")
+    }
+    data[, "item"] <- item_names[data[, "item"]]
   }
 
   # Validate rank
@@ -380,8 +403,7 @@ long_to_ranking <- function(data,
     tidyr::spread(item, rank, drop = FALSE) %>%
     dplyr::ungroup() %>%
     dplyr::select(dplyr::all_of(item_names)) %>%
-    as.matrix()
-  )
+    as.matrix())
 }
 
 # A helper to convert a matrix of rankings into ordering format.
@@ -391,12 +413,16 @@ ranking_to_ordering <- function(ranking) {
     out <- as.data.frame(
       do.call(
         rbind,
-        lapply(seq_len(dim(ranking)[1]),
-               function(i) {
-                 r <- ranking[i, ]
-                 sapply(seq_len(max_rank),
-                        function(x) list(names(r)[which(r == x)]))
-               })
+        lapply(
+          seq_len(dim(ranking)[1]),
+          function(i) {
+            r <- ranking[i, ]
+            sapply(
+              seq_len(max_rank),
+              function(x) list(names(r)[which(r == x)])
+            )
+          }
+        )
       )
     )
   } else {
@@ -404,12 +430,15 @@ ranking_to_ordering <- function(ranking) {
       do.call(
         rbind,
         apply(ranking,
-              1L,
-              function(r) {
-                sapply(seq_len(max_rank),
-                       function(x) as.list(names(r)[which(r == x)]))
-              },
-              simplify = FALSE)
+          1L,
+          function(r) {
+            sapply(
+              seq_len(max_rank),
+              function(x) as.list(names(r)[which(r == x)])
+            )
+          },
+          simplify = FALSE
+        )
       )
     )
   }
@@ -422,36 +451,37 @@ ranking_to_ordering <- function(ranking) {
 #' @method Ops preferences
 #' @export
 Ops.preferences <- function(e1, e2) {
-  op <- .Generic[[1]]
+  op <- .Generic[[1]] # nolint: object_usage_linter
   switch(op,
-         `==` = {
-           minlen <- min(length(e1), length(e2))
-           maxlen <- max(length(e1), length(e2))
-           e1_names <- names(e1)
-           e2_names <- names(e2)
-           if (!identical(sort(e1_names), sort(e2_names))) {
-             return(rep(FALSE, maxlen))
-           }
-           e1 <- unclass(e1)
-           e2 <- unclass(e2)[, e1_names, drop = FALSE]
-           if (anyNA(e1)) {
-             e1[is.na(e1)] <- 0
-           }
-           if (anyNA(e2)) {
-             e2[is.na(e2)] <- 0
-           }
-           cmp <- rowSums(e1[seq_len(minlen), , drop = FALSE] ==
-                          e2[seq_len(minlen), , drop = FALSE]) >= 1
-           if (minlen < maxlen) {
-             warning("Objects being compared are not the same length.")
-             cmp <- c(cmp, rep(FALSE, maxlen - minlen))
-           }
-           return(cmp)
-         },
-         `!=` = {
-           return(!e1 == e2)
-         },
-         stop("Undefined operation for \"preferences\"."))
+    `==` = {
+      minlen <- min(length(e1), length(e2))
+      maxlen <- max(length(e1), length(e2))
+      e1_names <- names(e1)
+      e2_names <- names(e2)
+      if (!identical(sort(e1_names), sort(e2_names))) {
+        return(rep(FALSE, maxlen))
+      }
+      e1 <- unclass(e1)
+      e2 <- unclass(e2)[, e1_names, drop = FALSE]
+      if (anyNA(e1)) {
+        e1[is.na(e1)] <- 0
+      }
+      if (anyNA(e2)) {
+        e2[is.na(e2)] <- 0
+      }
+      cmp <- rowSums(e1[seq_len(minlen), , drop = FALSE] ==
+        e2[seq_len(minlen), , drop = FALSE]) >= 1
+      if (minlen < maxlen) {
+        warning("Objects being compared are not the same length.")
+        cmp <- c(cmp, rep(FALSE, maxlen - minlen))
+      }
+      return(cmp)
+    },
+    `!=` = {
+      return(!e1 == e2)
+    },
+    stop("Undefined operation for \"preferences\".")
+  )
 }
 
 #' @rdname preferences
@@ -468,8 +498,12 @@ Ops.preferences <- function(e1, e2) {
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
 #' @export
-"[.preferences" <- function(x, i, j, ..., drop = FALSE, by.ordering = FALSE) {
-
+"[.preferences" <- function(x, # nolint: cyclocomp_linter
+                            i,
+                            j,
+                            ...,
+                            drop = FALSE,
+                            by.ordering = FALSE) {
   if (!missing(j) && is.numeric(j) && any(abs(j) > ncol(x))) {
     stop("Subscript `j` out of bounds.")
   }
@@ -484,8 +518,10 @@ Ops.preferences <- function(e1, e2) {
     }
     if (!missing(i)) {
       if (!is.numeric(i)) {
-        stop("When accessing preferences as ordering lists, index must ",
-             "be numeric.")
+        stop(
+          "When accessing preferences as ordering lists, index must ",
+          "be numeric."
+        )
       }
       value <- .subset(x, i, TRUE, drop = FALSE)
     } else {
@@ -518,15 +554,22 @@ Ops.preferences <- function(e1, e2) {
     # Subset and convert to dense rank again.
     if (getRversion() < "4.1.0") {
       value <- .subset(x, i, j, drop = FALSE)
-      value <- do.call(rbind,
-                       lapply(seq_len(dim(value)[1]),
-                              function(i) dplyr::dense_rank(value[i, ])))
+      value <- do.call(
+        rbind,
+        lapply(
+          seq_len(dim(value)[1]),
+          function(i) dplyr::dense_rank(value[i, ])
+        )
+      )
     } else {
-      value <- do.call(rbind,
-                       apply(.subset(x, i, j, drop = FALSE),
-                             1L,
-                             dplyr::dense_rank,
-                             simplify = FALSE))
+      value <- do.call(
+        rbind,
+        apply(.subset(x, i, j, drop = FALSE),
+          1L,
+          dplyr::dense_rank,
+          simplify = FALSE
+        )
+      )
     }
   }
   items <- attr(x, "item_names")
@@ -549,16 +592,18 @@ Ops.preferences <- function(e1, e2) {
     value
   } else if (is.character(j)) {
     structure(value,
-              dimnames = list(NULL, sub_items),
-              item_names = sub_items,
-              class = c("preferences", class(value)),
-              preftype = preftype(value))
+      dimnames = list(NULL, sub_items),
+      item_names = sub_items,
+      class = c("preferences", class(value)),
+      preftype = preftype(value)
+    )
   } else {
     structure(value,
-              dimnames = list(NULL, sub_items),
-              item_names = sub_items,
-              class = c("preferences", class(value)),
-              preftype = preftype(value))
+      dimnames = list(NULL, sub_items),
+      item_names = sub_items,
+      class = c("preferences", class(value)),
+      preftype = preftype(value)
+    )
   }
 }
 
@@ -592,7 +637,7 @@ preftype <- function(prefs) {
 
 #' @rdname preferences
 #' @export
-as.preferences <- function(x, ...) {
+as.preferences <- function(x, ...) { # nolint
   UseMethod("as.preferences")
 }
 
@@ -628,8 +673,8 @@ as.preferences.default <- function(x,
   # Convert orderings data frames into ranking matrices.
   if (
     format == "ordering" ||
-    "data.frame" %in% class(x) &&
-    all(sapply(x, typeof) == "list")
+      "data.frame" %in% class(x) &&
+        all(sapply(x, typeof) == "list")
   ) {
     x <- ordering_to_ranking(x, item_names, verbose)
     format <- "ranking"
@@ -638,14 +683,16 @@ as.preferences.default <- function(x,
     item_names <- unique(x[, item])
   }
   x <- as.matrix(x)
-  as.preferences.matrix(x,
-                        format,
-                        id,
-                        item,
-                        rank,
-                        item_names,
-                        aggregate,
-                        verbose)
+  as.preferences.matrix(
+    x,
+    format,
+    id,
+    item,
+    rank,
+    item_names,
+    aggregate,
+    verbose
+  )
 }
 
 #' @rdname preferences
@@ -663,12 +710,14 @@ as.preferences.matrix <- function(x,
   format <- match.arg(format)
   # First we reformat the data into a matrix of rankings.
   if (format == "long") {
-    prefs <- long_to_ranking(x,
-                             id,
-                             item,
-                             rank,
-                             item_names,
-                             verbose)
+    prefs <- long_to_ranking(
+      x,
+      id,
+      item,
+      rank,
+      item_names,
+      verbose
+    )
   } else if (format == "ranking") {
     prefs <- x
   } else {
@@ -692,8 +741,10 @@ as.preferences.matrix <- function(x,
 #' @method as.preferences aggregated_preferences
 #' @export
 as.preferences.aggregated_preferences <- function(x, ...) {
-  return(rep(x$preferences,
-             x$frequencies))
+  return(rep(
+    x$preferences,
+    x$frequencies
+  ))
 }
 
 #' @method length preferences
@@ -706,12 +757,14 @@ length.preferences <- function(x) {
 #' @export
 is.na.preferences <- function(x) {
   # Valid dense rankings
-  apply(x,
-        1L,
-        function(x) {
-          x_sub <- na.omit(x)
-          identical(dplyr::dense_rank(x_sub), x_sub)
-        })
+  apply(
+    x,
+    1L,
+    function(x) {
+      x_sub <- na.omit(x)
+      identical(dplyr::dense_rank(x_sub), x_sub)
+    }
+  )
 }
 
 #' @method print preferences
@@ -738,7 +791,7 @@ format.preferences <- function(x, width = 40L, ...) {
       "blank"
     }
   }
-  value <- apply(x, 1L, f,  items = attr(x, "item_names"))
+  value <- apply(x, 1L, f, items = attr(x, "item_names"))
   nc <- nchar(value)
   trunc <- !is.na(nc) & nc > width
   value[trunc] <- paste(strtrim(value[trunc], width - 4), "...")
@@ -748,42 +801,48 @@ format.preferences <- function(x, width = 40L, ...) {
 #' @method rbind preferences
 #' @export
 rbind.preferences <- function(...) {
-    # check contain the same items
-    preflist <- list(...)
-    nm <- lapply(preflist, colnames)
-    ref <- nm[[1L]]
-    ok <- vapply(nm, identical, TRUE, ref)
-    item_names <- unique(unlist(nm))
-    if (any(!ok)) {
-        preflist <- lapply(
-          preflist,
-          function(x) {
-            preflist <- matrix(0L,
-                               nrow = nrow(x),
-                               ncol = length(item_names),
-                               dimnames = list(NULL, item_names))
-            preflist[, colnames(x)] <- x
-            preflist
-          }
+  # check contain the same items
+  preflist <- list(...)
+  nm <- lapply(preflist, colnames)
+  ref <- nm[[1L]]
+  ok <- vapply(nm, identical, TRUE, ref)
+  item_names <- unique(unlist(nm))
+  if (any(!ok)) {
+    preflist <- lapply(
+      preflist,
+      function(x) {
+        preflist <- matrix(0L,
+          nrow = nrow(x),
+          ncol = length(item_names),
+          dimnames = list(NULL, item_names)
         )
-    }
-    # rbind all preferences matrices
-    preflist <- do.call("rbind", lapply(preflist, unclass))
-    structure(preflist,
-              class = unique(c("preferences", class(preflist))),
-              item_names = item_names,
-              preftype = preftype(preflist))
+        preflist[, colnames(x)] <- x
+        preflist
+      }
+    )
+  }
+  # rbind all preferences matrices
+  preflist <- do.call("rbind", lapply(preflist, unclass))
+  structure(preflist,
+    class = unique(c("preferences", class(preflist))),
+    item_names = item_names,
+    preftype = preftype(preflist)
+  )
 }
 
 #' @method as.data.frame preferences
 #' @export
+# nolint start
 as.data.frame.preferences <- function(x,
                                       row.names = NULL,
                                       optional = FALSE,
                                       ...,
-                                      nm = paste(deparse(substitute(x),
-                                                         width.cutoff = 20L),
-                                                 collapse = " ")) {
+                                      nm = paste(
+                                        deparse(substitute(x),
+                                          width.cutoff = 20L
+                                        ),
+                                        collapse = " "
+                                      )) {
   value <- list(x)
   if (!optional) {
     names(value) <- nm
@@ -803,15 +862,19 @@ as.data.frame.preferences <- function(x,
       stop("row names contain missing values")
     }
     if (anyDuplicated(row.names)) {
-      stop(paste("duplicate row.names: ",
-           paste(unique(row.names[duplicated(row.names)]),
-                       collapse = ", ")))
+      stop(paste(
+        "duplicate row.names: ",
+        paste(unique(row.names[duplicated(row.names)]),
+          collapse = ", "
+        )
+      ))
     }
   }
   attr(value, "row.names") <- row.names
   class(value) <- "data.frame"
   value
 }
+# nolint end
 
 #' @method as.matrix preferences
 #' @export
@@ -828,7 +891,7 @@ utils::str
 
 #' @method str preferences
 str.preferences <- function(object, ...) {
-    str(unclass(object))
+  str(unclass(object))
 }
 
 #' @method rep preferences
@@ -847,8 +910,8 @@ names.preferences <- function(x, ...) {
 #' @export
 "names<-.preferences" <- function(x, value) {
   if (anyNA(value) ||
-      !identical(unique(value), value) ||
-      length(value) != dim(x)[2]) {
+    !identical(unique(value), value) ||
+    length(value) != dim(x)[2]) {
     stop("Item names must be unique and cannot be empty.")
   }
   attr(x, "item_names") <- value

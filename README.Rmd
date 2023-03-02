@@ -60,7 +60,8 @@ long <- data.frame(
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 knitr::kable(long,
-             caption = "Three orderings on items {A, B, C} in long-format.")
+  caption = "Three orderings on items {A, B, C} in long-format."
+)
 ```
 
 This data can be converted from a `data.frame` into a `preferences` object:
@@ -72,10 +73,11 @@ long <- data.frame(
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 prefs <- preferences(long,
-                     format = "long",
-                     id = "ID",
-                     item = "ItemName",
-                     rank = "Rank")
+  format = "long",
+  id = "ID",
+  item = "ItemName",
+  rank = "Rank"
+)
 print(prefs)
 ```
 
@@ -83,34 +85,40 @@ Another way of tabulating orderings is with each unique ordering on a single
 row, with each column representing the rank given to a particular item:
 
 ```{r echo = FALSE, results = 'asis'}
-rankings <- matrix(c(
-  1, 2, 3,
-  3, 2, 1,
-  2, 1, 3
+rankings <- matrix(
+  c(
+    1, 2, 3,
+    3, 2, 1,
+    2, 1, 3
   ),
   nrow = 3,
   byrow = TRUE
 )
 colnames(rankings) <- LETTERS[1:3]
 knitr::kable(rankings,
-             caption = paste0("Three orderings on items ",
-                              "{A, B, C} in a \"rankings\" format."))
+  caption = paste0(
+    "Three orderings on items ",
+    "{A, B, C} in a \"rankings\" format."
+  )
+)
 ```
 
 This data can be converted from a `data.frame` into a `preferences` object:
 
 ```{r}
-rankings <- matrix(c(
-  1, 2, 3,
-  3, 2, 1,
-  2, 1, 3
+rankings <- matrix(
+  c(
+    1, 2, 3,
+    3, 2, 1,
+    2, 1, 3
   ),
   nrow = 3,
   byrow = TRUE
 )
 colnames(rankings) <- LETTERS[1:3]
 prefs <- preferences(rankings,
-                     format = "ranking")
+  format = "ranking"
+)
 print(prefs)
 ```
 

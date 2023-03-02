@@ -67,7 +67,6 @@
 read_preflib <- function(file,
                          from_preflib = FALSE,
                          preflib_url = "https://www.preflib.org/static/data") {
-
   if (from_preflib) {
     file <- file.path(preflib_url, file)
   }
@@ -85,32 +84,44 @@ read_preflib <- function(file,
   names(preflib_attributes) <- sapply(metadata, function(x) x[1])
 
   # Assert that the minimum required attributes are present
-  required_attributes <- c("NUMBER UNIQUE ORDERS",
-                           "NUMBER VOTERS",
-                           "NUMBER ALTERNATIVES")
+  required_attributes <- c(
+    "NUMBER UNIQUE ORDERS",
+    "NUMBER VOTERS",
+    "NUMBER ALTERNATIVES"
+  )
 
   if (suppressWarnings(
-        anyNA(as.integer(unlist(preflib_attributes[required_attributes]))))) {
-    stop("PrefLib datafile is corrupt: 'NUMBER UNIQUE ORDERS', ",
-         "'NUMBER VOTERS' and 'NUMBER ALTERNATIVES' must be able to be ",
-         "coerced into integers.")
+    anyNA(as.integer(unlist(preflib_attributes[required_attributes])))
+  )) {
+    stop(
+      "PrefLib datafile is corrupt: 'NUMBER UNIQUE ORDERS', ",
+      "'NUMBER VOTERS' and 'NUMBER ALTERNATIVES' must be able to be ",
+      "coerced into integers."
+    )
   }
   if (!"NUMBER ALTERNATIVES" %in% names(preflib_attributes)) {
-    stop(paste0("PrefLib datafile is corrupt: ",
-                "missing 'NUMBER ALTERNATIVES' metadata."))
+    stop(paste0(
+      "PrefLib datafile is corrupt: ",
+      "missing 'NUMBER ALTERNATIVES' metadata."
+    ))
   }
   n_alternatives <- as.integer(preflib_attributes[["NUMBER ALTERNATIVES"]])
-  required_attributes <- c(required_attributes,
-                           paste("ALTERNATIVE NAME",
-                                 seq_len(n_alternatives)))
+  required_attributes <- c(
+    required_attributes,
+    paste(
+      "ALTERNATIVE NAME",
+      seq_len(n_alternatives)
+    )
+  )
   if (any(!required_attributes %in% names(preflib_attributes))) {
-    stop(paste0("PrefLib datafile is corrupt: ",
-                "missing required metadata (",
-                paste(required_attributes[
-                    which(!required_attributes %in% names(preflib_attributes))
-                  ]
-                ),
-                ")."))
+    stop(paste0(
+      "PrefLib datafile is corrupt: ",
+      "missing required metadata (",
+      paste(required_attributes[
+        which(!required_attributes %in% names(preflib_attributes))
+      ]),
+      ")."
+    ))
   }
 
   # Concatenate all the 'ALTERNATIVE NAME X' into a list of names
@@ -134,13 +145,15 @@ read_preflib <- function(file,
     ),
     collapse = "\n"
   )
-  preferences <- read.csv(text = csv_string,
-                          header = FALSE,
-                          stringsAsFactors = FALSE,
-                          strip.white = TRUE,
-                          quote = "'",
-                          col.names = paste0("V", 1:(n_alternatives + 1)),
-                          colClasses = rep("character", n_alternatives))
+  preferences <- read.csv(
+    text = csv_string,
+    header = FALSE,
+    stringsAsFactors = FALSE,
+    strip.white = TRUE,
+    quote = "'",
+    col.names = paste0("V", 1:(n_alternatives + 1)),
+    colClasses = rep("character", n_alternatives)
+  )
   # Replace character columns with lists
   preferences[, seq(2, ncol(preferences))] <- as.data.frame(
     do.call(
@@ -161,7 +174,7 @@ read_preflib <- function(file,
   )
   names(preferences) <- c(
     "Frequency",
-    paste("Rank", seq_len(ncol(preferences)  - 1))
+    paste("Rank", seq_len(ncol(preferences) - 1))
   )
   frequencies <- preferences[, 1]
   preferences <- preferences[, -1]
@@ -177,22 +190,24 @@ read_preflib <- function(file,
   n_unique_orders <- as.integer(preflib_attributes[["NUMBER UNIQUE ORDERS"]])
   n_voters <- as.integer(preflib_attributes[["NUMBER VOTERS"]])
   if (length(aggregated_prefs$preferences) != n_unique_orders) {
-    warning(paste0("Expected ",
-                   n_unique_orders,
-                   " unique orderings but only ",
-                   length(aggregated_prefs$preferences),
-                   " were recovered when reading the PrefLib datafile.",
-                   " The file may be corrupt."
-                    ))
+    warning(paste0(
+      "Expected ",
+      n_unique_orders,
+      " unique orderings but only ",
+      length(aggregated_prefs$preferences),
+      " were recovered when reading the PrefLib datafile.",
+      " The file may be corrupt."
+    ))
   }
   if (sum(aggregated_prefs$frequencies) != n_voters) {
-    warning(paste0("Expected ",
-                   n_voters,
-                   " total orderings but only ",
-                   sum(aggregated_prefs$frequencies),
-                   " were recovered when reading the PrefLib datafile.",
-                   " The file may be corrupt."
-                    ))
+    warning(paste0(
+      "Expected ",
+      n_voters,
+      " total orderings but only ",
+      sum(aggregated_prefs$frequencies),
+      " were recovered when reading the PrefLib datafile.",
+      " The file may be corrupt."
+    ))
   }
 
   return(aggregated_prefs)
@@ -297,7 +312,7 @@ read_preflib <- function(file,
 #' `attr(x, "preflib")`, and if it exists we check for `RELATED FILES`.
 #'
 #' @export
-write_preflib <- function(x,
+write_preflib <- function(x, # nolint: cyclocomp_linter
                           file = "",
                           title = NULL,
                           publication_date = NULL,
@@ -314,62 +329,85 @@ write_preflib <- function(x,
   if (missing(title)) {
     if (is.list(pl_attr) && "TITLE" %in% names(pl_attr)) {
       title <- pl_attr[["TITLE"]]
-      message("`title` inferred from attributes of `x`: ",
-              title)
+      message(
+        "`title` inferred from attributes of `x`: ",
+        title
+      )
     } else {
       title <- NA
-      warning("Missing `title`: the PrefLib format requires a ",
-              "title to be specified. Using `NA`.")
+      warning(
+        "Missing `title`: the PrefLib format requires a ",
+        "title to be specified. Using `NA`."
+      )
     }
   }
 
   if (missing(publication_date)) {
     if (is.list(pl_attr) && "PUBLICATION DATE" %in% names(pl_attr)) {
       publication_date <- pl_attr[["PUBLICATION DATE"]]
-      message("`publication_date` inferred from attributes of `x`: ",
-              publication_date)
+      message(
+        "`publication_date` inferred from attributes of `x`: ",
+        publication_date
+      )
     } else {
       publication_date <- format(Sys.time(), "%Y-%m-%d")
-      warning("Missing `publication_date`, using today's date(",
-              publication_date,
-              ").")
+      warning(
+        "Missing `publication_date`, using today's date(",
+        publication_date,
+        ")."
+      )
     }
   }
 
   if (missing(modification_date)) {
     if (is.list(pl_attr) && "MODIFICATION DATE" %in% names(pl_attr)) {
       modification_date <- pl_attr[["MODIFICATION DATE"]]
-      message("`modification_date` inferred from attributes of `x`: ",
-              modification_date)
+      message(
+        "`modification_date` inferred from attributes of `x`: ",
+        modification_date
+      )
     } else {
       modification_date <- format(Sys.time(), "%Y-%m-%d")
-      warning("Missing `modification_date`, using today's date(",
-              modification_date,
-              ").")
+      warning(
+        "Missing `modification_date`, using today's date(",
+        modification_date,
+        ")."
+      )
     }
   }
 
   if (missing(modification_type)) {
     if (is.list(pl_attr) && "MODIFICATION TYPE" %in% names(pl_attr)) {
       modification_type <- pl_attr[["MODIFICATION TYPE"]]
-      message("`modification_type` inferred from attributes of `x`: ",
-              modification_type)
+      message(
+        "`modification_type` inferred from attributes of `x`: ",
+        modification_type
+      )
     } else {
       modification_type <- NA
-      warning("Missing `modification_type`: the PrefLib format requires ",
-              "this to be specified. Using `NA`.")
-
+      warning(
+        "Missing `modification_type`: the PrefLib format requires ",
+        "this to be specified. Using `NA`."
+      )
     }
   } else {
-    modification_type <- try(match.arg(modification_type,
-                                       c("original",
-                                         "induced",
-                                         "imbued",
-                                         "synthetic")),
-                             silent = TRUE)
+    modification_type <- try(
+      match.arg(
+        modification_type,
+        c(
+          "original",
+          "induced",
+          "imbued",
+          "synthetic"
+        )
+      ),
+      silent = TRUE
+    )
     if (inherits(modification_type, "try-error")) {
-      stop("`modification_type` must be one of \"original\", \"induced\",",
-           "\"imbued\" or \"synthetic\".")
+      stop(
+        "`modification_type` must be one of \"original\", \"induced\",",
+        "\"imbued\" or \"synthetic\"."
+      )
     }
   }
 
@@ -423,9 +461,13 @@ write_preflib <- function(x,
     as.matrix(x$preferences),
     1L,
     function(item_ranks) {
-      paste0(sapply(seq_len(max(na.omit(item_ranks))),
-                    function(ri) fmt_eql_items(which(ri == item_ranks))),
-             collapse = ",")
+      paste0(
+        sapply(
+          seq_len(max(na.omit(item_ranks))),
+          function(ri) fmt_eql_items(which(ri == item_ranks))
+        ),
+        collapse = ","
+      )
     }
   )
   lines <- c(lines, paste0(x$frequencies, ": ", orderings))

@@ -1,9 +1,10 @@
 item_names <- c("A", "B", "C")
 
-rankings <- matrix(c(
-  1, 2, 3,
-  3, 2, 1,
-  2, 1, 3
+rankings <- matrix(
+  c(
+    1, 2, 3,
+    3, 2, 1,
+    2, 1, 3
   ),
   nrow = 3,
   byrow = TRUE

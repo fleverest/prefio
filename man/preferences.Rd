@@ -180,10 +180,14 @@ determined automatically.
 # create rankings from data in long form
 
 # Example long-form data
-x <- data.frame(id = c(rep(1:4, each = 4), 5, 5, 5),
-                item = c(LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
-                           LETTERS[3:5]),
-                rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3))
+x <- data.frame(
+  id = c(rep(1:4, each = 4), 5, 5, 5),
+  item = c(
+    LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
+    LETTERS[3:5]
+  ),
+  rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3)
+)
 
 # * Set #1 has two different ranks for the same item (item C
 # has rank 1 and 2). This item will be excluded from the preferences.
@@ -200,12 +204,14 @@ split(x, x$rank)
 preferences(x, id = "id", item = "item", rank = "rank")
 
 # Convert an existing matrix of rankings to a preferences object.
-rnk <- matrix(c(1, 2, 0, 0,
-                4, 1, 2, 3,
-                2, 1, 1, 1,
-                1, 2, 3, 0,
-                2, 1, 1, 0,
-                1, 0, 3, 2), nrow = 6, byrow = TRUE)
+rnk <- matrix(c(
+  1, 2, 0, 0,
+  4, 1, 2, 3,
+  2, 1, 1, 1,
+  1, 2, 3, 0,
+  2, 1, 1, 0,
+  1, 0, 3, 2
+), nrow = 6, byrow = TRUE)
 colnames(rnk) <- c("apple", "banana", "orange", "pear")
 
 rnk <- as.preferences(rnk, format = "ranking")
