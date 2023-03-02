@@ -1,12 +1,14 @@
 on:
+  push:
+    branches: ["!gh-pages"]
   pull_request:
-    branches: [main]
+    branches: ["!gh-pages"]
 
-name: Lint, Style, Document
+name: Lint-Style-Document
 
 jobs:
-  lsd:
-    name: lint_style_document
+  Lint-Style-Document:
+    name: Lint-Style-Document
     runs-on: ubuntu-latest
     env:
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
