@@ -31,7 +31,7 @@
 #'   0, 0, 1, 2,
 #'   2, 1, 0, 0,
 #'   0, 1, 2, 3
-#' ), ncol = 4, byrow = TRUE))
+#' ), ncol = 4, byrow = TRUE, dimnames = list(NULL, LETTERS[1:4])))
 #' length(R)
 #' R
 #'
