@@ -23,5 +23,6 @@ exclusions: list(
   "man",
   "tests",
   "touchstone",
-  "vignettes"
+  "vignettes",
+  "README.Rmd"
  )

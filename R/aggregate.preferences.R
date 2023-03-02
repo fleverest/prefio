@@ -82,7 +82,7 @@ aggregate.preferences <- function(x, frequencies = NULL, ...) {
     )
     colnames(res) <- c("preferences", "frequencies")
   } else {
-    if (is.null(frequencies)) frequencies <- rep.int(1, length(r))
+    if (is.null(frequencies)) frequencies <- rep.int(1L, length(r))
     res <- data.frame(
       preferences = x,
       frequencies = frequencies

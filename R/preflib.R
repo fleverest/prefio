@@ -80,8 +80,8 @@ read_preflib <- function(file,
     regexpr(": ", header_lines),
     invert = TRUE
   )
-  preflib_attributes <- lapply(metadata, function(x) x[2])
-  names(preflib_attributes) <- sapply(metadata, function(x) x[1])
+  preflib_attributes <- lapply(metadata, function(x) x[2L])
+  names(preflib_attributes) <- sapply(metadata, function(x) x[1L])
 
   # Assert that the minimum required attributes are present
   required_attributes <- c(
@@ -100,10 +100,10 @@ read_preflib <- function(file,
     )
   }
   if (!"NUMBER ALTERNATIVES" %in% names(preflib_attributes)) {
-    stop(paste0(
+    stop(
       "PrefLib datafile is corrupt: ",
       "missing 'NUMBER ALTERNATIVES' metadata."
-    ))
+    )
   }
   n_alternatives <- as.integer(preflib_attributes[["NUMBER ALTERNATIVES"]])
   required_attributes <- c(
@@ -113,15 +113,19 @@ read_preflib <- function(file,
       seq_len(n_alternatives)
     )
   )
-  if (any(!required_attributes %in% names(preflib_attributes))) {
-    stop(paste0(
+  if (!all(required_attributes %in% names(preflib_attributes))) {
+    missing_attributes <- paste(
+      required_attributes[
+        which(!required_attributes %in% names(preflib_attributes))
+      ],
+      sep = ", "
+    )
+    stop(
       "PrefLib datafile is corrupt: ",
       "missing required metadata (",
-      paste(required_attributes[
-        which(!required_attributes %in% names(preflib_attributes))
-      ]),
+      missing_attributes,
       ")."
-    ))
+    )
   }
 
   # Concatenate all the 'ALTERNATIVE NAME X' into a list of names
@@ -151,15 +155,15 @@ read_preflib <- function(file,
     stringsAsFactors = FALSE,
     strip.white = TRUE,
     quote = "'",
-    col.names = paste0("V", 1:(n_alternatives + 1)),
+    col.names = paste0("V", 1L:(n_alternatives + 1L)),
     colClasses = rep("character", n_alternatives)
   )
   # Replace character columns with lists
-  preferences[, seq(2, ncol(preferences))] <- as.data.frame(
+  preferences[, seq(2L, ncol(preferences))] <- as.data.frame(
     do.call(
       rbind,
       apply(
-        preferences[, seq(2, ncol(preferences))],
+        preferences[, seq(2L, ncol(preferences))],
         1L,
         strsplit,
         split = ","
@@ -174,10 +178,10 @@ read_preflib <- function(file,
   )
   names(preferences) <- c(
     "Frequency",
-    paste("Rank", seq_len(ncol(preferences) - 1))
+    paste("Rank", seq_len(ncol(preferences) - 1L))
   )
-  frequencies <- preferences[, 1]
-  preferences <- preferences[, -1]
+  frequencies <- preferences[, 1L]
+  preferences <- preferences[, -1L]
   preferences <- as.preferences(
     preferences,
     "ordering",
@@ -190,24 +194,24 @@ read_preflib <- function(file,
   n_unique_orders <- as.integer(preflib_attributes[["NUMBER UNIQUE ORDERS"]])
   n_voters <- as.integer(preflib_attributes[["NUMBER VOTERS"]])
   if (length(aggregated_prefs$preferences) != n_unique_orders) {
-    warning(paste0(
+    warning(
       "Expected ",
       n_unique_orders,
       " unique orderings but only ",
       length(aggregated_prefs$preferences),
       " were recovered when reading the PrefLib datafile.",
       " The file may be corrupt."
-    ))
+    )
   }
   if (sum(aggregated_prefs$frequencies) != n_voters) {
-    warning(paste0(
+    warning(
       "Expected ",
       n_voters,
       " total orderings but only ",
       sum(aggregated_prefs$frequencies),
       " were recovered when reading the PrefLib datafile.",
       " The file may be corrupt."
-    ))
+    )
   }
 
   return(aggregated_prefs)
@@ -480,7 +484,7 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
 
 # Helper function for formatting list of items at equal rank
 fmt_eql_items <- function(items) {
-  if (length(items) > 1) {
+  if (length(items) > 1L) {
     paste0("{", paste0(items, collapse = ","), "}")
   } else {
     as.character(items)

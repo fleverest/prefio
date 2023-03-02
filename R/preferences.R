@@ -219,10 +219,10 @@ preferences <- function(data,
     if (!is.null(colnames(x)) && missing(item_names)) {
       item_names <- colnames(x)
     } else if (is.null(colnames(x)) && missing(item_names)) {
-      message(paste0(
+      message(
         "Item names could not be inferred from ",
-        "ranked data. Defaulting to the integers 1-", dim(x)[2]
-      ))
+        "ranked data. Defaulting to the integers 1-", dim(x)[2L]
+      )
     }
     prefs <- as.preferences.matrix(data,
       format = "ranking",
@@ -395,7 +395,7 @@ long_to_ranking <- function(data,
     dplyr::filter(!is.na(rank) & !is.na(item) & !is.na(id)) %>%
     # Filter duplicate rankings, keeping the highest ranking for an item.
     dplyr::group_by(id, item) %>%
-    dplyr::top_n(1, -rank) %>%
+    dplyr::top_n(1L, -rank) %>%
     # Convert rankings to dense rankings
     dplyr::ungroup(item) %>%
     dplyr::mutate(rank = dplyr::dense_rank(rank)) %>%
@@ -408,13 +408,13 @@ long_to_ranking <- function(data,
 
 # A helper to convert a matrix of rankings into ordering format.
 ranking_to_ordering <- function(ranking) {
-  max_rank <- max(c(0, na.omit(c(as.matrix(ranking)))))
+  max_rank <- max(c(0L, na.omit(c(as.matrix(ranking)))))
   if (getRversion() < "4.1.0") {
     out <- as.data.frame(
       do.call(
         rbind,
         lapply(
-          seq_len(dim(ranking)[1]),
+          seq_len(dim(ranking)[1L]),
           function(i) {
             r <- ranking[i, ]
             sapply(
@@ -442,7 +442,7 @@ ranking_to_ordering <- function(ranking) {
       )
     )
   }
-  if (ncol(out) > 0) {
+  if (ncol(out) > 0L) {
     colnames(out) <- paste0("Rank", seq_len(max_rank))
   }
   out
@@ -464,13 +464,13 @@ Ops.preferences <- function(e1, e2) {
       e1 <- unclass(e1)
       e2 <- unclass(e2)[, e1_names, drop = FALSE]
       if (anyNA(e1)) {
-        e1[is.na(e1)] <- 0
+        e1[is.na(e1)] <- 0L
       }
       if (anyNA(e2)) {
-        e2[is.na(e2)] <- 0
+        e2[is.na(e2)] <- 0L
       }
       cmp <- rowSums(e1[seq_len(minlen), , drop = FALSE] ==
-        e2[seq_len(minlen), , drop = FALSE]) >= 1
+        e2[seq_len(minlen), , drop = FALSE]) >= 1L
       if (minlen < maxlen) {
         warning("Objects being compared are not the same length.")
         cmp <- c(cmp, rep(FALSE, maxlen - minlen))
@@ -557,7 +557,7 @@ Ops.preferences <- function(e1, e2) {
       value <- do.call(
         rbind,
         lapply(
-          seq_len(dim(value)[1]),
+          seq_len(dim(value)[1L]),
           function(i) dplyr::dense_rank(value[i, ])
         )
       )
@@ -673,7 +673,7 @@ as.preferences.default <- function(x,
   # Convert orderings data frames into ranking matrices.
   if (
     format == "ordering" ||
-      "data.frame" %in% class(x) &&
+      inherits(x, "data.frame") &&
         all(sapply(x, typeof) == "list")
   ) {
     x <- ordering_to_ranking(x, item_names, verbose)
@@ -784,7 +784,7 @@ format.preferences <- function(x, width = 40L, ...) {
     ord <- order(i)
     if (length(obj) > 1L) {
       op <- ifelse(diff(i[ord]) == 0L, " = ", " > ")
-      paste(obj[ord], c(op, ""), sep = "", collapse = "")
+      paste0(obj[ord], c(op, ""), collapse = "")
     } else if (length(obj) == 1L) {
       obj
     } else {
@@ -794,7 +794,7 @@ format.preferences <- function(x, width = 40L, ...) {
   value <- apply(x, 1L, f, items = attr(x, "item_names"))
   nc <- nchar(value)
   trunc <- !is.na(nc) & nc > width
-  value[trunc] <- paste(strtrim(value[trunc], width - 4), "...")
+  value[trunc] <- paste(strtrim(value[trunc], width - 4L), "...")
   value
 }
 
@@ -807,7 +807,7 @@ rbind.preferences <- function(...) {
   ref <- nm[[1L]]
   ok <- vapply(nm, identical, TRUE, ref)
   item_names <- unique(unlist(nm))
-  if (any(!ok)) {
+  if (!all(ok)) {
     preflist <- lapply(
       preflist,
       function(x) {
@@ -862,12 +862,11 @@ as.data.frame.preferences <- function(x,
       stop("row names contain missing values")
     }
     if (anyDuplicated(row.names)) {
-      stop(paste(
+      dup_rows <- paste(unique(row.names[duplicated(row.names)]), collapse = ", ")
+      stop(
         "duplicate row.names: ",
-        paste(unique(row.names[duplicated(row.names)]),
-          collapse = ", "
-        )
-      ))
+        dup_rows
+      )
     }
   }
   attr(value, "row.names") <- row.names
@@ -911,7 +910,7 @@ names.preferences <- function(x, ...) {
 "names<-.preferences" <- function(x, value) {
   if (anyNA(value) ||
     !identical(unique(value), value) ||
-    length(value) != dim(x)[2]) {
+    length(value) != dim(x)[2L]) {
     stop("Item names must be unique and cannot be empty.")
   }
   attr(x, "item_names") <- value

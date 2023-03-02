@@ -1,8 +1,8 @@
-^\.github$
 ^LICENSE$
 ^README\.(Rmd|md|html)$
-^readme.bib$
+^\.github$
 ^_pkgdown\.yml$
+^codecov\.yml$
 ^docs$
 ^pkgdown$
-^codecov\.yml$
+^readme.bib$
