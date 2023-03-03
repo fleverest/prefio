@@ -60,7 +60,7 @@
 #'                item.}
 #' }
 #' @param format The format of the data: one of "ordering", "ranking", or
-#' "long" (see above). By default, `data` is assumed to be in `ordering` format.
+#' "long" (see above). By default, `data` is assumed to be in "long" format.
 #' @param id For `data` in long-format: the column representing the
 #' preference set grouping.
 #' @param item For `data` in long-format: the column representing
@@ -148,20 +148,20 @@
 #' # Access the first three sets of preferences
 #' ord[1:3, ]
 #'
-#' # Truncate preferences to the top 2 ranks and return as a data frame
-#' ord[, 1:2, by.ordering = TRUE]
+#' # Truncate preferences to the top 2 ranks
+#' ord[, 1:2, by_rank = TRUE]
 #'
 #' # Exclude pear from the rankings
 #' ord[, -4]
 #'
-#' # Get the highest-ranked items and return as a data frame
-#' ord[, 1, by.ordering = TRUE]
-#'
-#' # Get the rank of apple in the third preference-set
-#' as.matrix(ord)[3, 1]
+#' # Get the highest-ranked items and return as a data.frame of orderings
+#' ord[, 1, by_rank = TRUE, as.ordering = TRUE]
 #'
 #' # Convert the preferences to a ranking matrix
 #' as.matrix(ord)
+#'
+#' # Get the rank of apple in the third preference-set
+#' as.matrix(ord)[3, 1]
 #'
 #' # Get all the ranks assigned to apple as a vector
 #' as.matrix(ord)[, "apple"]
@@ -488,12 +488,18 @@ Ops.preferences <- function(e1, e2) {
 #' @method [ preferences
 #' @param x The `preferences` object to subset.
 #' @param i The index of the preference-set to access.
-#' @param j The rank index to access, or if `by.ordering = TRUE` the
-#' index or name of the item to obtain the ranking for.
-#' @param by.ordering When `FALSE`, returns a `preferences` object:
+#' @param j The items to project onto, either by index or by name; if
+#' `by.rank = TRUE`, the ranks to access.
+#' @param j The item names or indices to project onto, e.g. if `j = 1` the
+#' preferences will be projected only onto the first item; if `by.rank = TRUE`
+#' `j` corresponds to the rank of the items to subset to, e.g. if `j = 1` then
+#' preferences will be truncated to only contain their highest-preference.
+#' @param by.rank When `FALSE`, the index `j` corresponds to items, when true
+#' the index corresponds to rank.
+#' @param as.ordering When `FALSE`, returns a `preferences` object:
 #' internally rows \eqn{i} contain the ranking assigned to each item
 #' in preference \eqn{p_i}. When `TRUE`, returns a data frame where
-#' rows group the the candidates in order of rank.
+#' columns group the items by rank.
 #' @param drop If `TRUE`, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
@@ -502,35 +508,13 @@ Ops.preferences <- function(e1, e2) {
                             i,
                             j,
                             ...,
-                            drop = FALSE,
-                            by.ordering = FALSE) {
+                            by.rank = FALSE,
+                            as.ordering = FALSE) {
   if (!missing(j) && is.numeric(j) && any(abs(j) > ncol(x))) {
     stop("Subscript `j` out of bounds.")
   }
   if (!missing(i) && is.numeric(i) && any(abs(i) > nrow(x))) {
     stop("Subscript `i` out of bounds.")
-  }
-
-  # Accessing orderings
-  if (by.ordering) {
-    if (drop) {
-      message("Cannot drop when returning as orderings")
-    }
-    if (!missing(i)) {
-      if (!is.numeric(i)) {
-        stop(
-          "When accessing preferences as ordering lists, index must ",
-          "be numeric."
-        )
-      }
-      value <- .subset(x, i, TRUE, drop = FALSE)
-    } else {
-      value <- x
-    }
-    if (missing(j)) {
-      j <- TRUE
-    }
-    return(ranking_to_ordering(value)[, j])
   }
 
   # Accessing rankings
@@ -551,9 +535,16 @@ Ops.preferences <- function(e1, e2) {
     if (missing(i)) {
       i <- TRUE
     }
-    # Subset and convert to dense rank again.
-    if (getRversion() < "4.1.0") {
+    if (by.rank) {
+      # Select only ranks specified in j:
+      value <- .subset(x, i, TRUE, drop = FALSE)
+      value[matrix(!value %in% j, nrow = 3L)] <- NA
+    } else {
+      # Subset normally
       value <- .subset(x, i, j, drop = FALSE)
+    }
+    # Convert to dense rank
+    if (getRversion() < "4.1.0") {
       value <- do.call(
         rbind,
         lapply(
@@ -564,7 +555,7 @@ Ops.preferences <- function(e1, e2) {
     } else {
       value <- do.call(
         rbind,
-        apply(.subset(x, i, j, drop = FALSE),
+        apply(value,
           1L,
           dplyr::dense_rank,
           simplify = FALSE
@@ -572,31 +563,27 @@ Ops.preferences <- function(e1, e2) {
       )
     }
   }
-  items <- attr(x, "item_names")
 
   # Sort subset of items so that they appear in the same order as the
   # original preferences' items.
-  if (!is.character(j)) {
-    sub_items <- items[j]
-  } else {
-    sub_items <- j
-  }
-  ord <- order(match(sub_items, items))
-  value <- value[, ord, drop = drop]
-  sub_items <- sub_items[ord]
-
-  if (is.null(dim(value))) {
-    if (length(sub_items) > 1L) {
-      names(value) <- sub_items
+  items <- attr(x, "item_names")
+  if (!by.rank) {
+    if (!is.character(j)) {
+      sub_items <- items[j]
+    } else {
+      sub_items <- j
     }
-    value
-  } else if (is.character(j)) {
-    structure(value,
-      dimnames = list(NULL, sub_items),
-      item_names = sub_items,
-      class = c("preferences", class(value)),
-      preftype = preftype(value)
-    )
+    ord <- order(match(sub_items, items))
+    value <- value[, ord, drop = FALSE]
+    sub_items <- sub_items[ord]
+  } else {
+    sub_items <- items
+  }
+
+  # Accessing orderings
+  if (as.ordering) {
+    colnames(value) <- sub_items
+    ranking_to_ordering(value)
   } else {
     structure(value,
       dimnames = list(NULL, sub_items),
@@ -661,7 +648,7 @@ as.preferences.grouped_preferences <- function(x,
 #' @method as.preferences default
 #' @export
 as.preferences.default <- function(x,
-                                   format = c("ranking", "long", "ordering"),
+                                   format = c("long", "ranking", "ordering"),
                                    id = NULL,
                                    item = NULL,
                                    rank = NULL,
@@ -699,7 +686,7 @@ as.preferences.default <- function(x,
 #' @method as.preferences matrix
 #' @export
 as.preferences.matrix <- function(x,
-                                  format = c("ranking", "long"),
+                                  format = c("long", "ranking"),
                                   id = NULL,
                                   item = NULL,
                                   rank = NULL,
@@ -719,13 +706,15 @@ as.preferences.matrix <- function(x,
       verbose
     )
   } else if (format == "ranking") {
-    prefs <- x
+    if (is.null(item_names)) {
+      item_names <- colnames(x)
+    }
+    prefs <- t(apply(x, 1L, dplyr::dense_rank))
+    colnames(prefs) <- item_names
   } else {
     stop("Not implemented.")
   }
-  if (is.null(item_names)) {
-    item_names <- colnames(prefs)
-  }
+  item_names <- colnames(prefs)
   colnames(prefs) <- item_names
   class(prefs) <- c("preferences", class(prefs))
   attr(prefs, "item_names") <- item_names

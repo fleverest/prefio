@@ -20,8 +20,7 @@ group(x, ...)
 \code{grouped_preferences} object.}
 
 \item{...}{Additional arguments passed on to \verb{\link{as.preferences}}
-by \code{grouped_preferences}; unused by
-\code{format}.}
+by \code{grouped_preferences}; unused by \code{format}.}
 
 \item{index}{A numeric vector or a factor with length equal to the number of
 preferences specifying the subject for each set.}

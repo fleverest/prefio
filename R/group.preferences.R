@@ -16,8 +16,7 @@
 #' @param width The maximum width in number of characters to format the
 #' preferences.
 #' @param ... Additional arguments passed on to `\link{as.preferences}`
-#' by `grouped_preferences`; unused by
-#' `format`.
+#' by `grouped_preferences`; unused by `format`.
 #' @return An object of class `grouped_preferences`, which is a vector of
 #' of group IDs with the following attributes:
 #' \item{preferences}{ The `preferences` object.}
@@ -133,12 +132,12 @@ group.preferences <- function(x, index, ...) {
     index <- attr(x, "index")
   }
   # now subset preferences matrix
-  preferences <- attr(x, "preferences")[i, j]
+  preferences <- attr(x, "preferences")[i, j, ...]
   # convert preferences matrix to grouped_preferences
   if (!is.null(group_names)) {
-    group(as.preferences(preferences), as.factor(group_names[index]))
+    group(preferences, as.factor(group_names[index]))
   } else {
-    group(as.preferences(preferences), index)
+    group(preferences, index)
   }
 }
 

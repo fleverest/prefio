@@ -12,7 +12,6 @@
 #' previously aggregated.
 #' @param i indices specifying preferences to extract, as for `\link{[}`.
 #' @param j indices specifying items to extract, as for `\link{[}`.
-#' @param drop if `TRUE` return single row/column matrices as a vector.
 #' @param as.aggregated_preferences if `TRUE` create an
 #' `aggregated_preferences` object from the indexed preferences Otherwise
 #' index the underlying matrix of ranks and return in a data frame with the
@@ -123,8 +122,8 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
 #' @rdname aggregate.preferences
 #' @method [ aggregated_preferences
 #' @export
-"[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
-  preferences <- x$preferences[i, j, ..., drop = drop]
+"[.aggregated_preferences" <- function(x, i, j, ...) {
+  preferences <- x$preferences[i, j, ...]
   aggregate(preferences, frequencies = x$frequencies[i])
 }
 
