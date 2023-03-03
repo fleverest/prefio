@@ -194,3 +194,55 @@ test_that("Loading preferences from long format doesn't permute item names", {
   expect_true(all(prefs[3, by.ordering = TRUE] == c("A", "B", "C", "D")))
   expect_true(all(prefs[4, by.ordering = TRUE] == c("D", "B", "C", "A")))
 })
+
+test_that("Using `frequencies` argument with long-format data yields warning", {
+  expect_warning(
+    preferences(
+      long,
+      format = "long",
+      id = "id",
+      item = "item",
+      rank = "rank",
+      frequencies = rep(2, 6)
+    )
+  )
+})
+
+test_that("Loading \"ranking\" format with no names yields warning", {
+  expect_warning(preferences(unname(rankings), format = "ranking"))
+})
+
+test_that("Calling `preferences` with nonsense format raises error", {
+  expect_error(preferences(rankings, format = "nonsense"))
+})
+
+test_that("Calling `preferences` with `item_names` missing item raises error", {
+  expect_error(
+    preferences(
+      long,
+      format = "long",
+      id = "id",
+      item = "item",
+      rank = "rank",
+      item_names = LETTERS[1:2]
+    )
+  )
+  expect_error(
+    preferences(rankings, format = "ranking", item_names = LETTERS[1:2])
+  )
+  expect_error(
+    preferences(ordering, format = "ordering", item_names = LETTERS[1:2])
+  )
+})
+
+test_that("preferences from long format without id item or rank throws error", {
+  expect_error(
+    preferences(long, format = "long", item = "item", id = "id")
+  )
+  expect_error(
+    preferences(long, format = "long", item = "item", rank = "rank")
+  )
+  expect_error(
+    preferences(long, format = "long", rank = "rank", id = "id")
+  )
+})

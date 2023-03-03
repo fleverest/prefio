@@ -177,12 +177,23 @@ preferences <- function(data,
                         aggregate = FALSE,
                         verbose = TRUE,
                         ...) {
-  format <- match.arg(format)
+  fmt <- try(match.arg(format), silent = TRUE)
   # First we reformat the data into a matrix of rankings.
-  if (format == "long") {
+  if (inherits(fmt, "try-error")) {
+    stop(
+      "Format '", format, "' not implemented: Must be one ",
+      "of 'ordering', 'ranking' or 'long'."
+    )
+  } else if (fmt == "long") {
+    if (missing(id) || missing(item) || missing(rank)) {
+      stop(
+        "When creating \"preferences\" from long-format data, ",
+        "`id`, `item` and `rank` must all specify columns in the data."
+      )
+    }
     if (!missing(frequencies)) {
       warning(
-        "When creating \"preferences\" from long-format data,",
+        "When creating \"preferences\" from long-format data, ",
         "`frequencies` parameter is ignored."
       )
       frequencies <- NULL
@@ -205,7 +216,7 @@ preferences <- function(data,
       aggregate = FALSE,
       verbose = verbose
     )
-  } else if (format == "ordering") {
+  } else if (fmt == "ordering") {
     ranking <- ordering_to_ranking(data, NULL, verbose)
     prefs <- as.preferences.matrix(ranking,
       format = "ranking",
@@ -213,16 +224,17 @@ preferences <- function(data,
       aggregate = FALSE,
       verbose = verbose
     )
-  } else if (format == "ranking") {
+  } else if (fmt == "ranking") {
     x <- data
     # Infer item names
     if (!is.null(colnames(x)) && missing(item_names)) {
       item_names <- colnames(x)
     } else if (is.null(colnames(x)) && missing(item_names)) {
-      message(
+      warning(
         "Item names could not be inferred from ",
         "ranked data. Defaulting to the integers 1-", dim(x)[2L]
       )
+      item_names <- as.character(seq_len(dim(x)[2L]))
     }
     prefs <- as.preferences.matrix(data,
       format = "ranking",
@@ -230,11 +242,6 @@ preferences <- function(data,
       ...,
       aggregate = FALSE,
       verbose = verbose
-    )
-  } else {
-    stop(
-      "Format '", format, "' not implemented: Must be one ",
-      "of 'ordering', 'ranking' or 'long'."
     )
   }
   # Aggregate if necessary.
@@ -344,10 +351,10 @@ validate_long <- function(data,
     item_names <- unique(data[, "item"])
   }
   if (is.character(data[, "item"])) {
-    if (is.null(setdiff(
+    if (length(setdiff(
       na.omit(unique(data[, "item"])),
       item_names
-    ))) {
+    )) > 0L) {
       stop("Found `item` not in `item_names`.")
     }
   } else if (is.numeric(data[, "item"])) {
