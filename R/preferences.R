@@ -345,7 +345,7 @@ validate_long <- function(data,
   }
   if (is.character(data[, "item"])) {
     if (is.null(setdiff(
-      unique(data[, "item"]),
+      na.omit(unique(data[, "item"])),
       item_names
     ))) {
       stop("Found `item` not in `item_names`.")

@@ -1,3 +1,5 @@
+^.lintr$
+^.pre-commit-config.yaml$
 ^LICENSE$
 ^README\.(Rmd|md|html)$
 ^\.github$
