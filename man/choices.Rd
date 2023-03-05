@@ -40,6 +40,7 @@ R <- matrix(c(
   1, 0, 3, 2
 ), nrow = 6, byrow = TRUE)
 colnames(R) <- c("apple", "banana", "orange", "pear")
+R <- preferences(R, format = "ranking")
 
 actual_choices <- choices(R, names = TRUE)
 actual_choices[1:6, ]

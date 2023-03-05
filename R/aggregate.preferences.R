@@ -12,7 +12,6 @@
 #' previously aggregated.
 #' @param i indices specifying preferences to extract, as for `\link{[}`.
 #' @param j indices specifying items to extract, as for `\link{[}`.
-#' @param drop if `TRUE` return single row/column matrices as a vector.
 #' @param as.aggregated_preferences if `TRUE` create an
 #' `aggregated_preferences` object from the indexed preferences Otherwise
 #' index the underlying matrix of ranks and return in a data frame with the
@@ -36,7 +35,7 @@
 #'   1, 0, 3, 2
 #' ), nrow = 6, byrow = TRUE)
 #' colnames(R) <- c("apple", "banana", "orange", "pear")
-#' R <- as.preferences(R)
+#' R <- as.preferences(R, format = "ranking")
 #'
 #' # aggregate the preferences
 #' A <- aggregate(R)
@@ -49,6 +48,9 @@
 #'
 #' # (partial) preferences projected to items 2-4 only
 #' A[, 2:4]
+#'
+#' # Project preferences onto their hightest ranking
+#' A[, 1, by.rank = TRUE]
 #'
 #' # convert to a matrix
 #' as.matrix(A)
@@ -123,8 +125,8 @@ as.aggregated_preferences.aggregated_preferences <- function(x, ...) {
 #' @rdname aggregate.preferences
 #' @method [ aggregated_preferences
 #' @export
-"[.aggregated_preferences" <- function(x, i, j, ..., drop = FALSE) {
-  preferences <- x$preferences[i, j, ..., drop = drop]
+"[.aggregated_preferences" <- function(x, i, j, ...) {
+  preferences <- x$preferences[i, j, ...]
   aggregate(preferences, frequencies = x$frequencies[i])
 }
 

@@ -20,8 +20,7 @@ group(x, ...)
 \code{grouped_preferences} object.}
 
 \item{...}{Additional arguments passed on to \verb{\link{as.preferences}}
-by \code{grouped_preferences}; unused by
-\code{format}.}
+by \code{grouped_preferences}; unused by \code{format}.}
 
 \item{index}{A numeric vector or a factor with length equal to the number of
 preferences specifying the subject for each set.}
@@ -51,15 +50,18 @@ preferences to be linked to covariates with group-specific values.
 \examples{
 
 # ungrouped preferences (5 preference sets, 4 items)
-R <- as.preferences(matrix(c(
-  1, 2, 0, 0,
-  0, 2, 1, 0,
-  0, 0, 1, 2,
-  2, 1, 0, 0,
-  0, 1, 2, 3
-), ncol = 4, byrow = TRUE, dimnames = list(NULL, LETTERS[1:4])))
+R <- as.preferences(
+  matrix(c(
+    1, 2, 0, 0,
+    0, 2, 1, 0,
+    0, 0, 1, 2,
+    2, 1, 0, 0,
+    0, 1, 2, 3
+  ), ncol = 4, byrow = TRUE),
+  format = "ranking",
+  item_names = LETTERS[1:4]
+)
 length(R)
-R
 
 # group preferences (first three in group 1, next two in group 2)
 G <- group(R, c(1, 1, 1, 2, 2))
@@ -76,8 +78,11 @@ G[1, ]
 ## exclude item 3 from preferences
 G[, -3]
 
+## Project preferences in all groups to their first preference
+G[, 1, by.rank = TRUE]
+
 ## preferences from group 2, excluding item 3
-## - note group 2 becomes the first group
+## - note group 2 becomes the first (and only) group
 G[2, -3]
 
 # Group preferences by a factor

@@ -105,7 +105,7 @@ test_that("Constructing `preferences` with `frequencies` aggregates output", {
 
 test_that("`[.preferences` as orderings is inverse to `as.preferences`", {
   prefs <- preferences(rankings, format = "ranking")
-  prefs_as_ord <- prefs[, by.ordering = TRUE]
+  prefs_as_ord <- prefs[, as.ordering = TRUE]
   prefs_as_ord_as_prefs <- as.preferences(prefs_as_ord, format = "ordering")
   expect_true(all(prefs == prefs_as_ord_as_prefs))
 })
@@ -114,7 +114,7 @@ test_that("`[.preferences` produces valid preferences when subsetting", {
   prefs <- preferences(rankings, format = "ranking")
   expect_true(all(prefs[] == prefs))
   expect_true(all(prefs[1:3] == prefs))
-  expect_true(all(as.preferences(prefs[1:3, by.ordering = TRUE],
+  expect_true(all(as.preferences(prefs[1:3, as.ordering = TRUE],
     format = "ordering"
   ) == prefs))
   expect_true(all(prefs[, 1] == prefs[, "A"]))
@@ -189,10 +189,28 @@ test_that("Loading preferences from long format doesn't permute item names", {
     item = "item",
     rank = "rank"
   )
-  expect_true(all(prefs[1, by.ordering = TRUE] == c("B", "A", "C", "D")))
-  expect_true(all(prefs[2, by.ordering = TRUE] == c("C", "B", "A", "D")))
-  expect_true(all(prefs[3, by.ordering = TRUE] == c("A", "B", "C", "D")))
-  expect_true(all(prefs[4, by.ordering = TRUE] == c("D", "B", "C", "A")))
+  expect_true(all(prefs[1, as.ordering = TRUE] == c("B", "A", "C", "D")))
+  expect_true(all(prefs[2, as.ordering = TRUE] == c("C", "B", "A", "D")))
+  expect_true(all(prefs[3, as.ordering = TRUE] == c("A", "B", "C", "D")))
+  expect_true(all(prefs[4, as.ordering = TRUE] == c("D", "B", "C", "A")))
+})
+
+test_that("Subsetting preferences with `by.rank = TRUE` succeeds", {
+  x <- matrix(
+    c(
+      1, 1, 1,
+      1, 2, 3,
+      2, 3, 1,
+      3, 2, 1,
+      1, 2, 3
+    ),
+    ncol = 3,
+    byrow = TRUE
+  )
+  prefs <- preferences(x, format = "ranking", item_names = LETTERS[1:3])
+  expect_equal(prefs[1, 1, by.rank = TRUE], prefs[1])
+  expect_equal(prefs[2, 1, by.rank = TRUE], prefs[5, 1, by.rank = TRUE])
+  expect_equal(prefs[3, 3, by.rank = TRUE], prefs[4, 2, by.rank = TRUE])
 })
 
 test_that("Using `frequencies` argument with long-format data yields warning", {

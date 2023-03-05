@@ -26,7 +26,7 @@
 #'   3, 2, 0, 0, 1,
 #'   1, 0, 2, 2, 3
 #' ), nrow = 3, byrow = TRUE)
-#' X <- as.preferences(X)
+#' X <- as.preferences(X, format = "ranking", item_names = LETTERS[1:5])
 #' adjacency(X)
 #'
 #' adjacency(X, weights = c(1, 1, 2))

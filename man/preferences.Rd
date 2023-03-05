@@ -24,7 +24,7 @@ preferences(
   ...
 )
 
-\method{[}{preferences}(x, i, j, ..., drop = FALSE, by.ordering = FALSE)
+\method{[}{preferences}(x, i, j, ..., by.rank = FALSE, as.ordering = FALSE)
 
 as.preferences(x, ...)
 
@@ -32,7 +32,7 @@ as.preferences(x, ...)
 
 \method{as.preferences}{default}(
   x,
-  format = c("ranking", "long", "ordering"),
+  format = c("long", "ranking", "ordering"),
   id = NULL,
   item = NULL,
   rank = NULL,
@@ -44,7 +44,7 @@ as.preferences(x, ...)
 
 \method{as.preferences}{matrix}(
   x,
-  format = c("ranking", "long"),
+  format = c("long", "ranking"),
   id = NULL,
   item = NULL,
   rank = NULL,
@@ -77,7 +77,7 @@ item.}
 }}
 
 \item{format}{The format of the data: one of "ordering", "ranking", or
-"long" (see above). By default, \code{data} is assumed to be in \code{ordering} format.}
+"long" (see above). By default, \code{data} is assumed to be in "long" format.}
 
 \item{id}{For \code{data} in long-format: the column representing the
 preference set grouping.}
@@ -111,15 +111,18 @@ frequencies.}
 
 \item{i}{The index of the preference-set to access.}
 
-\item{j}{The rank index to access, or if \code{by.ordering = TRUE} the
-index or name of the item to obtain the ranking for.}
+\item{j}{The item names or indices to project onto, e.g. if \code{j = 1} the
+preferences will be projected only onto the first item; if \code{by.rank = TRUE}
+\code{j} corresponds to the rank of the items to subset to, e.g. if \code{j = 1} then
+preferences will be truncated to only contain their highest-preference.}
 
-\item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
+\item{by.rank}{When \code{FALSE}, the index \code{j} corresponds to items, when true
+the index corresponds to rank.}
 
-\item{by.ordering}{When \code{FALSE}, returns a \code{preferences} object:
+\item{as.ordering}{When \code{FALSE}, returns a \code{preferences} object:
 internally rows \eqn{i} contain the ranking assigned to each item
 in preference \eqn{p_i}. When \code{TRUE}, returns a data frame where
-rows group the the candidates in order of rank.}
+columns group the items by rank.}
 
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
@@ -236,20 +239,20 @@ ord <- preferences(
 # Access the first three sets of preferences
 ord[1:3, ]
 
-# Truncate preferences to the top 2 ranks and return as a data frame
-ord[, 1:2, by.ordering = TRUE]
+# Truncate preferences to the top 2 ranks
+ord[, 1:2, by_rank = TRUE]
 
 # Exclude pear from the rankings
 ord[, -4]
 
-# Get the highest-ranked items and return as a data frame
-ord[, 1, by.ordering = TRUE]
-
-# Get the rank of apple in the third preference-set
-as.matrix(ord)[3, 1]
+# Get the highest-ranked items and return as a data.frame of orderings
+ord[, 1, by_rank = TRUE, as.ordering = TRUE]
 
 # Convert the preferences to a ranking matrix
 as.matrix(ord)
+
+# Get the rank of apple in the third preference-set
+as.matrix(ord)[3, 1]
 
 # Get all the ranks assigned to apple as a vector
 as.matrix(ord)[, "apple"]
