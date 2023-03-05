@@ -75,8 +75,7 @@ format(x, max = 2L, width = 20L, ...)</code></pre></div>
 
 <dt>...</dt>
 <dd><p>Additional arguments passed on to <code>\link{as.preferences}</code>
-by <code>grouped_preferences</code>; unused by
-<code>format</code>.</p></dd>
+by <code>grouped_preferences</code>; unused by <code>format</code>.</p></dd>
 
 
 <dt>index</dt>
@@ -121,17 +120,19 @@ of group IDs with the following attributes:</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># ungrouped preferences (5 preference sets, 4 items)</span></span></span>
-<span class="r-in"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="preferences.html">as.preferences</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span></span>
-<span class="r-in"><span>  <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span></span></span>
-<span class="r-in"><span><span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">4</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span>, dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="cn">NULL</span>, <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="preferences.html">as.preferences</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>    <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">0</span>, <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">2</span>, <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>    <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">3</span></span></span>
+<span class="r-in"><span>  <span class="op">)</span>, ncol <span class="op">=</span> <span class="fl">4</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  format <span class="op">=</span> <span class="st">"ranking"</span>,</span></span>
+<span class="r-in"><span>  item_names <span class="op">=</span> <span class="va">LETTERS</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 5</span>
-<span class="r-in"><span><span class="va">R</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "A &gt; B"     "C &gt; B"     "C &gt; D"     "B &gt; A"     "B &gt; C &gt; D"</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># group preferences (first three in group 1, next two in group 2)</span></span></span>
 <span class="r-in"><span><span class="va">G</span> <span class="op">&lt;-</span> <span class="fu">group</span><span class="op">(</span><span class="va">R</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">1</span>, <span class="fl">2</span>, <span class="fl">2</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -157,8 +158,13 @@ of group IDs with the following attributes:</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                           1                           2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "D &gt; A &gt; B, A = D &gt; B, ..."      "D &gt; B &gt; A, A &gt; B &gt; D" </span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co">## Project preferences in all groups to their first preference</span></span></span>
+<span class="r-in"><span><span class="va">G</span><span class="op">[</span>, <span class="fl">1</span>, by.rank <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                   1                   2 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> "C = D, A = D, ..."          "C = D, A" </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co">## preferences from group 2, excluding item 3</span></span></span>
-<span class="r-in"><span><span class="co">## - note group 2 becomes the first group</span></span></span>
+<span class="r-in"><span><span class="co">## - note group 2 becomes the first (and only) group</span></span></span>
 <span class="r-in"><span><span class="va">G</span><span class="op">[</span><span class="fl">2</span>, <span class="op">-</span><span class="fl">3</span><span class="op">]</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                      1 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> "D &gt; B &gt; A, A &gt; B &gt; D" </span>

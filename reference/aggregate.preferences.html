@@ -60,7 +60,7 @@ aggregate(x, frequencies = NULL, ...)
 as.aggregated_preferences(x, ...)
 
 # S3 method for aggregated_preferences
-[(x, i, j, ..., drop = FALSE)
+[(x, i, j, ...)
 
 frequencies(x)</code></pre></div>
     </div>
@@ -89,10 +89,6 @@ previously aggregated.</p></dd>
 
 <dt>j</dt>
 <dd><p>indices specifying items to extract, as for <code>\link{[}</code>.</p></dd>
-
-
-<dt>drop</dt>
-<dd><p>if <code>TRUE</code> return single row/column matrices as a vector.</p></dd>
 
 
 <dt>as.aggregated_preferences</dt>
@@ -129,7 +125,7 @@ preferences</p></dd>
 <span class="r-in"><span>  <span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">3</span>, <span class="fl">2</span></span></span>
 <span class="r-in"><span><span class="op">)</span>, nrow <span class="op">=</span> <span class="fl">6</span>, byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"apple"</span>, <span class="st">"banana"</span>, <span class="st">"orange"</span>, <span class="st">"pear"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="preferences.html">as.preferences</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">R</span> <span class="op">&lt;-</span> <span class="fu"><a href="preferences.html">as.preferences</a></span><span class="op">(</span><span class="va">R</span>, format <span class="op">=</span> <span class="st">"ranking"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># aggregate the preferences</span></span></span>
 <span class="r-in"><span><span class="va">A</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="va">R</span><span class="op">)</span></span></span>
@@ -139,9 +135,9 @@ preferences</p></dd>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Subsetting applies to the preferences, e.g. first two unique preferences</span></span></span>
 <span class="r-in"><span><span class="va">A</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>               preferences frequencies</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1          apple &gt; banana           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 banana = orange &gt; apple           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      preferences frequencies</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 orange = pear &gt; apple &gt; banana           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 pear &gt; banana = orange &gt; apple           2</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># (partial) preferences projected to items 2-4 only</span></span></span>
 <span class="r-in"><span><span class="va">A</span><span class="op">[</span>, <span class="fl">2</span><span class="op">:</span><span class="fl">4</span><span class="op">]</span></span></span>
@@ -151,13 +147,21 @@ preferences</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 3 banana &gt; orange &gt; pear           1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 4 banana &gt; pear &gt; orange           1</span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Project preferences onto their hightest ranking</span></span></span>
+<span class="r-in"><span><span class="va">A</span><span class="op">[</span>, <span class="fl">1</span>, by.rank <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     preferences frequencies</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1 orange = pear           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2          pear           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         apple           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        banana           1</span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># convert to a matrix</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">A</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      apple banana orange pear frequencies</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]     1      2      0    0           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]     2      1      1    0           2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]     0      1      2    3           1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]     1      0      3    2           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1,]     2      3      1    1           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [2,]     3      2      2    1           2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3,]     1      2      3    4           1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [4,]     2      1      4    3           1</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

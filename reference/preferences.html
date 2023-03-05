@@ -62,7 +62,7 @@
 )
 
 # S3 method for preferences
-[(x, i, j, ..., drop = FALSE, by.ordering = FALSE)
+[(x, i, j, ..., by.rank = FALSE, as.ordering = FALSE)
 
 as.preferences(x, ...)
 
@@ -72,7 +72,7 @@ as.preferences(x, aggregate = FALSE, verbose = TRUE, ...)
 # S3 method for default
 as.preferences(
   x,
-  format = c("ranking", "long", "ordering"),
+  format = c("long", "ranking", "ordering"),
   id = NULL,
   item = NULL,
   rank = NULL,
@@ -85,7 +85,7 @@ as.preferences(
 # S3 method for matrix
 as.preferences(
   x,
-  format = c("ranking", "long"),
+  format = c("long", "ranking"),
   id = NULL,
   item = NULL,
   rank = NULL,
@@ -130,7 +130,7 @@ item.</p></dd>
 
 <dt>format</dt>
 <dd><p>The format of the data: one of "ordering", "ranking", or
-"long" (see above). By default, <code>data</code> is assumed to be in <code>ordering</code> format.</p></dd>
+"long" (see above). By default, <code>data</code> is assumed to be in "long" format.</p></dd>
 
 
 <dt>id</dt>
@@ -186,19 +186,22 @@ frequencies.</p></dd>
 
 
 <dt>j</dt>
-<dd><p>The rank index to access, or if <code>by.ordering = TRUE</code> the
-index or name of the item to obtain the ranking for.</p></dd>
+<dd><p>The item names or indices to project onto, e.g. if <code>j = 1</code> the
+preferences will be projected only onto the first item; if <code>by.rank = TRUE</code>
+<code>j</code> corresponds to the rank of the items to subset to, e.g. if <code>j = 1</code> then
+preferences will be truncated to only contain their highest-preference.</p></dd>
 
 
-<dt>drop</dt>
-<dd><p>If <code>TRUE</code>, return single row/column matrices as a vector.</p></dd>
+<dt>by.rank</dt>
+<dd><p>When <code>FALSE</code>, the index <code>j</code> corresponds to items, when true
+the index corresponds to rank.</p></dd>
 
 
-<dt>by.ordering</dt>
+<dt>as.ordering</dt>
 <dd><p>When <code>FALSE</code>, returns a <code>preferences</code> object:
 internally rows \(i\) contain the ranking assigned to each item
 in preference \(p_i\). When <code>TRUE</code>, returns a data frame where
-rows group the the candidates in order of rank.</p></dd>
+columns group the items by rank.</p></dd>
 
 
 <dt>width</dt>
@@ -357,15 +360,10 @@ determined automatically.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1 &gt; banana"                     "banana &gt; orange &gt; pear &gt; apple"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "banana = orange = pear &gt; apple"</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Truncate preferences to the top 2 ranks and return as a data frame</span></span></span>
-<span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, by.ordering <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                  Rank1  Rank2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1                    1 banana</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2               banana orange</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 banana, orange, pear  apple</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4                apple banana</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       banana, orange  apple</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6                apple   pear</span>
+<span class="r-in"><span><span class="co"># Truncate preferences to the top 2 ranks</span></span></span>
+<span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, by_rank <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1 &gt; banana" "banana"     "banana"     "banana"     "banana"    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [6] "blank"     </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exclude pear from the rankings</span></span></span>
 <span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="op">-</span><span class="fl">4</span><span class="op">]</span></span></span>
@@ -373,50 +371,15 @@ determined automatically.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [3] "banana = orange &gt; apple" "apple &gt; banana &gt; orange"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [5] "banana = orange &gt; apple" "apple &gt; orange"         </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get the highest-ranked items and return as a data frame</span></span></span>
-<span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span>, by.ordering <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[1]][[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "1"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "banana"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]][[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "banana"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]][[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "orange"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[3]][[3]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "pear"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[4]][[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "apple"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]][[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "banana"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[5]][[2]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "orange"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[6]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [[6]][[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "apple"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Get the rank of apple in the third preference-set</span></span></span>
-<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>  1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> NA </span>
+<span class="r-in"><span><span class="co"># Get the highest-ranked items and return as a data.frame of orderings</span></span></span>
+<span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span>, by_rank <span class="op">=</span> <span class="cn">TRUE</span>, as.ordering <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Rank1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2  NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3  NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4  NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6  NULL</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Convert the preferences to a ranking matrix</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span></span></span>
@@ -429,6 +392,11 @@ determined automatically.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [6,] NA     NA      3    2     1 NA</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"preftype")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "toi"</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Get the rank of apple in the third preference-set</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span><span class="op">[</span><span class="fl">3</span>, <span class="fl">1</span><span class="op">]</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>  1 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NA </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get all the ranks assigned to apple as a vector</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">ord</span><span class="op">)</span><span class="op">[</span>, <span class="st">"apple"</span><span class="op">]</span></span></span>
