@@ -20,14 +20,16 @@ jobs:
       - uses: actions/checkout@v3
       - run: echo "VERSION_PR=$(cat DESCRIPTION | grep Version | cut -d ' ' -f 2)" >> $GITHUB_ENV
 
-      - run: echo $VERSION_PR
-
       - uses: actions/checkout@v3
         with:
           ref: main
       - run: echo "VERSION_MAIN=$(cat DESCRIPTION | grep Version | cut -d ' ' -f 2)" >> $GITHUB_ENV
 
-      - run: echo $VERSION_PR > $VERSION_MAIN
+      - run: echo $VERSION_PR \> $VERSION_MAIN
 
       - name: Check version of PR > version of main
-        run: Rscript -e 'print("${{ VERSION_PR }}");print("${{ VERSION_MAIN }}");if("${{ VERSION_PR }}" <= "${{ VERSION_MAIN }}") stop("PR must increment package version before merging to main.")'
+        run: |
+          if (Sys.getenv("VERSION_PR") <= Sys.getenv("VERSION_MAIN")) {
+            stop("PR must increment package version before it can merge to main.")
+          }
+        shell: Rscript {0}
