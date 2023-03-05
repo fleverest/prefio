@@ -30,4 +30,4 @@ jobs:
       - run: echo $VERSION_PR > $VERSION_MAIN
 
       - name: Check version of PR > version of main
-        run: Rscript -e 'print("$VERSION_PR");print("$VERSION_MAIN");if("$VERSION_PR" <= "$VERSION_MAIN") stop("PR must increment package version before merging to main.")'
+        run: Rscript -e 'print("${{ VERSION_PR }}");print("${{ VERSION_MAIN }}");if("${{ VERSION_PR }}" <= "${{ VERSION_MAIN }}") stop("PR must increment package version before merging to main.")'
