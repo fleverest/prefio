@@ -35,7 +35,7 @@
 #'   1, 0, 3, 2
 #' ), nrow = 6, byrow = TRUE)
 #' colnames(R) <- c("apple", "banana", "orange", "pear")
-#' R <- as.preferences(R)
+#' R <- as.preferences(R, format = "ranking")
 #'
 #' # aggregate the preferences
 #' A <- aggregate(R)
@@ -48,6 +48,9 @@
 #'
 #' # (partial) preferences projected to items 2-4 only
 #' A[, 2:4]
+#'
+#' # Project preferences onto their hightest ranking
+#' A[, 1, by.rank = TRUE]
 #'
 #' # convert to a matrix
 #' as.matrix(A)

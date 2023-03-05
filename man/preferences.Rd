@@ -126,8 +126,6 @@ columns group the items by rank.}
 
 \item{width}{The width in number of characters to format each preference,
 truncating by "..." when they are too long.}
-
-\item{drop}{If \code{TRUE}, return single row/column matrices as a vector.}
 }
 \value{
 By default, a \code{preferences} object, which is a data frame with

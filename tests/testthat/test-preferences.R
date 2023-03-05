@@ -194,3 +194,21 @@ test_that("Loading preferences from long format doesn't permute item names", {
   expect_true(all(prefs[3, as.ordering = TRUE] == c("A", "B", "C", "D")))
   expect_true(all(prefs[4, as.ordering = TRUE] == c("D", "B", "C", "A")))
 })
+
+test_that("Subsetting preferences with `by.rank = TRUE` succeeds", {
+  x <- matrix(
+    c(
+      1, 1, 1,
+      1, 2, 3,
+      2, 3, 1,
+      3, 2, 1,
+      1, 2, 3
+    ),
+    ncol = 3,
+    byrow = TRUE
+  )
+  prefs <- preferences(x, format = "ranking", item_names = LETTERS[1:3])
+  expect_equal(prefs[1, 1, by.rank = TRUE], prefs[1])
+  expect_equal(prefs[2, 1, by.rank = TRUE], prefs[5, 1, by.rank = TRUE])
+  expect_equal(prefs[3, 3, by.rank = TRUE], prefs[4, 2, by.rank = TRUE])
+})

@@ -24,15 +24,18 @@
 #' @examples
 #'
 #' # ungrouped preferences (5 preference sets, 4 items)
-#' R <- as.preferences(matrix(c(
-#'   1, 2, 0, 0,
-#'   0, 2, 1, 0,
-#'   0, 0, 1, 2,
-#'   2, 1, 0, 0,
-#'   0, 1, 2, 3
-#' ), ncol = 4, byrow = TRUE, dimnames = list(NULL, LETTERS[1:4])))
+#' R <- as.preferences(
+#'   matrix(c(
+#'     1, 2, 0, 0,
+#'     0, 2, 1, 0,
+#'     0, 0, 1, 2,
+#'     2, 1, 0, 0,
+#'     0, 1, 2, 3
+#'   ), ncol = 4, byrow = TRUE),
+#'   format = "ranking",
+#'   item_names = LETTERS[1:4]
+#' )
 #' length(R)
-#' R
 #'
 #' # group preferences (first three in group 1, next two in group 2)
 #' G <- group(R, c(1, 1, 1, 2, 2))
@@ -49,8 +52,11 @@
 #' ## exclude item 3 from preferences
 #' G[, -3]
 #'
+#' ## Project preferences in all groups to their first preference
+#' G[, 1, by.rank = TRUE]
+#'
 #' ## preferences from group 2, excluding item 3
-#' ## - note group 2 becomes the first group
+#' ## - note group 2 becomes the first (and only) group
 #' G[2, -3]
 #'
 #' # Group preferences by a factor

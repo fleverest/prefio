@@ -500,7 +500,6 @@ Ops.preferences <- function(e1, e2) {
 #' internally rows \eqn{i} contain the ranking assigned to each item
 #' in preference \eqn{p_i}. When `TRUE`, returns a data frame where
 #' columns group the items by rank.
-#' @param drop If `TRUE`, return single row/column matrices as a vector.
 #' @param width The width in number of characters to format each preference,
 #' truncating by "..." when they are too long.
 #' @export
@@ -538,7 +537,11 @@ Ops.preferences <- function(e1, e2) {
     if (by.rank) {
       # Select only ranks specified in j:
       value <- .subset(x, i, TRUE, drop = FALSE)
-      value[matrix(!value %in% j, nrow = 3L)] <- NA
+      value <- replace(
+        value,
+        !value %in% j,
+        NA
+      )
     } else {
       # Subset normally
       value <- .subset(x, i, j, drop = FALSE)
@@ -695,8 +698,38 @@ as.preferences.matrix <- function(x,
                                   verbose = TRUE,
                                   ...) {
   format <- match.arg(format)
-  # First we reformat the data into a matrix of rankings.
+  if (inherits(x, "preferences")) {
+    format <- "ranking"
+  }
+
+  # Process item_names
+  if (is.null(item_names)) {
+    if (format == "ranking") {
+      if (!is.null(colnames(x))) {
+        item_names <- colnames(x)
+      } else {
+        if (verbose) {
+          message(
+            "Could not determine item names. ",
+            "Using the integers 1-", ncol(x), "."
+          )
+        }
+        item_names <- as.character(seq_len(ncol(x)))
+        colnames(x) <- item_names
+      }
+    } else if (format == "long") {
+      item_names <- na.omit(unique(x["item"]))
+    }
+  }
+
+  # Reformat the data into a matrix of rankings.
   if (format == "long") {
+    if (is.null(id) || is.null(item) || is.null(rank)) {
+      stop(
+        "When using long-format, `id`, `item` and `rank` ",
+        "must all specify names of columns in `data`."
+      )
+    }
     prefs <- long_to_ranking(
       x,
       id,
@@ -706,16 +739,11 @@ as.preferences.matrix <- function(x,
       verbose
     )
   } else if (format == "ranking") {
-    if (is.null(item_names)) {
-      item_names <- colnames(x)
-    }
     prefs <- t(apply(x, 1L, dplyr::dense_rank))
     colnames(prefs) <- item_names
   } else {
     stop("Not implemented.")
   }
-  item_names <- colnames(prefs)
-  colnames(prefs) <- item_names
   class(prefs) <- c("preferences", class(prefs))
   attr(prefs, "item_names") <- item_names
   attr(prefs, "preftype") <- preftype(prefs)
