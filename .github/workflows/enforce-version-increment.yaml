@@ -15,8 +15,8 @@ jobs:
         with:
           use-public-rspm: true
       - run: git checkout ${{ github.ref }}
-      - run: export VERSION_PR=$(cat DESCRIPTION | grep Version: | cut -d\  -f 2)
+      - run: export VERSION_PR=$(cat DESCRIPTION | grep Version | cut -d ' ' -f 2)
       - run: git checkout main
-      - run: export VERSION_MAIN=$(cat DESCRIPTION | grep Version: | cut -d\  -f 2)
+      - run: export VERSION_MAIN=$(cat DESCRIPTION | grep Version | cut -d ' ' -f 2)
       - name: Check version of PR > version of main
         run: Rscript -e 'if("$VERSION_PR" <= "$VERSION_MAIN") quit(status = 1)'
