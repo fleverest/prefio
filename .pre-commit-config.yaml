@@ -16,6 +16,7 @@ repos:
     -   id: spell-check
         exclude: >
           (?x)^(
+          CRAN-SUBMISSION|
           tests/data/.*|
           .*\.[rR]|
           .*\.feather|
