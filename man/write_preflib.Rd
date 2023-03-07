@@ -54,6 +54,9 @@ another one. If not provided, we check for the presence of
 comma separated. If not provided, we check for the presence of
 \code{attr(x, "preflib")}, and if it exists we check for \verb{RELATED FILES}.}
 }
+\value{
+No return value. Output will be written to file or stdout.
+}
 \description{
 Write \code{preferences} to \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types, as
 defined by the PrefLib specification:

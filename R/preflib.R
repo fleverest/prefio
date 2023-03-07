@@ -42,10 +42,6 @@
 #' \emph{Proceedings of Third International Conference on Algorithmic Decision
 #' Theory (ADT 2013)}. Lecture Notes in Artificial Intelligence, Springer.
 #'
-#' Caragiannis, I., Chatzigeorgiou, X, Krimpas, G. A., and Voudouris, A. A.
-#' (2017) Optimizing positional scoring rules for rank aggregation.
-#' In \emph{Proceedings of the 31st AAAI Conference on Artificial Intelligence}.
-#'
 #' Bennett, J. and Lanning, S. (2007) The Netflix Prize.
 #' \emph{Proceedings of The KDD Cup and Workshops}.
 #'
@@ -314,6 +310,7 @@ read_preflib <- function(file,
 #' @param related_files The list of all the data files related to this one,
 #' comma separated. If not provided, we check for the presence of
 #' `attr(x, "preflib")`, and if it exists we check for `RELATED FILES`.
+#' @return No return value. Output will be written to file or stdout.
 #'
 #' @export
 write_preflib <- function(x, # nolint: cyclocomp_linter

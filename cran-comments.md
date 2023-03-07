@@ -2,6 +2,24 @@
 
 This submission contains the initial release of **prefio**.
 
+## Addressing comments from previous submission:
+
+```
+If there are references describing the methods in your package, please
+add these in the description field of your DESCRIPTION file in the form
+authors (year) <doi:...>
+authors (year) <arXiv:...>
+authors (year, ISBN:...)
+or if those are not available: <https:...>
+with no space after 'doi:', 'arXiv:', 'https:' and angle brackets for
+auto-linking. (If you want to add a title as well please put it in
+quotes: "Title")
+```
+
+I have added one `doi` link to the DESCRIPTION, but there were two references
+in the `.Rd` files. The other reference is for the Netflix Prize, which refers
+only to the data fetched in the `dontrun` example.
+
 ## `R CMD check` results
 
 #### GitHub Actions (via `usethis::use_github_action_check_standard()`):
