@@ -2,7 +2,7 @@ pandoc: 2.19.2
 pkgdown: 2.0.7
 pkgdown_sha: ~
 articles: {}
-last_built: 2023-03-09T02:14Z
+last_built: 2023-03-09T02:17Z
 urls:
   reference: https://fleverest.github.io/prefio/reference
   article: https://fleverest.github.io/prefio/articles
