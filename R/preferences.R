@@ -808,7 +808,7 @@ is.na.preferences <- function(x) {
 #' @export
 print.preferences <- function(x, ...) {
   if (length(x) == 0L) {
-    cat("preferences(0)")
+    cat("preferences(0)\n")
   } else {
     print.default(format(x, ...), quote = FALSE)
   }
@@ -834,9 +834,9 @@ format.preferences <- function(x, width = 40L, ...) {
   }
   value <- apply(x, 1L, f, items = attr(x, "item_names"))
   nc <- nchar(value)
-  trunc <- !is.na(nc) & nc > width
-  value[trunc] <- paste(strtrim(value[trunc], width - 4L), "...")
-  value
+  trunc <- !is.na(nc) & nc > (width - 2L)
+  value[trunc] <- paste(strtrim(value[trunc], width - 6L), "...")
+  paste0("[", value, "]")
 }
 
 #' @method rbind preferences

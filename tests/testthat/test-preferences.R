@@ -137,11 +137,14 @@ test_that("Equality and inequality work for `preferences`", {
 
 test_that("`print.preference` formats correctly", {
   prefs <- preferences(rankings, format = "ranking")
-  expect_output(print(prefs), "A > B > C")
-  expect_output(print(prefs), "C > B > A")
-  expect_output(print(prefs), "B > A > C")
-  expect_output(print(prefs[, 1]), '"A" "A" "A"')
-  expect_output(print(prefs[, NULL]), '"blank" "blank" "blank"')
+  expect_output(print(prefs), "\\[A > B > C\\]")
+  expect_output(print(prefs), "\\[C > B > A\\]")
+  expect_output(print(prefs), "\\[B > A > C\\]")
+  expect_output(print(prefs[, 1]), "\\[A\\] \\[A\\] \\[A\\]")
+  expect_output(
+    print(prefs[, NULL]),
+    "\\[blank\\] \\[blank\\] \\[blank\\]"
+  )
 })
 
 test_that("Some valid examples of `preferences` are not `na`", {
@@ -288,5 +291,9 @@ test_that("Empty preferences can be created by `preferences`", {
 })
 
 test_that("Formatting of empty preferences object shows `preferences(0)`", {
-
+  prefs <- preferences(
+    matrix(ncol = 4, nrow = 0, dimnames = list(NULL, LETTERS[1:4])),
+    format = "ranking"
+  )
+  expect_output(print(prefs), "preferences\\(0\\)")
 })

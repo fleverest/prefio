@@ -193,7 +193,7 @@ as.data.frame.grouped_preferences <-
 #' @method print grouped_preferences
 #' @export
 print.grouped_preferences <- function(x, max = 2L, width = 20L, ...) {
-  print.default(format(x, max = max, width = width, ...))
+  print.default(format(x, max = max, width = width, ...), quote = FALSE)
 }
 
 #' @rdname group
