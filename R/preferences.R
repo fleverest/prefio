@@ -73,12 +73,12 @@
 #' integer-valued indices in place of item names, the `item_names` character
 #' vector should be in the correct order.
 #' @param aggregate If `TRUE`, aggregate the preferences via
-#' `\link{aggregate.preferences}` before returning. This returns a
-#' `\link{aggregated_preferences}` object.
+#' [`aggregate.preferences`][aggregate.preferences] before returning. This
+#' returns an [`aggregated_preferences`][aggregate.preferences] object.
 #' @param frequencies An optional integer vector containing the number of
 #' occurences of each preference. If provided, the method will return a
-#' `\link{aggregated_preferences}` object with the corresponding
-#' frequencies.
+#' [`aggregated_preferences`][aggregate.preferences] object with the
+#' corresponding frequencies.
 #' @param verbose If `TRUE`, diagnostic messages will be sent to stdout.
 #' @param ... Unused.
 #'

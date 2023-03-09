@@ -96,12 +96,12 @@ vector should be in the correct order.}
 
 \item{frequencies}{An optional integer vector containing the number of
 occurences of each preference. If provided, the method will return a
-\verb{\link{aggregated_preferences}} object with the corresponding
-frequencies.}
+\code{\link[=aggregate.preferences]{aggregated_preferences}} object with the
+corresponding frequencies.}
 
 \item{aggregate}{If \code{TRUE}, aggregate the preferences via
-\verb{\link{aggregate.preferences}} before returning. This returns a
-\verb{\link{aggregated_preferences}} object.}
+\code{\link{aggregate.preferences}} before returning. This
+returns an \code{\link[=aggregate.preferences]{aggregated_preferences}} object.}
 
 \item{verbose}{If \code{TRUE}, diagnostic messages will be sent to stdout.}
 
