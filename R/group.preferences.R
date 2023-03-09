@@ -9,14 +9,15 @@
 #' @param x A [`preferences`][preferences] object for `group()`; otherwise a
 #' `grouped_preferences` object.
 #' @param i Indices specifying groups to extract, may be any data type accepted
-#' by `\link{[}`.
-#' @param j Indices specifying items to extract, as for `\link{[}`.
+#' by `[`.
+#' @param j Indices specifying items to extract.
 #' object, otherwise return a matrix/vector.
 #' @param max The maximum number of preferences to format per subject.
 #' @param width The maximum width in number of characters to format the
 #' preferences.
-#' @param ... Additional arguments passed on to `\link{as.preferences}`
-#' by `grouped_preferences`; unused by `format`.
+#' @param ... Additional arguments passed on to
+#' [`as.preferences`][as.preferences] by `grouped_preferences`; unused by
+#' `format`.
 #' @return An object of class `grouped_preferences`, which is a vector of
 #' of group IDs with the following attributes:
 #' \item{preferences}{ The `preferences` object.}

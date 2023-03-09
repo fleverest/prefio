@@ -7,11 +7,11 @@
 choices(preferences, names = FALSE)
 }
 \arguments{
-\item{preferences}{a \verb{\link{preferences}} object, or an object that can be
+\item{preferences}{a \code{\link{preferences}} object, or an object that can be
 coerced by \code{as.preferences}.}
 
 \item{names}{logical: if \code{TRUE} use the object names in the returned
-\code{"choices"} object, else use object indices.}
+\code{choices} object, else use object indices.}
 }
 \value{
 A data frame of class \code{choices} with elements:

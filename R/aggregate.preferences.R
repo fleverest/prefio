@@ -10,8 +10,8 @@
 #' object.
 #' @param frequencies A vector of frequencies for preferences that have been
 #' previously aggregated.
-#' @param i indices specifying preferences to extract, as for `\link{[}`.
-#' @param j indices specifying items to extract, as for `\link{[}`.
+#' @param i indices specifying preferences to extract.
+#' @param j indices specifying items to extract.
 #' @param as.aggregated_preferences if `TRUE` create an
 #' `aggregated_preferences` object from the indexed preferences Otherwise
 #' index the underlying matrix of ranks and return in a data frame with the

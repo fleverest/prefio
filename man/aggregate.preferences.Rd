@@ -26,9 +26,9 @@ previously aggregated.}
 
 \item{...}{Additional arguments, currently unused.}
 
-\item{i}{indices specifying preferences to extract, as for \verb{\link{[}}.}
+\item{i}{indices specifying preferences to extract.}
 
-\item{j}{indices specifying items to extract, as for \verb{\link{[}}.}
+\item{j}{indices specifying items to extract.}
 
 \item{as.aggregated_preferences}{if \code{TRUE} create an
 \code{aggregated_preferences} object from the indexed preferences Otherwise

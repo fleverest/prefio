@@ -19,16 +19,17 @@ group(x, ...)
 \item{x}{A \code{\link{preferences}} object for \code{group()}; otherwise a
 \code{grouped_preferences} object.}
 
-\item{...}{Additional arguments passed on to \verb{\link{as.preferences}}
-by \code{grouped_preferences}; unused by \code{format}.}
+\item{...}{Additional arguments passed on to
+\code{\link{as.preferences}} by \code{grouped_preferences}; unused by
+\code{format}.}
 
 \item{index}{A numeric vector or a factor with length equal to the number of
 preferences specifying the subject for each set.}
 
 \item{i}{Indices specifying groups to extract, may be any data type accepted
-by \verb{\link{[}}.}
+by \code{[}.}
 
-\item{j}{Indices specifying items to extract, as for \verb{\link{[}}.
+\item{j}{Indices specifying items to extract.
 object, otherwise return a matrix/vector.}
 
 \item{max}{The maximum number of preferences to format per subject.}

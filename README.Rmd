@@ -24,13 +24,11 @@ The **prefio** R package provides a set of functions which enable users to perfo
 
 ## Installation
 
-<!--
 The package may be installed from CRAN via
 
 ```{r, eval = FALSE}
 install.packages("prefio")
 ```
--->
 
 The development version can be installed via
 ```{r, eval = FALSE}

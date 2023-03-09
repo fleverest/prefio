@@ -3,10 +3,10 @@
 #' Convert a set of preferences to a list of choices, alternatives, and
 #' preferences.
 #'
-#' @param preferences a `\link{preferences}` object, or an object that can be
-#' coerced by \code{as.preferences}.
-#' @param names logical: if \code{TRUE} use the object names in the returned
-#' \code{"choices"} object, else use object indices.
+#' @param preferences a [`preferences`][preferences] object, or an object that can be
+#' coerced by `as.preferences`.
+#' @param names logical: if `TRUE` use the object names in the returned
+#' `choices` object, else use object indices.
 #' @return A data frame of class `choices` with elements:
 #' \describe{
 #' \item{choices}{A list where each element represents the items chosen for a

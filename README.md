@@ -24,14 +24,11 @@ datasets.
 
 ## Installation
 
-<!--
 The package may be installed from CRAN via
 
-
-```r
+``` r
 install.packages("prefio")
 ```
--->
 
 The development version can be installed via
 
@@ -179,10 +176,10 @@ write_preflib(prefs)
     ## title to be specified. Using `NA`.
 
     ## Warning in write_preflib(prefs): Missing `publication_date`, using today's
-    ## date(2023-03-02).
+    ## date(2023-03-09).
 
     ## Warning in write_preflib(prefs): Missing `modification_date`, using today's
-    ## date(2023-03-02).
+    ## date(2023-03-09).
 
     ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib
     ## format requires this to be specified. Using `NA`.
@@ -194,8 +191,8 @@ write_preflib(prefs)
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2023-03-02
-    ## # MODIFICATION DATE: 2023-03-02
+    ## # PUBLICATION DATE: 2023-03-09
+    ## # MODIFICATION DATE: 2023-03-09
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
@@ -217,9 +214,9 @@ to PrefLib, these warnings must be resolved.
 
 <div id="ref-Bennett2007" class="csl-entry">
 
-Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *<span
-class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*, 3–6.
-ACM.
+Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In
+*<span class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*,
+3–6. ACM.
 
 </div>
 

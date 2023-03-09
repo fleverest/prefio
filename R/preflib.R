@@ -227,7 +227,10 @@ read_preflib <- function(file,
 #' \item{.toi}{Orders with Ties - Incomplete List}
 #' }
 #'
-#' Writing to PrefLib format requires the following additional metadata:
+#' The PrefLib format specification requires some additional metadata. Note
+#' that the additional metadata required for the PrefLib specification is not
+#' necessarily required for the `write_preflib` method; any missing fields
+#' required by the PrefLib format will simply show "NA".
 #' \describe{
 #' \item{TITLE (required)}{
 #'   The title of the data file, for instance the year of the election
