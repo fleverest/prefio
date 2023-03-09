@@ -6,7 +6,7 @@
 \alias{prefio-package}
 \title{prefio: Structures for Preference Data}
 \description{
-Convenient structures for creating, sourcing, reading, writing and manipulating ordinal preference data.
+Convenient structures for creating, sourcing, reading, writing and manipulating ordinal preference data. Methods for writing to/from PrefLib formats. See Nicholas Mattei and Toby Walsh "PrefLib: A Library of Preference Data" (2013) \doi{10.1007/978-3-642-41575-3_20}.
 }
 \seealso{
 Useful links:

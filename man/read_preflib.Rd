@@ -75,10 +75,6 @@ Mattei, N. and Walsh, T. (2013) PrefLib: A Library of Preference Data.
 \emph{Proceedings of Third International Conference on Algorithmic Decision
 Theory (ADT 2013)}. Lecture Notes in Artificial Intelligence, Springer.
 
-Caragiannis, I., Chatzigeorgiou, X, Krimpas, G. A., and Voudouris, A. A.
-(2017) Optimizing positional scoring rules for rank aggregation.
-In \emph{Proceedings of the 31st AAAI Conference on Artificial Intelligence}.
-
 Bennett, J. and Lanning, S. (2007) The Netflix Prize.
 \emph{Proceedings of The KDD Cup and Workshops}.
 }

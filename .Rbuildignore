@@ -1,10 +1,13 @@
 ^.lintr$
 ^.pre-commit-config.yaml$
+^CRAN-RELEASE$
+^CRAN-SUBMISSION$
 ^LICENSE$
 ^README\.(Rmd|md|html)$
 ^\.github$
 ^_pkgdown\.yml$
 ^codecov\.yml$
+^cran-comments.md$
 ^docs$
 ^pkgdown$
 ^readme.bib$
