@@ -264,3 +264,29 @@ test_that("preferences from long format without id item or rank throws error", {
     preferences(long, format = "long", rank = "rank", id = "id")
   )
 })
+
+test_that("Empty preferences can be created by `preferences`", {
+  expect_success({
+    prefs <- preferences(
+      matrix(ncol = 4, nrow = 0),
+      format = "ranking",
+      item_names = LETTERS[1:4]
+    )
+    expect_true(length(prefs) == 0)
+  })
+  expect_success({
+    prefs <- preferences(
+      matrix(ncol = 3, nrow = 0, dimnames = list(NULL, c("id", "itm", "rnk"))),
+      format = "long",
+      id = "id",
+      item = "itm",
+      rank = "rnk",
+      item_names = LETTERS[1:4]
+    )
+    expect_true(length(prefs) == 0)
+  })
+})
+
+test_that("Formatting of empty preferences object shows `preferences(0)`", {
+
+})
