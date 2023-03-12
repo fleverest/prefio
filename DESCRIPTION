@@ -11,7 +11,7 @@ Authors@R: c(
          role = c("aut"), comment = c(ORCID = "0000-0002-1256-3375")),
   person("Damjan", "Vukcevic", email = "damjan@vukcevic.net",
          role = c("aut"), comment = c(ORCID = "0000-0001-7780-9586")))
-Version: 0.1.1
+Version: 0.1.3
 Depends: R (>= 2.10)
 LazyData: true
 License: GPL-3
