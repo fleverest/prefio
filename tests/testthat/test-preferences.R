@@ -264,3 +264,20 @@ test_that("preferences from long format without id item or rank throws error", {
     preferences(long, format = "long", rank = "rank", id = "id")
   )
 })
+
+e <- character()
+test_that("Constructing preferences from orderings with index and name works", {
+  prefs <- preferences(
+    as.data.frame(
+      rbind(
+        list("A", "B", e),
+        list(1, 2, e)
+      )
+    ),
+    format = "ordering",
+    item_names = c("A", "B")
+  )
+  # Both rows are evaluated to be equal and then aggregated to one entry with
+  # frequency 2
+  expect_true(aggregate(prefs)$frequencies == 2)
+})
