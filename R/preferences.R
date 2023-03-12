@@ -217,7 +217,7 @@ preferences <- function(data,
       verbose = verbose
     )
   } else if (fmt == "ordering") {
-    ranking <- ordering_to_ranking(data, NULL, verbose)
+    ranking <- ordering_to_ranking(data, item_names, verbose)
     prefs <- as.preferences.matrix(ranking,
       format = "ranking",
       ...,

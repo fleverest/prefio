@@ -296,4 +296,20 @@ test_that("Formatting of empty preferences object shows `preferences(0)`", {
     format = "ranking"
   )
   expect_output(print(prefs), "preferences\\(0\\)")
+
+e <- character()
+test_that("Constructing preferences from orderings with index and name works", {
+  prefs <- preferences(
+    as.data.frame(
+      rbind(
+        list("A", "B", e),
+        list(1, 2, e)
+      )
+    ),
+    format = "ordering",
+    item_names = c("A", "B")
+  )
+  # Both rows are evaluated to be equal and then aggregated to one entry with
+  # frequency 2
+  expect_true(aggregate(prefs)$frequencies == 2)
 })
