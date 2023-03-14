@@ -296,6 +296,7 @@ test_that("Formatting of empty preferences object shows `preferences(0)`", {
     format = "ranking"
   )
   expect_output(print(prefs), "preferences\\(0\\)")
+})
 
 e <- character()
 test_that("Constructing preferences from orderings with index and name works", {
