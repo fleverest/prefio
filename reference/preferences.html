@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">prefio</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.2</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.3</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -326,7 +326,7 @@ determined automatically.</p>
 <span class="r-in"><span><span class="fu">preferences</span><span class="op">(</span><span class="va">x</span>, id <span class="op">=</span> <span class="st">"id"</span>, item <span class="op">=</span> <span class="st">"item"</span>, rank <span class="op">=</span> <span class="st">"rank"</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Dropping rows containing `NA`.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Duplicated rankings per item detected: only the highest ranks will be used.</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "C &gt; B &gt; A" "B &gt; C"     "A &gt; B"     "C = D &gt; E"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] [C &gt; B &gt; A] [B &gt; C]     [A &gt; B]     [C = D &gt; E]</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Convert an existing matrix of rankings to a preferences object.</span></span></span>
 <span class="r-in"><span><span class="va">rnk</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
@@ -360,19 +360,19 @@ determined automatically.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Access the first three sets of preferences</span></span></span>
 <span class="r-in"><span><span class="va">ord</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">3</span>, <span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "apple &gt; banana"                 "banana &gt; orange &gt; pear &gt; apple"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "banana = orange = pear &gt; apple"</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] [apple &gt; banana]                 [banana &gt; orange &gt; pear &gt; apple]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] [banana = orange = pear &gt; apple]</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Truncate preferences to the top 2 ranks</span></span></span>
 <span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, by_rank <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "apple &gt; banana" "banana &gt; apple" "banana &gt; apple" "apple &gt; banana"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "banana &gt; apple" "apple"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] [apple &gt; banana] [banana &gt; apple] [banana &gt; apple] [apple &gt; banana]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5] [banana &gt; apple] [apple]         </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Exclude pear from the rankings</span></span></span>
 <span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="op">-</span><span class="fl">4</span><span class="op">]</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] "apple &gt; banana"          "banana &gt; orange &gt; apple"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [3] "banana = orange &gt; apple" "apple &gt; banana &gt; orange"</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [5] "banana = orange &gt; apple" "apple &gt; orange"         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] [apple &gt; banana]          [banana &gt; orange &gt; apple]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [3] [banana = orange &gt; apple] [apple &gt; banana &gt; orange]</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [5] [banana = orange &gt; apple] [apple &gt; orange]         </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Get the highest-ranked items and return as a data.frame of orderings</span></span></span>
 <span class="r-in"><span><span class="va">ord</span><span class="op">[</span>, <span class="fl">1</span>, by_rank <span class="op">=</span> <span class="cn">TRUE</span>, as.ordering <span class="op">=</span> <span class="cn">TRUE</span><span class="op">]</span></span></span>
