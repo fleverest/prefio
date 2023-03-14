@@ -43,11 +43,11 @@ test_that("`print.grouped_preferences` formats correctly", {
   expect_output(print(gprefs), "Group X")
   expect_output(print(gprefs), "Group Y")
   expect_output(print(gprefs), "Group Z")
-  expect_output(print(gprefs), '"A > B > C, A > C > B"')
-  expect_output(print(gprefs), '"B > A > C, C > A > B"')
-  expect_output(print(gprefs), '"B > C > A, C > B > A"')
-  expect_output(print(gprefs[, 1]), '"A, A"')
-  expect_output(print(gprefs[, NULL]), '"blank, blank"')
+  expect_output(print(gprefs), "\\[A > B > C\\], \\[A > C > B\\]")
+  expect_output(print(gprefs), "\\[B > A > C\\], \\[C > A > B\\]")
+  expect_output(print(gprefs), "\\[B > C > A\\], \\[C > B > A\\]")
+  expect_output(print(gprefs[, 1]), "\\[A\\], \\[A\\]")
+  expect_output(print(gprefs[, NULL]), "\\[blank\\], \\[blank\\]")
 })
 
 test_that("`as.data.frame` produces one row of grouped_preferences per index", {
