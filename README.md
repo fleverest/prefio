@@ -84,7 +84,7 @@ prefs <- preferences(long,
 print(prefs)
 ```
 
-    ## [1] "A > B > C" "C > B > A" "B > A > C"
+    ## [1] [A > B > C] [C > B > A] [B > A > C]
 
 Another way of tabulating orderings is with each unique ordering on a
 single row, with each column representing the rank given to a particular
@@ -118,7 +118,7 @@ prefs <- preferences(rankings,
 print(prefs)
 ```
 
-    ## [1] "A > B > C" "C > B > A" "B > A > C"
+    ## [1] [A > B > C] [C > B > A] [B > A > C]
 
 #### Reading from PrefLib
 
@@ -142,12 +142,12 @@ head(netflix)
 ```
 
     ##                                preferences frequencies
-    ## 1 Beverly Hills Cop > Mean Girls > Mis ...          68
-    ## 2 Mean Girls > Beverly Hills Cop > Mis ...          53
-    ## 3 Beverly Hills Cop > Mean Girls > The ...          49
-    ## 4 Mean Girls > Beverly Hills Cop > The ...          44
-    ## 5 Beverly Hills Cop > Mission: Impossi ...          39
-    ## 6 The Mummy Returns > Beverly Hills Co ...          37
+    ## 1 [Beverly Hills Cop > Mean Girls > M ...]          68
+    ## 2 [Mean Girls > Beverly Hills Cop > M ...]          53
+    ## 3 [Beverly Hills Cop > Mean Girls > T ...]          49
+    ## 4 [Mean Girls > Beverly Hills Cop > T ...]          44
+    ## 5 [Beverly Hills Cop > Mission: Impos ...]          39
+    ## 6 [The Mummy Returns > Beverly Hills  ...]          37
 
 Each row corresponds to a unique ordering of the four movies in the
 dataset. The number of Netflix users that assigned each ordering is
@@ -159,7 +159,7 @@ following:
 print(netflix$preferences[1], width = 100)
 ```
 
-    ## [1] "Beverly Hills Cop > Mean Girls > Mission: Impossible II > The Mummy Returns"
+    ## [1] [Beverly Hills Cop > Mean Girls > Mission: Impossible II > The Mummy Returns]
 
 #### Writing to Preflib formats
 
@@ -173,17 +173,14 @@ our `prefs` from earlier:
 write_preflib(prefs)
 ```
 
-    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a
-    ## title to be specified. Using `NA`.
+    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.
 
-    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's
-    ## date(2023-03-09).
+    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-06-14).
 
-    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's
-    ## date(2023-03-09).
+    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-06-14).
 
-    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib
-    ## format requires this to be specified. Using `NA`.
+    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using
+    ## `NA`.
 
     ## # FILE NAME: NA
     ## # TITLE: NA
@@ -192,8 +189,8 @@ write_preflib(prefs)
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2023-03-09
-    ## # MODIFICATION DATE: 2023-03-09
+    ## # PUBLICATION DATE: 2023-06-14
+    ## # MODIFICATION DATE: 2023-06-14
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
@@ -208,6 +205,16 @@ Note that this produces four warnings. Each warning corresponds to a
 field which is required by the official PrefLib format, but may not be
 necessary for internal use-cases. If your goal is to publish some data
 to PrefLib, these warnings must be resolved.
+
+## Projects using **prefio**
+
+The [New South Wales Legislative Assembly Election
+Dataset](https://github.com/fleverest/nswla_preflib) uses **prefio** to
+process the public election datasets into PrefLib formats.
+
+The R package
+[elections.dtree](https://github.com/fleverest/elections.dtree) uses
+**prefio** for tracking ballots observed by the Dirichlet-tree model.
 
 ## References
 

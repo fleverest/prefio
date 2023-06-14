@@ -166,4 +166,12 @@ internal use-cases. If your goal is to publish some data to PrefLib, these
 warnings must be resolved.
 
 
+## Projects using **prefio**
+
+The [New South Wales Legislative Assembly Election Dataset](https://github.com/fleverest/nswla_preflib)
+uses **prefio** to process the public election datasets into PrefLib formats.
+
+The R package [elections.dtree](https://github.com/fleverest/elections.dtree) uses **prefio** for tracking
+ballots observed by the Dirichlet-tree model.
+
 ## References
