@@ -167,7 +167,7 @@
 <span>  rank <span class="op">=</span> <span class="st">"Rank"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prefs</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] "A &gt; B &gt; C" "C &gt; B &gt; A" "B &gt; A &gt; C"</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] [A &gt; B &gt; C] [C &gt; B &gt; A] [B &gt; A &gt; C]</span></span></code></pre></div>
 <p>Another way of tabulating orderings is with each unique ordering on a single row, with each column representing the rank given to a particular item:</p>
 <table class="table">
 <thead><tr class="header">
@@ -210,7 +210,7 @@
 <span>  format <span class="op">=</span> <span class="st">"ranking"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">prefs</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] "A &gt; B &gt; C" "C &gt; B &gt; A" "B &gt; A &gt; C"</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] [A &gt; B &gt; C] [C &gt; B &gt; A] [B &gt; A &gt; C]</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="reading-from-preflib">Reading from PrefLib<a class="anchor" aria-label="anchor" href="#reading-from-preflib"></a>
@@ -221,16 +221,16 @@
 <code class="sourceCode R"><span><span class="va">netflix</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/read_preflib.html">read_preflib</a></span><span class="op">(</span><span class="st">"netflix/00004-00000138.soc"</span>, from_preflib <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">netflix</span><span class="op">)</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="do">##                                preferences frequencies</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 Beverly Hills Cop &gt; Mean Girls &gt; Mis ...          68</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 Mean Girls &gt; Beverly Hills Cop &gt; Mis ...          53</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 Beverly Hills Cop &gt; Mean Girls &gt; The ...          49</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 Mean Girls &gt; Beverly Hills Cop &gt; The ...          44</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 Beverly Hills Cop &gt; Mission: Impossi ...          39</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 The Mummy Returns &gt; Beverly Hills Co ...          37</span></span></code></pre></div>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="do">## 1 [Beverly Hills Cop &gt; Mean Girls &gt; M ...]          68</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="do">## 2 [Mean Girls &gt; Beverly Hills Cop &gt; M ...]          53</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="do">## 3 [Beverly Hills Cop &gt; Mean Girls &gt; T ...]          49</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="do">## 4 [Mean Girls &gt; Beverly Hills Cop &gt; T ...]          44</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="do">## 5 [Beverly Hills Cop &gt; Mission: Impos ...]          39</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="do">## 6 [The Mummy Returns &gt; Beverly Hills  ...]          37</span></span></code></pre></div>
 <p>Each row corresponds to a unique ordering of the four movies in the dataset. The number of Netflix users that assigned each ordering is given in the <code>frequencies</code> column. In this case, the most common ordering (with 68 voters specifying the same preferences) is the following:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">netflix</span><span class="op">$</span><span class="va">preferences</span><span class="op">[</span><span class="fl">1</span><span class="op">]</span>, width <span class="op">=</span> <span class="fl">100</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] "Beverly Hills Cop &gt; Mean Girls &gt; Mission: Impossible II &gt; The Mummy Returns"</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="do">## [1] [Beverly Hills Cop &gt; Mean Girls &gt; Mission: Impossible II &gt; The Mummy Returns]</span></span></code></pre></div>
 </div>
 <div class="section level4">
 <h4 id="writing-to-preflib-formats">Writing to Preflib formats<a class="anchor" aria-label="anchor" href="#writing-to-preflib-formats"></a>
@@ -238,38 +238,42 @@
 <p><strong>prefio</strong> provides a convenient interface for writing preferential datasets to PrefLib formats. To aid the user, the <code><a href="reference/preferences.html">preferences()</a></code> function automatically calculates metrics of the dataset which are required for producing valid PrefLib files. For example, we can write our <code>prefs</code> from earlier:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/write_preflib.html">write_preflib</a></span><span class="op">(</span><span class="va">prefs</span><span class="op">)</span></span></code></pre></div>
-<div class="sourceCode" id="cb12"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="do">## title to be specified. Using `NA`.</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `publication_date`, using today's</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="do">## date(2023-03-09).</span></span>
+<div class="sourceCode" id="cb12"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-06-14).</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-06-14).</span></span>
 <span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `modification_date`, using today's</span></span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="do">## date(2023-03-09).</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="do">## `NA`.</span></span>
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="do">## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib</span></span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="do">## format requires this to be specified. Using `NA`.</span></span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="do">## # FILE NAME: NA</span></span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="do">## # TITLE: NA</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="do">## # DESCRIPTION: </span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="do">## # DATA TYPE: soc</span></span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="do">## # MODIFICATION TYPE: NA</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="do">## # RELATES TO: </span></span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="do">## # RELATED FILES: </span></span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="do">## # PUBLICATION DATE: 2023-03-09</span></span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="do">## # MODIFICATION DATE: 2023-03-09</span></span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER ALTERNATIVES: 3</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER VOTERS: 3</span></span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER UNIQUE ORDERS: 3</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 1: A</span></span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 2: B</span></span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 3: C</span></span>
-<span id="cb12-28"><a href="#cb12-28" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 1,2,3</span></span>
-<span id="cb12-29"><a href="#cb12-29" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 3,2,1</span></span>
-<span id="cb12-30"><a href="#cb12-30" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 2,1,3</span></span></code></pre></div>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="do">## # FILE NAME: NA</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="do">## # TITLE: NA</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="do">## # DESCRIPTION: </span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a><span class="do">## # DATA TYPE: soc</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a><span class="do">## # MODIFICATION TYPE: NA</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a><span class="do">## # RELATES TO: </span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a><span class="do">## # RELATED FILES: </span></span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a><span class="do">## # PUBLICATION DATE: 2023-06-14</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a><span class="do">## # MODIFICATION DATE: 2023-06-14</span></span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER ALTERNATIVES: 3</span></span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER VOTERS: 3</span></span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a><span class="do">## # NUMBER UNIQUE ORDERS: 3</span></span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 1: A</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 2: B</span></span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a><span class="do">## # ALTERNATIVE NAME 3: C</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 1,2,3</span></span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 3,2,1</span></span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a><span class="do">## 1: 2,1,3</span></span></code></pre></div>
 <p>Note that this produces four warnings. Each warning corresponds to a field which is required by the official PrefLib format, but may not be necessary for internal use-cases. If your goal is to publish some data to PrefLib, these warnings must be resolved.</p>
 </div>
+</div>
+<div class="section level2">
+<h2 id="projects-using-prefio">Projects using <strong>prefio</strong>
+<a class="anchor" aria-label="anchor" href="#projects-using-prefio"></a>
+</h2>
+<p>The <a href="https://github.com/fleverest/nswla_preflib" class="external-link">New South Wales Legislative Assembly Election Dataset</a> uses <strong>prefio</strong> to process the public election datasets into PrefLib formats.</p>
+<p>The R package <a href="https://github.com/fleverest/elections.dtree" class="external-link">elections.dtree</a> uses <strong>prefio</strong> for tracking ballots observed by the Dirichlet-tree model.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
