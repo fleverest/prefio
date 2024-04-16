@@ -291,7 +291,7 @@ read_preflib <- function(file,
 #' open connection. The empty string `""` will write to stdout.
 #' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences to be written to file.
-#' If not provided and `x` is a `tibble`, then 
+#' If not provided and `x` is a `tibble`, then
 #' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the frequency of the preferences. If not
 #' provided, each row is considered to be observed a single time.
@@ -462,12 +462,16 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
       which() |>
       names()
     if (length(preferences_colnames) == 0L) {
-      stop("Expected one column of \"preferences\" for ",
-           "`write_preflib`, but got 0.")
+      stop(
+        "Expected one column of \"preferences\" for ",
+        "`write_preflib`, but got 0."
+      )
     } else if (length(preferences_colnames) > 1L) {
-      warning("Expected one column of \"preferences\" for `write_preflib`, ",
-              "but got ", length(preferences_colnames), ". Using `",
-              preferences_colnames[1L], "`.")
+      warning(
+        "Expected one column of \"preferences\" for `write_preflib`, ",
+        "but got ", length(preferences_colnames), ". Using `",
+        preferences_colnames[1L], "`."
+      )
     }
     x_preferences <- x_preferences |>
       select(preferences = preferences_colnames[1L])
@@ -486,8 +490,10 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
         which() |>
         names()
       if (length(numeric_colnames) > 1L) {
-        warning("Expected only one column of frequency for `write_preflib`. ",
-                "Using `", numeric_colnames[1L], "`.")
+        warning(
+          "Expected only one column of frequency for `write_preflib`. ",
+          "Using `", numeric_colnames[1L], "`."
+        )
       }
       x_frequency <- x_frequency |>
         select(frequency = numeric_colnames[1L])
@@ -538,8 +544,8 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
           fmt_eql_items # Formats ties ~ {1,2,3,...}
         ),
         collapse = ","
+      )
     )
-  )
   lines <- c(lines, paste0(x$frequency, ": ", ordering_str))
 
   writeLines(lines, file, sep = "\n")

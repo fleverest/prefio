@@ -65,7 +65,7 @@ pref_trunc <- function(x, max_rank = 1L, top_ranks = TRUE) {
 }
 
 #' Eliminate items from preference selections.
-#' @export 
+#' @export
 pref_elim <- function(x, lowest = TRUE) {
   x |>
     vapply(
