@@ -3,7 +3,7 @@
 \docType{import}
 \name{reexports}
 \alias{reexports}
-\alias{str}
+\alias{vec_ptype_abbr}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -11,6 +11,6 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{utils}{\code{\link[utils]{str}}}
+  \item{vctrs}{\code{\link[vctrs:vec_ptype_full]{vec_ptype_abbr}}}
 }}
 
