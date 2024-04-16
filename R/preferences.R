@@ -154,15 +154,14 @@ long_preferences <- function(data,
                              verbose = TRUE,
                              unused_fn = NULL,
                              ...) {
-
   col <- rlang::enquo(col)
   id_cols <- rlang::enquo(id_cols)
   item_col <- rlang::enquo(item_col)
   rank_col <- rlang::enquo(rank_col)
 
-  if (rlang::quo_is_null(id_cols) || 
-      rlang::quo_is_null(item_col) ||
-      rlang::quo_is_null(rank_col)) {
+  if (rlang::quo_is_null(id_cols) ||
+    rlang::quo_is_null(item_col) ||
+    rlang::quo_is_null(rank_col)) {
     stop(
       "When creating \"preferences\" from long-format data, `id_cols`, ",
       "`item_col` and `rank_col` must all specify columns in `data`."
@@ -170,17 +169,17 @@ long_preferences <- function(data,
   }
   preferences <- format_long(
     data,
-    {{col}},
-    {{id_cols}},
-    {{item_col}},
-    {{rank_col}},
+    {{ col }},
+    {{ id_cols }},
+    {{ item_col }},
+    {{ rank_col }},
     item_names,
     aggregate,
     verbose,
     unused_fn
   )
   preferences |>
-    mutate(across({{col}}, vctr_preferences))
+    mutate(across({{ col }}, vctr_preferences))
 }
 
 #' @rdname preferences
@@ -209,9 +208,9 @@ new_preferences <- function(data,
       "of 'ordering', 'ranking' or 'long'."
     )
   } else if (fmt == "long") {
-    if (rlang::quo_is_null(id_cols) || 
-        rlang::quo_is_null(item_col) ||
-        rlang::quo_is_null(rank_col)) {
+    if (rlang::quo_is_null(id_cols) ||
+      rlang::quo_is_null(item_col) ||
+      rlang::quo_is_null(rank_col)) {
       stop(
         "When creating \"preferences\" from long-format data, `id_cols`, ",
         "`item_col` and `rank_col` must all specify columns in `data`."
@@ -234,9 +233,9 @@ new_preferences <- function(data,
     ordering <- format_long(
       data,
       col,
-      {{id_cols}},
-      {{item_col}},
-      {{rank_col}},
+      {{ id_cols }},
+      {{ item_col }},
+      {{ rank_col }},
       item_names,
       aggregate,
       verbose,
@@ -291,7 +290,7 @@ validate_ordering <- function(x,
   # Check there is no mixed types
   item_types <- unique(rapply(x, typeof))
   if (length(item_types) > 1L ||
-      !any(c("character", "integer") %in% item_types)) {
+    !any(c("character", "integer") %in% item_types)) {
     stop(
       "`data` in \"ordering\" format must be either all `character` vectors or ",
       "all `integer` vectors."
@@ -315,10 +314,13 @@ validate_ordering <- function(x,
       }
     }
     # Convert `character` items to index in `item_names`
-    x <- lapply(x,
-                \(pref) lapply(pref,
-                               match,
-                               table = item_names))
+    x <- lapply(
+      x,
+      \(pref) lapply(pref,
+        match,
+        table = item_names
+      )
+    )
   }
 
   # If items are "integer", then warn user if `item_names` is not passed.
@@ -333,10 +335,15 @@ validate_ordering <- function(x,
   }
 
   # Convert list-of-lists format to list of integer-valued matrices
-  x <- lapply(x,
-              \(pref) cbind(unlist(pref),
-                            rep(seq_along(pref),
-                                times = lengths(pref))))
+  x <- lapply(
+    x,
+    \(pref) cbind(
+      unlist(pref),
+      rep(seq_along(pref),
+        times = lengths(pref)
+      )
+    )
+  )
 
   # Return validated, cleaned data along with item_names
   structure(x, item_names = item_names)
@@ -349,7 +356,6 @@ validate_long <- function(data,
                           item_col,
                           item_names,
                           verbose = TRUE) {
-
   # Show warning if any columns contain NA
   if (anyNA(data) && verbose) {
     message("Dropping rows containing `NA`.")
@@ -358,11 +364,11 @@ validate_long <- function(data,
   # Find duplicated items
   if (
     data |>
-      group_by({{id_cols}}) |>
-      summarise(dupes = anyDuplicated({{item_col}})) |>
+      group_by({{ id_cols }}) |>
+      summarise(dupes = anyDuplicated({{ item_col }})) |>
       select(dupes) |>
-      any()
-    && verbose
+      any() &&
+      verbose
   ) {
     message(
       "Duplicated rankings per item detected: ",
@@ -373,27 +379,31 @@ validate_long <- function(data,
   # Validate items
   if (is.null(item_names)) {
     item_names <- data |>
-      pull({{item_col}}) |>
+      pull({{ item_col }}) |>
       unique()
   } else if (
-      data |>
-        pull({{item_col}}) |>
-        unique() |>
-        na.omit() |>
-        setdiff(item_names) |>
-        length() > 0L
+    data |>
+      pull({{ item_col }}) |>
+      unique() |>
+      na.omit() |>
+      setdiff(item_names) |>
+      length() > 0L
   ) {
-    stop("Found item not in `item_names`. `item_names` parameter must ",
-          "be a superset of items in preferences.")
+    stop(
+      "Found item not in `item_names`. `item_names` parameter must ",
+      "be a superset of items in preferences."
+    )
   } else if (
-    data |> pull({{item_col}}) |> is.numeric() &&
-    any(data |> pull({{item_col}}) > length(item_names))) {
-    stop("`item` index out of bounds. `item_names` does not contain ",
-         "enough elements to assign a unique name per item index.")
+    data |> pull({{ item_col }}) |> is.numeric() &&
+      any(data |> pull({{ item_col }}) > length(item_names))) {
+    stop(
+      "`item` index out of bounds. `item_names` does not contain ",
+      "enough elements to assign a unique name per item index."
+    )
   }
 
   # Validate rank
-  orig_rank <- data |> pull({{rank_col}})
+  orig_rank <- data |> pull({{ rank_col }})
   int_rank <- as.integer(orig_rank)
   if (anyNA(int_rank) || any(int_rank != orig_rank)) {
     stop("`rank` must be integer-valued.")
@@ -410,51 +420,54 @@ format_long <- function(data,
                         aggregate = TRUE,
                         verbose = TRUE,
                         unused_fn = NULL) {
-
   # Validate the data adequately describes preferences
-  validate_long(data,
-                {{id_cols}},
-                {{rank_col}},
-                {{item_col}},
-                item_names,
-                verbose)
+  validate_long(
+    data,
+    {{ id_cols }},
+    {{ rank_col }},
+    {{ item_col }},
+    item_names,
+    verbose
+  )
 
   # Replace item names if `item` column is numeric
   if (
     !is.null(item_names) &&
-    data |>
-      dplyr::pull({{item_col}}) |>
-      is.numeric()
+      data |>
+        dplyr::pull({{ item_col }}) |>
+        is.numeric()
   ) {
     data <- data |>
-      dplyr::mutate(across({{item_col}}, ~item_names[.x]))
+      dplyr::mutate(across({{ item_col }}, ~ item_names[.x]))
   } else if (is.null(item_names)) {
     # Otherwise extract item_names from `item` column if `item_names` is null
     item_names <- data |>
-      dplyr::pull({{item_col}}) |>
+      dplyr::pull({{ item_col }}) |>
       unique()
   }
   # Convert rank to integers
   data <- data |>
-    dplyr::mutate(across({{rank_col}}, as.integer))
+    dplyr::mutate(across({{ rank_col }}, as.integer))
 
   # Extract rankings
   data <- data |>
     # Filter rows containing NA
     tidyr::drop_na() |>
     # Filter duplicate rankings, keeping the highest ranking for an item.
-    dplyr::group_by({{id_cols}}, {{item_col}}) |>
-    dplyr::top_n(1L, -{{rank_col}}) |>
+    dplyr::group_by({{ id_cols }}, {{ item_col }}) |>
+    dplyr::top_n(1L, -{{ rank_col }}) |>
     # Convert rankings to dense rankings
-    dplyr::ungroup({{item_col}}) |>
-    dplyr::mutate(across({{rank_col}}, dplyr::dense_rank)) |>
+    dplyr::ungroup({{ item_col }}) |>
+    dplyr::mutate(across({{ rank_col }}, dplyr::dense_rank)) |>
     # Convert long-format rankings to wide rankings
     dplyr::ungroup() |>
-    tidyr::pivot_wider(id_cols = {{id_cols}},
-                       names_from = {{item_col}},
-                       values_from = {{rank_col}},
-                       names_expand = TRUE,
-                       unused_fn = unused_fn)
+    tidyr::pivot_wider(
+      id_cols = {{ id_cols }},
+      names_from = {{ item_col }},
+      values_from = {{ rank_col }},
+      names_expand = TRUE,
+      unused_fn = unused_fn
+    )
 
   # Convert rankings into orderings format
   data[[rlang::as_name(col)]] <- data |>
@@ -501,7 +514,7 @@ Ops.preferences <- function(e1, e2) {
 #' \item{`toc`}{Orders with Ties - Complete List}
 #' \item{`toi`}{Orders with Ties - Incomplete List}
 #' }
-#' 
+#'
 #' @param x A `preferences` object (or vector data representing preferences)
 pref_type <- function(x, n_items = NULL, long = FALSE) {
   if (is.null(n_items)) {
@@ -597,10 +610,12 @@ levels.preferences <- function(x, ...) {
 #' @export
 `levels<-.preferences` <- function(x, value) {
   if (anyNA(value) ||
-      !identical(unique(value), value) ||
-      length(value) != length(names(x))) {
-    warning("No action taken: item names must be unique and with length ",
-            "equal to the total number of items.")
+    !identical(unique(value), value) ||
+    length(value) != length(names(x))) {
+    warning(
+      "No action taken: item names must be unique and with length ",
+      "equal to the total number of items."
+    )
     return(x)
   }
   attr(x, "item_names") <- value

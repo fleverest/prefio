@@ -58,6 +58,7 @@ MERCHANTABILITY
 navbar
 noncommercially
 NOTANINTEGER
+occurance
 occurences
 ORCID
 prefio
@@ -69,6 +70,7 @@ px
 recommender
 relicensing
 Rhub
+rlang
 Roxygen
 RoxygenNote
 soi
@@ -79,11 +81,13 @@ Sublicensing
 summarising
 testthat
 Thewliss
+tibble
 tidyr
 toc
 toi
 Torre
 unranked
+vctrs
 Voudouris
 vukcevic
 Vukcevic
