@@ -176,14 +176,14 @@ read_preflib <- function(file,
     "Frequency",
     paste("Rank", seq_len(ncol(preferences) - 1L))
   )
-  frequencies <- preferences[, 1L]
+  frequency <- preferences[, 1L]
   preferences <- preferences[, -1L]
   preferences <- as.preferences(
     preferences,
     "ordering",
     item_names = alternative_names
   )
-  aggregated_prefs <- aggregate(preferences, frequencies = frequencies)
+  aggregated_prefs <- aggregate(preferences, frequency = frequency)
   attr(aggregated_prefs, "preflib") <- preflib_attributes
 
   # Ensure we have the expected number of unique and total orderings.
@@ -199,12 +199,12 @@ read_preflib <- function(file,
       " The file may be corrupt."
     )
   }
-  if (sum(aggregated_prefs$frequencies) != n_voters) {
+  if (sum(aggregated_prefs$frequency) != n_voters) {
     warning(
       "Expected ",
       n_voters,
       " total orderings but only ",
-      sum(aggregated_prefs$frequencies),
+      sum(aggregated_prefs$frequency),
       " were recovered when reading the PrefLib datafile.",
       " The file may be corrupt."
     )
@@ -285,11 +285,16 @@ read_preflib <- function(file,
 #' The "alternatives" in the output file will be the same as the "items" in the
 #' `aggregated_preferences` object.
 #'
-#' @param x An `aggregated_preferences` object to write to file. If `x` is of a
-#' different class, it attempts to coerce `x` into an `aggregated_preferences`
-#' object via `as.aggregated_preferences()`.
+#' @param x A `preferences` object or a `tibble` with a `preferences`-typed
+#' column to write to file.
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
+#' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' `tibble`, the column containing the preferences to be written to file.
+#' If not provided and `x` is a `tibble`, then 
+#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' `tibble`, the column containing the frequency of the preferences. If not
+#' provided, each row is considered to be observed a single time.
 #' @param title The title of the data file, for instance the name of the
 #' election represented in the data file. If not provided, we check for the
 #' presence of `attr(x, "preflib")`, and if it exists we check for `TITLE`.
@@ -318,6 +323,8 @@ read_preflib <- function(file,
 #' @export
 write_preflib <- function(x, # nolint: cyclocomp_linter
                           file = "",
+                          preferences_col = NULL,
+                          frequency_col = NULL,
                           title = NULL,
                           publication_date = NULL,
                           modification_type = NULL,
@@ -430,8 +437,69 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
     stop("'file' must be a character string.")
   }
 
-  # Coerce into aggregated_preferences
-  x <- as.aggregated_preferences(x)
+  if (inherits(x, "preferences")) {
+    # Convert vector preferences into a tibble with columns `preferences`
+    # and `frequency`.
+    x <- tibble(preferences = x) |>
+      group_by(preferences) |>
+      summarise(frequency = n()) |>
+      arrange(-frequency)
+  } else if (inherits(x, "tbl_df")) {
+    # Process tibble.
+    # If `preferences_col` is passed, select the appropriate column. Otherwise
+    # just look for a preferences-typed column.
+
+    # Get preferences column
+    preferences_col <- rlang::enquo(preferences_col)
+    if (rlang::quo_is_null(preferences_col)) {
+      preferences_col <- rlang::expr(where(~ inherits(.x, "preferences")))
+    }
+    x_preferences <- x |>
+      select(!!preferences_col)
+    # Ensure result has one column of "preferences" data.
+    preferences_colnames <- x_preferences |>
+      sapply(inherits, what = "preferences") |>
+      which() |>
+      names()
+    if (length(preferences_colnames) == 0L) {
+      stop("Expected one column of \"preferences\" for ",
+           "`write_preflib`, but got 0.")
+    } else if (length(preferences_colnames) > 1L) {
+      warning("Expected one column of \"preferences\" for `write_preflib`, ",
+              "but got ", length(preferences_colnames), ". Using `",
+              preferences_colnames[1L], "`.")
+    }
+    x_preferences <- x_preferences |>
+      select(preferences = preferences_colnames[1L])
+
+    # Get frequency column
+    frequency_col <- rlang::enquo(frequency_col)
+    if (rlang::quo_is_null(frequency_col)) {
+      frequency_col <- NULL
+    }
+    x_frequency <- x |>
+      select(!!frequency_col)
+    # Ensure result has one column of "numeric" data.
+    if (!is.null(frequency_col)) {
+      numeric_colnames <- x_frequency |>
+        sapply(is.numeric) |>
+        which() |>
+        names()
+      if (length(numeric_colnames) > 1L) {
+        warning("Expected only one column of frequency for `write_preflib`. ",
+                "Using `", numeric_colnames[1L], "`.")
+      }
+      x_frequency <- x_frequency |>
+        select(frequency = numeric_colnames[1L])
+    } else {
+      x_frequency <- 1L
+    }
+
+    x <- cbind(x_preferences, frequency = x_frequency) |>
+      group_by(preferences) |>
+      summarise(frequency = sum(frequency)) |>
+      arrange(-frequency)
+  }
 
   # Prepare lines for file
   lines <- c(
@@ -439,15 +507,15 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
     paste("#", "FILE NAME:", file_name),
     paste("#", "TITLE:", title),
     paste("#", "DESCRIPTION:", description),
-    paste("#", "DATA TYPE:", preftype(x$preferences)),
+    paste("#", "DATA TYPE:", pref_type(x$preferences)),
     paste("#", "MODIFICATION TYPE:", modification_type),
     paste("#", "RELATES TO:", paste(relates_to, collapse = ",")),
     paste("#", "RELATED FILES:", paste(related_files, collapse = ",")),
     paste("#", "PUBLICATION DATE:", publication_date),
     paste("#", "MODIFICATION DATE:", modification_date),
     # Derived metadata
-    paste("#", "NUMBER ALTERNATIVES:", length(names(x$preferences))),
-    paste("#", "NUMBER VOTERS:", sum(x$frequencies)),
+    paste("#", "NUMBER ALTERNATIVES:", length(levels(x$preferences))),
+    paste("#", "NUMBER VOTERS:", sum(x$frequency)),
     paste("#", "NUMBER UNIQUE ORDERS:", length(x$preferences))
   )
 
@@ -461,20 +529,18 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
   )
 
   # Format orders as strings
-  orderings <- apply(
-    as.matrix(x$preferences),
-    1L,
-    function(item_ranks) {
-      paste0(
+
+  ordering_str <- vctrs::vec_data(x$preferences) |>
+    sapply(
+      \(o) paste0(
         sapply(
-          seq_len(max(na.omit(item_ranks))),
-          function(ri) fmt_eql_items(which(ri == item_ranks))
+          split(o[, 1L], o[, 2L]),
+          fmt_eql_items # Formats ties ~ {1,2,3,...}
         ),
         collapse = ","
-      )
-    }
+    )
   )
-  lines <- c(lines, paste0(x$frequencies, ": ", orderings))
+  lines <- c(lines, paste0(x$frequency, ": ", ordering_str))
 
   writeLines(lines, file, sep = "\n")
   if (file_name != "NA") {
@@ -482,11 +548,11 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
   }
 }
 
-# Helper function for formatting list of items at equal rank
+# Helper function for formatting list of items at equal rank ~ {1,2,3,...}
 fmt_eql_items <- function(items) {
   if (length(items) > 1L) {
     paste0("{", paste0(items, collapse = ","), "}")
   } else {
-    as.character(items)
+    items
   }
 }
