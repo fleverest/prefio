@@ -335,34 +335,6 @@ format.preferences <- function(x, ...) {
   vapply(vctrs::vec_data(x), fmt_order, character(1L))
 }
 
-#' @importFrom vctrs vec_ptype_abbr
-#' @export
-vctrs::vec_ptype_abbr
-
-#' @method vec_ptype_abbr toi_preferences
-#' @export
-vec_ptype_abbr.toi_preferences <- function(x, ...) {
-  "toi_pref"
-}
-
-#' @method vec_ptype_abbr toc_preferences
-#' @export
-vec_ptype_abbr.toc_preferences <- function(x, ...) {
-  "toc_pref"
-}
-
-#' @method vec_ptype_abbr soi_preferences
-#' @export
-vec_ptype_abbr.soi_preferences <- function(x, ...) {
-  "soi_pref"
-}
-
-#' @method vec_ptype_abbr soc_preferences
-#' @export
-vec_ptype_abbr.soc_preferences <- function(x, ...) {
-  "soc_pref"
-}
-
 #' @method levels preferences
 #' @export
 levels.preferences <- function(x, ...) {
