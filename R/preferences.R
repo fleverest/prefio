@@ -2,27 +2,9 @@
 #' @name preferences
 #'
 #' @description
-#' TODO
+#' A tidy interface for working with ordinal preferences.
 #'
-#' @param data A `list`, `matrix` or `tibble` in one of three formats:
-#' \describe{
-#' \item{`ordering`}{`list` elements represent a preference, with its' values
-#'                        the item(s) (multiple in the case of a tie) assigned
-#'                        to a rank by order of first to last preference, so
-#'                        with no repetitions. If elements are `integer`s, then
-#'                        the `item_names` parameter should be set, otherwise
-#'                        the integers themselves will be treated as names.}
-#' \item{`ranking`}{Columns are associated with a single item, with values
-#'                        representing the rank assigned to the item for each
-#'                        preference. Conventionally, ranks are integers in
-#'                        increasing order (with larger values indicating lower
-#'                        preference), but they can be any ordinal values. Any
-#'                        rankings will be converted to 'dense' integer
-#'                        rankings, as implemented by `dplyr::dense_rank()`.}
-#' \item{`long`}{Like `ranking` but in a long format: three columns (`id`,
-#'                        `item`, `rank`) are used to infer the `ranking`
-#'                        structure.}
-#' }
+#' @param data A `data.frame` or `tibble` to extract preferences from
 #' @param format The format of the data: one of "ordering", "ranking", or
 #' "long" (see above). By default, `data` is assumed to be in "long" format.
 #' @param col The name of the new column, as a string or symbol.
@@ -45,87 +27,35 @@
 #' helpful to keep covariates from columns which are unused in processing
 #' preferences, but are important for upstream modelling. See
 #' <[`pivot_wider`][pivot_wider]> for more details.
-#' @param aggregate If `TRUE`, aggregates identical preference selections and
-#' counts repetitions. When enabled, `new_preferences` will return a `tibble`.
 #' @param ... Unused.
-#'
-#' @return A `preferences` object, or a `tibble` with
-#' columns `preferences` and `frequency` when `aggregate=TRUE`.
+#' 
+#' @return A new tibble with a column of formatted [`preferences`][preferences].
 #'
 #' @examples
-#' # create rankings from data in long format
-#'
-#' # Example long-form data
-#' x <- data.frame(
-#'   id = c(rep(1:4, each = 4), 5, 5, 5),
-#'   item = c(
-#'     LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
-#'     LETTERS[3:5]
-#'   ),
-#'   rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3)
+#' # Votes cast by two animals ranking a variety of fruits and vegetables.
+#' # This is not real data, I made this up.
+#' x <- tribble(
+#'   ~voter_id, ~species, ~food,   ~ranking,
+#'   1,         "Rabbit", "Apple",  1,
+#'   1,         "Rabbit", "Banana", 2,
+#'   1,         "Rabbit", "Carrot", 3,
+#'   2,         "Monkey", "Banana", 1,
+#'   2,         "Monkey", "Apple",  2,
+#'   2,         "Monkey", "Carrot", 3
 #' )
-#'
-#' # * Set #1 has two different ranks for the same item (item C
-#' # has rank 1 and 2). This item will be excluded from the preferences.
-#' # * All ranks are missing in set #2, a technically valid partial ordering
-#' # * Some ranks are missing in set #3, a perfectly valid partial ordering
-#' # * Set #4 has inconsistent ranks for two items, and a rank with a
-#' # missing item.
-#' # * Set #5 is not a dense ranking. It will be converted to be dense and then
-#' # inferred to be a regular partial ordering with ties.
-#' split(x, x$rank)
-#'
-#' # Creating a preferences object with this data will attempt to resolve these
-#' # issues automatically, sending warnings when assumptions need to be made.
-#' new_preferences(x, id = "id", item = "item", rank = "rank")
-#'
-#' # Convert an existing matrix of rankings to a preferences object.
-#' rnk <- matrix(c(
-#'   1, 2, 0, 0,
-#'   4, 1, 2, 3,
-#'   2, 1, 1, 1,
-#'   1, 2, 3, 0,
-#'   2, 1, 1, 0,
-#'   1, 0, 3, 2
-#' ), nrow = 6, byrow = TRUE)
-#' colnames(rnk) <- c("apple", "banana", "orange", "pear")
-#'
-#' rnk <- as_preferences(rnk, format = "ranking")
-#'
-#' # Convert an existing data frame of orderings to a preferences object.
-#' e <- character() # short-hand for empty ranks
-#' ord <- new_preferences(
-#'   as.data.frame(
-#'     rbind(
-#'       list(1, 2, e, e), # apple, banana
-#'       list("banana", "orange", "pear", "apple"),
-#'       list(c("banana", "orange", "pear"), "apple", e, e),
-#'       list("apple", "banana", "orange", e),
-#'       list(c("banana", "orange"), "apple", e, e),
-#'       list("apple", "pear", "orange", e)
-#'     )
-#'   ),
-#'   format = "ordering",
-#'   item_names = c("apple", "banana", "orange", "pear")
-#' )
-#'
-#' # Access the first three sets of preferences
-#' ord[1:3]
-#'
-#' # Truncate preferences to the top 2 ranks
-#' ord[, 1:2, by_rank = TRUE]
-#'
-#' # Exclude pear from the rankings
-#' ord[, -4]
-#'
-#' # Convert the preferences to a ranking matrix
-#' as.matrix(ord)
-#'
-#' # Get the rank of apple in the third preference-set
-#' as.matrix(ord)[3, 1]
-#'
-#' # Get all the ranks assigned to apple as a vector
-#' as.matrix(ord)[, "apple"]
+#' # Process preferencial data into a single column.
+#' x |>
+#'   long_preferences(food_preference,
+#'                    id_cols = voter_id,
+#'                    item_col = fruit,
+#'                    rank_col = ranking)
+#' # The same, but keep the species data.
+#' x |>
+#'   long_preferences(food_preference,
+#'                    id_cols = voter_id,
+#'                    item_col = fruit,
+#'                    rank_col = ranking,
+#'                    unused_col = list(species = first))
 NULL
 
 # Format a list of orderings as a "preferences" vctr with vctrs::list_of
@@ -180,171 +110,6 @@ long_preferences <- function(data,
   )
   preferences |>
     mutate(across({{ col }}, vctr_preferences))
-}
-
-#' @rdname preferences
-#' @export
-new_preferences <- function(data,
-                            col,
-                            format = c("long", "ordering", "ranking"),
-                            id_cols = NULL,
-                            rank_col = NULL,
-                            item_col = NULL,
-                            frequency_col = NULL,
-                            item_names = NULL,
-                            aggregate = FALSE,
-                            verbose = TRUE,
-                            unused_fn = NULL,
-                            ...) {
-  fmt <- try(match.arg(format), silent = TRUE)
-  id_cols <- rlang::enquo(id_cols)
-  item_col <- rlang::enquo(item_col)
-  rank_col <- rlang::enquo(rank_col)
-  frequency_col <- rlang::enquo(frequency_col)
-  # First we reformat the data into a matrix of rankings.
-  if (inherits(fmt, "try-error")) {
-    stop(
-      "Format '", format, "' not implemented: Must be one ",
-      "of 'ordering', 'ranking' or 'long'."
-    )
-  } else if (fmt == "long") {
-    if (rlang::quo_is_null(id_cols) ||
-      rlang::quo_is_null(item_col) ||
-      rlang::quo_is_null(rank_col)) {
-      stop(
-        "When creating \"preferences\" from long-format data, `id_cols`, ",
-        "`item_col` and `rank_col` must all specify columns in `data`."
-      )
-    }
-    if (!rlang::quo_is_null(frequency_col)) {
-      warning(
-        "When creating \"preferences\" from long-format data, ",
-        "`frequency_col` parameter is ignored."
-      )
-      frequency <- NULL
-    }
-    if (!is.null(unused_fn) && aggregate) {
-      warning(
-        "When creating \"preferences\" from long-format data, ",
-        "cannot specify both `unused_fn` and `aggregate`. Ignoring `unused_fn`."
-      )
-      unused_fn <- NULL
-    }
-    ordering <- format_long(
-      data,
-      col,
-      {{ id_cols }},
-      {{ item_col }},
-      {{ rank_col }},
-      item_names,
-      aggregate,
-      verbose,
-      unused_fn
-    )
-    return(ordering)
-  } else if (fmt == "ranking") {
-    ordering <- ranking_to_ordering(
-      data
-    )
-  } else if (fmt == "ordering") {
-    ordering <- validate_ordering(data, item_names, verbose)
-  }
-  # Obtain item_names from validation step if necessary
-  if (is.null(item_names)) {
-    item_names <- attr(ordering, "item_names")
-  }
-  x <- vctrs::as_list_of(
-    ordering,
-    .ptype = matrix(integer(), ncol = 2L)
-  )
-  x <- vctrs::new_vctr(
-    x,
-    item_names = item_names,
-    class = "preferences"
-  )
-  if (aggregate) {
-    if (is.null(frequency)) {
-      warning("Did not aggregate preferences. Setting every `frequency` to 1.")
-      frequency <- 1L
-    }
-    return(tibble(preferences = x, frequency = frequency) |> dplyr::arrange(-frequency))
-  } else {
-    x
-  }
-}
-
-# A helper function to validate ordinal preferences in ordering format and clean them up.
-validate_ordering <- function(x,
-                              item_names,
-                              verbose = TRUE) {
-  # Ensure the object is formatted correctly as a list of lists
-  if (!is.list(x) && !all(sapply(x, is.list))) {
-    stop(
-      "`data` in \"ordering\" format must be a `list` of `list`s"
-    )
-  }
-
-  # Check there is no mixed types
-  item_types <- unique(rapply(x, typeof))
-  if (length(item_types) > 1L ||
-    !any(c("character", "integer") %in% item_types)) {
-    stop(
-      "`data` in \"ordering\" format must be either all `character` vectors or ",
-      "all `integer` vectors."
-    )
-  }
-
-  # If items are `character` vectors, extract the item_names by factoring
-  if (item_types == "character") {
-    # Infer unique item_names if not given
-    if (is.null(item_names)) {
-      item_names <- x |>
-        unlist() |>
-        unique()
-    } else {
-      observed_items <- x |>
-        unlist() |>
-        unique()
-      # When item_names is passed, make sure it's a superset of the items in `data`.
-      if (!all(observed_items %in% item_names)) {
-        stop("Expected all observed items to occur in `item_names`, but found missing values.")
-      }
-    }
-    # Convert `character` items to index in `item_names`
-    x <- lapply(
-      x,
-      lapply,
-      FUN = match,
-      table = item_names
-    )
-  }
-
-  # If items are "integer", then warn user if `item_names` is not passed.
-  if (item_types == "integer" && is.null(item_names)) {
-    if (verbose) {
-      warning("`item_names` missing on \"integer\"-valued items.")
-    }
-    item_names <- x |>
-      unlist() |>
-      unique() |>
-      as.character()
-  }
-
-  # Convert list-of-lists format to list of integer-valued matrices
-  x <- lapply(
-    x,
-    \(pref) {
-      cbind(
-        unlist(pref),
-        rep(seq_along(pref),
-          times = lengths(pref)
-        )
-      )
-    }
-  )
-
-  # Return validated, cleaned data along with item_names
-  structure(x, item_names = item_names)
 }
 
 # A helper function to validate ordinal preferences in long format.
@@ -415,7 +180,6 @@ format_long <- function(data,
                         item_col,
                         rank_col,
                         item_names = NULL,
-                        aggregate = TRUE,
                         verbose = TRUE,
                         unused_fn = NULL) {
   # Validate the data adequately describes preferences
