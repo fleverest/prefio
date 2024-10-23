@@ -27,18 +27,19 @@
 #'
 #' @examples
 #' x <- tribble(
-#'   ~voter_id, ~species, ~food,   ~ranking,
-#'   1,         "Rabbit", "Apple",  1,
-#'   1,         "Rabbit", "Banana", 2,
-#'   1,         "Rabbit", "Carrot", 3,
-#'   2,         "Monkey", "Banana", 1,
-#'   2,         "Monkey", "Apple",  2,
-#'   2,         "Monkey", "Carrot", 3
+#'   ~voter_id, ~species, ~food, ~ranking,
+#'   1, "Rabbit", "Apple", 1,
+#'   1, "Rabbit", "Banana", 2,
+#'   1, "Rabbit", "Carrot", 3,
+#'   2, "Monkey", "Banana", 1,
+#'   2, "Monkey", "Apple", 2,
+#'   2, "Monkey", "Carrot", 3
 #' ) |>
 #'   long_preferences(food_preference,
-#'                    id_cols = voter_id,
-#'                    item_col = fruit,
-#'                    rank_col = ranking) |>
+#'     id_cols = voter_id,
+#'     item_col = fruit,
+#'     rank_col = ranking
+#'   ) |>
 #'   pull(food_preference) |>
 #'   adjacency()
 #'
@@ -48,76 +49,13 @@ adjacency <- function(x,
                       frequency_col = NULL,
                       ...) {
   # Process into a 2-column tibble with preferences and frequencies columns.
-  if (inherits(x, "preferences")) {
-    # Convert vector preferences into a tibble with columns `preferences`
-    # and `frequency`.
-    x <- tibble(preferences = x) |>
-      group_by(preferences) |>
-      summarise(frequency = n()) |>
-      arrange(-frequency)
-  } else if (inherits(x, "tbl_df")) {
-    # Process tibble.
-    # If `preferences_col` is passed, select the appropriate column. Otherwise
-    # just look for a preferences-typed column.
+  x <- .validate_preferences_frequencies(
+    x,
+    {{ preferences_col }},
+    {{ frequency_col }}
+  ) |>
+    mutate(preferences = pref_complete(preferences))
 
-    # Get preferences column
-    preferences_col <- rlang::enquo(preferences_col)
-    if (rlang::quo_is_null(preferences_col)) {
-      preferences_col <- rlang::expr(where(~ inherits(.x, "preferences")))
-    }
-    x_preferences <- x |>
-      select(!!preferences_col)
-    # Ensure result has one column of "preferences" data.
-    preferences_colnames <- x_preferences |>
-      sapply(inherits, what = "preferences") |>
-      which() |>
-      names()
-    if (length(preferences_colnames) == 0L) {
-      stop(
-        "Expected one column of \"preferences\" for ",
-        "`write_preflib`, but got 0."
-      )
-    } else if (length(preferences_colnames) > 1L) {
-      warning(
-        "Expected one column of \"preferences\" for `write_preflib`, ",
-        "but got ", length(preferences_colnames), ". Using `",
-        preferences_colnames[1L], "`."
-      )
-    }
-    x_preferences <- x_preferences |>
-      select(preferences = preferences_colnames[1L])
-
-    # Get frequency column
-    frequency_col <- rlang::enquo(frequency_col)
-    if (rlang::quo_is_null(frequency_col)) {
-      frequency_col <- NULL
-    }
-    x_frequency <- x |>
-      select(!!frequency_col)
-    # Ensure result has one column of "numeric" data.
-    if (!is.null(frequency_col)) {
-      numeric_colnames <- x_frequency |>
-        sapply(is.numeric) |>
-        which() |>
-        names()
-      if (length(numeric_colnames) > 1L) {
-        warning(
-          "Expected only one column of frequency for `write_preflib`. ",
-          "Using `", numeric_colnames[1L], "`."
-        )
-      }
-      x_frequency <- x_frequency |>
-        select(frequency = numeric_colnames[1L])
-    } else {
-      x_frequency <- 1L
-    }
-
-    x <- cbind(x_preferences, frequency = x_frequency) |>
-      group_by(preferences) |>
-      summarise(frequency = sum(frequency)) |>
-      arrange(-frequency) |>
-      mutate(preferences = pref_complete(preferences))
-  }
 
   n <- nlevels(x$preferences)
   m <- x$preferences |>
@@ -142,7 +80,7 @@ adjacency <- function(x,
       SIMPLIFY = FALSE
     ) |>
     Reduce(f = `+`) # Take the sum
-  
+
   rownames(adj) <- nm
   colnames(adj) <- nm
   structure(adj, class = c("adjacency", "matrix"))
