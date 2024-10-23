@@ -108,7 +108,7 @@ long_preferences <- function(data,
     unused_fn
   )
   preferences |>
-    mutate(across({{ col }}, vctr_preferences))
+    dplyr::mutate(dplyr::across({{ col }}, vctr_preferences))
 }
 
 # A helper function to validate ordinal preferences in long format.
@@ -126,9 +126,9 @@ validate_long <- function(data,
   # Find duplicated items
   if (
     data |>
-      group_by({{ id_cols }}) |>
-      summarise(dupes = anyDuplicated({{ item_col }})) |>
-      select(dupes) |>
+      dplyr::group_by({{ id_cols }}) |>
+      dplyr::summarise(dupes = anyDuplicated({{ item_col }})) |>
+      dplyr::select(dupes) |>
       any() &&
       verbose
   ) {
@@ -141,13 +141,13 @@ validate_long <- function(data,
   # Validate items
   if (is.null(item_names)) {
     item_names <- data |>
-      pull({{ item_col }}) |>
+      dplyr::pull({{ item_col }}) |>
       unique()
   } else if (
     data |>
-      pull({{ item_col }}) |>
+      dplyr::pull({{ item_col }}) |>
       unique() |>
-      na.omit() |>
+      stats::na.omit() |>
       setdiff(item_names) |>
       length() > 0L
   ) {
@@ -156,8 +156,8 @@ validate_long <- function(data,
       "be a superset of items in preferences."
     )
   } else if (
-    data |> pull({{ item_col }}) |> is.numeric() &&
-      any(data |> pull({{ item_col }}) > length(item_names))) {
+    data |> dplyr::pull({{ item_col }}) |> is.numeric() &&
+      any(data |> dplyr::pull({{ item_col }}) > length(item_names))) {
     stop(
       "`item` index out of bounds. `item_names` does not contain ",
       "enough elements to assign a unique name per item index."
@@ -165,7 +165,7 @@ validate_long <- function(data,
   }
 
   # Validate rank
-  orig_rank <- data |> pull({{ rank_col }})
+  orig_rank <- data |> dplyr::pull({{ rank_col }})
   int_rank <- as.integer(orig_rank)
   if (anyNA(int_rank) || any(int_rank != orig_rank)) {
     stop("`rank` must be integer-valued.")
@@ -199,7 +199,7 @@ format_long <- function(data,
         is.numeric()
   ) {
     data <- data |>
-      dplyr::mutate(across({{ item_col }}, ~ item_names[.x]))
+      dplyr::mutate(dplyr::across({{ item_col }}, ~ item_names[.x]))
   } else if (is.null(item_names)) {
     # Otherwise extract item_names from `item` column if `item_names` is null
     item_names <- data |>
@@ -208,7 +208,7 @@ format_long <- function(data,
   }
   # Convert rank to integers
   data <- data |>
-    dplyr::mutate(across({{ rank_col }}, as.integer))
+    dplyr::mutate(dplyr::across({{ rank_col }}, as.integer))
 
   # Extract rankings
   data <- data |>
@@ -219,7 +219,7 @@ format_long <- function(data,
     dplyr::top_n(1L, -{{ rank_col }}) |>
     # Convert rankings to dense rankings
     dplyr::ungroup({{ item_col }}) |>
-    dplyr::mutate(across({{ rank_col }}, dplyr::dense_rank)) |>
+    dplyr::mutate(dplyr::across({{ rank_col }}, dplyr::dense_rank)) |>
     # Convert long-format rankings to wide rankings
     dplyr::ungroup() |>
     tidyr::pivot_wider(
@@ -232,7 +232,7 @@ format_long <- function(data,
 
   # Convert rankings into orderings format
   data[[rlang::as_name(col)]] <- data |>
-    dplyr::select(all_of(item_names)) |>
+    dplyr::select(dplyr::all_of(item_names)) |>
     apply(
       1L,
       function(x) {
@@ -242,7 +242,7 @@ format_long <- function(data,
     )
   # Drop rankings
   data <- data |>
-    dplyr::select(-all_of(item_names))
+    dplyr::select(-dplyr::all_of(item_names))
 
   # Add frequency as an attribute if necessary
   attr(data[[rlang::as_name(col)]], "item_names") <- item_names
@@ -367,10 +367,10 @@ levels.preferences <- function(x, ...) {
   if (inherits(x, "preferences")) {
     # Convert vector preferences into a tibble with columns `preferences`
     # and `frequency`.
-    x <- tibble(preferences = x) |>
-      group_by(preferences) |>
-      summarise(frequency = n()) |>
-      arrange(-frequency)
+    x <- tibble::tibble(preferences = x) |>
+      dplyr::group_by(preferences) |>
+      dplyr::summarise(frequency = dplyr::n()) |>
+      dplyr::arrange(-frequency)
   } else if (inherits(x, "tbl_df")) {
     # Process tibble.
     # If `preferences_col` is passed, select the appropriate column. Otherwise
@@ -379,10 +379,10 @@ levels.preferences <- function(x, ...) {
     # Get preferences column
     preferences_col <- rlang::enquo(preferences_col)
     if (rlang::quo_is_null(preferences_col)) {
-      preferences_col <- rlang::expr(where(~ inherits(.x, "preferences")))
+      preferences_col <- rlang::expr(dplyr::where(~ inherits(.x, "preferences")))
     }
     x_preferences <- x |>
-      select(!!preferences_col)
+      dplyr::select(!!preferences_col)
     # Ensure result has one column of "preferences" data.
     preferences_colnames <- x_preferences |>
       sapply(inherits, what = "preferences") |>
@@ -401,7 +401,7 @@ levels.preferences <- function(x, ...) {
       )
     }
     x_preferences <- x_preferences |>
-      select(preferences = preferences_colnames[1L])
+      dplyr::select(preferences = preferences_colnames[1L])
 
     # Get frequency column
     frequency_col <- rlang::enquo(frequency_col)
@@ -409,7 +409,7 @@ levels.preferences <- function(x, ...) {
       frequency_col <- NULL
     }
     x_frequency <- x |>
-      select(!!frequency_col)
+      dplyr::select(!!frequency_col)
     # Ensure result has one column of "numeric" data.
     if (!is.null(frequency_col)) {
       numeric_colnames <- x_frequency |>
@@ -423,15 +423,15 @@ levels.preferences <- function(x, ...) {
         )
       }
       x_frequency <- x_frequency |>
-        select(frequency = numeric_colnames[1L])
+        dplyr::select(frequency = numeric_colnames[1L])
     } else {
       x_frequency <- 1L
     }
 
     x <- cbind(x_preferences, frequency = x_frequency) |>
-      group_by(preferences) |>
-      summarise(frequency = sum(frequency)) |>
-      arrange(-frequency)
+      dplyr::group_by(preferences) |>
+      dplyr::summarise(frequency = sum(frequency)) |>
+      dplyr::arrange(-frequency)
   }
   return(x)
 }

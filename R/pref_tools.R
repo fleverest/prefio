@@ -125,7 +125,7 @@ rm_items <- function(x, items) {
   x |>
     vapply(
       \(pref) {
-        rows <- na.omit(match(idxs, pref[, 1L]))
+        rows <- stats::na.omit(match(idxs, pref[, 1L]))
         if (length(rows) >= nrow(pref)) {
           pref[integer(0L), , drop = FALSE] |>
             list()
@@ -153,7 +153,7 @@ pref_project <- function(x, items) {
   x |>
     vapply(
       \(pref) {
-        pref[na.omit(match(idxs, pref[, 1L])), , drop = FALSE] |>
+        pref[stats::na.omit(match(idxs, pref[, 1L])), , drop = FALSE] |>
           .densify_col2() |>
           list()
       },

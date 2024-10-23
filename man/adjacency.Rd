@@ -40,18 +40,19 @@ weighted counts.
 }
 \examples{
 x <- tribble(
-  ~voter_id, ~species, ~food,   ~ranking,
-  1,         "Rabbit", "Apple",  1,
-  1,         "Rabbit", "Banana", 2,
-  1,         "Rabbit", "Carrot", 3,
-  2,         "Monkey", "Banana", 1,
-  2,         "Monkey", "Apple",  2,
-  2,         "Monkey", "Carrot", 3
+  ~voter_id, ~species, ~food, ~ranking,
+  1, "Rabbit", "Apple", 1,
+  1, "Rabbit", "Banana", 2,
+  1, "Rabbit", "Carrot", 3,
+  2, "Monkey", "Banana", 1,
+  2, "Monkey", "Apple", 2,
+  2, "Monkey", "Carrot", 3
 ) |>
   long_preferences(food_preference,
-                   id_cols = voter_id,
-                   item_col = fruit,
-                   rank_col = ranking) |>
+    id_cols = voter_id,
+    item_col = fruit,
+    rank_col = ranking
+  ) |>
   pull(food_preference) |>
   adjacency()
 
