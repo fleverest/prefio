@@ -63,25 +63,27 @@ A tidy interface for working with ordinal preferences.
 # Votes cast by two animals ranking a variety of fruits and vegetables.
 # This is not real data, I made this up.
 x <- tribble(
-  ~voter_id, ~species, ~food,   ~ranking,
-  1,         "Rabbit", "Apple",  1,
-  1,         "Rabbit", "Banana", 2,
-  1,         "Rabbit", "Carrot", 3,
-  2,         "Monkey", "Banana", 1,
-  2,         "Monkey", "Apple",  2,
-  2,         "Monkey", "Carrot", 3
+  ~voter_id, ~species, ~food, ~ranking,
+  1, "Rabbit", "Apple", 1,
+  1, "Rabbit", "Banana", 2,
+  1, "Rabbit", "Carrot", 3,
+  2, "Monkey", "Banana", 1,
+  2, "Monkey", "Apple", 2,
+  2, "Monkey", "Carrot", 3
 )
 # Process preferencial data into a single column.
 x |>
   long_preferences(food_preference,
-                   id_cols = voter_id,
-                   item_col = fruit,
-                   rank_col = ranking)
+    id_cols = voter_id,
+    item_col = fruit,
+    rank_col = ranking
+  )
 # The same, but keep the species data.
 x |>
   long_preferences(food_preference,
-                   id_cols = voter_id,
-                   item_col = fruit,
-                   rank_col = ranking,
-                   unused_col = list(species = first))
+    id_cols = voter_id,
+    item_col = fruit,
+    rank_col = ranking,
+    unused_col = list(species = first)
+  )
 }

@@ -23,7 +23,6 @@ URL: https://github.com/fleverest/prefio/,
 BugReports: https://github.com/fleverest/prefio/issues/
 Imports:
     dplyr,
-    magrittr,
     tidyr,
     tibble,
     vctrs,

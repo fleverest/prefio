@@ -54,7 +54,7 @@ adjacency <- function(x,
     {{ preferences_col }},
     {{ frequency_col }}
   ) |>
-    mutate(preferences = pref_complete(preferences))
+    dplyr::mutate(preferences = pref_complete(preferences))
 
 
   n <- nlevels(x$preferences)
