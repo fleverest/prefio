@@ -182,7 +182,8 @@ read_preflib <- function(file,
           \(r) cbind(ord[[r]], rep(r, length(ord[[r]])))
         ) |>
           do.call(what = rbind)
-      }
+      },
+      simplify = FALSE
     ) |>
     vctr_preferences(item_names = alternative_names)
 
