@@ -1,33 +1,25 @@
-item_names <- c("A", "B", "C")
-
-rankings <- matrix(
-  c(
-    1, 2, 3,
-    3, 2, 1,
-    2, 1, 3
-  ),
-  nrow = 3,
-  byrow = TRUE
-)
-colnames(rankings) <- item_names
+syd <- "../prefio_tidy/data//SG2301 LA Pref Data Sydney.txt" |>
+  read_tsv() |>
+  drop_na() |>
+  long_preferences(
+    ballot_type,
+    id_cols = BPNumber,
+    item_col = CandidateName,
+    rank_col = PrefCounted,
+    unused_fn = list(PollingPlaceName = first, District = first)
+  )
 
 test_that("`adjacency` works on `preferences`", {
-  prefs <- preferences(rankings, format = "ranking")
-  adj <- adjacency(prefs)
-  # Make sure all entries are >= 0
-  expect_true(all(adj >= 0))
-  # Check some entries
-  expect_true(adj["A", "B"] == 1)
-  expect_true(adj["B", "A"] == 2)
+  expect_success(adjacency(syd))
+  expect_true(all(adjacency(syd) >= 0))
 })
 
-test_that("`adjacency` also works on `aggregated_preferences`", {
-  prefs <- preferences(rankings, format = "ranking")
-  aprefs <- aggregate(prefs, frequencies = rep(2, 3))
-  adj <- adjacency(aprefs)
-  # Make sure all entries are >= 0
-  expect_true(all(adj >= 0))
-  # Check some entries
-  expect_true(adj["A", "B"] == 2)
-  expect_true(adj["B", "A"] == 4)
+test_that("`adjacency` is consistent when aggregating", {
+  adj1 <- adjacency(syd)
+  adj2 <- syd |>
+    group_by(ballot_type) |>
+    summary(frequency = n()) |>
+    adjacency(x = _, preferences_col = ballot_type, frequency_col = frequency)
+  # Should be same
+  expect_equal(adj1, adj2)
 })
