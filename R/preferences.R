@@ -33,27 +33,29 @@
 #' # Votes cast by two animals ranking a variety of fruits and vegetables.
 #' # This is not real data, I made this up.
 #' x <- tribble(
-#'   ~voter_id, ~species, ~food,   ~ranking,
-#'   1,         "Rabbit", "Apple",  1,
-#'   1,         "Rabbit", "Banana", 2,
-#'   1,         "Rabbit", "Carrot", 3,
-#'   2,         "Monkey", "Banana", 1,
-#'   2,         "Monkey", "Apple",  2,
-#'   2,         "Monkey", "Carrot", 3
+#'   ~voter_id, ~species, ~food, ~ranking,
+#'   1, "Rabbit", "Apple", 1,
+#'   1, "Rabbit", "Banana", 2,
+#'   1, "Rabbit", "Carrot", 3,
+#'   2, "Monkey", "Banana", 1,
+#'   2, "Monkey", "Apple", 2,
+#'   2, "Monkey", "Carrot", 3
 #' )
 #' # Process preferencial data into a single column.
 #' x |>
 #'   long_preferences(food_preference,
-#'                    id_cols = voter_id,
-#'                    item_col = fruit,
-#'                    rank_col = ranking)
+#'     id_cols = voter_id,
+#'     item_col = fruit,
+#'     rank_col = ranking
+#'   )
 #' # The same, but keep the species data.
 #' x |>
 #'   long_preferences(food_preference,
-#'                    id_cols = voter_id,
-#'                    item_col = fruit,
-#'                    rank_col = ranking,
-#'                    unused_col = list(species = first))
+#'     id_cols = voter_id,
+#'     item_col = fruit,
+#'     rank_col = ranking,
+#'     unused_col = list(species = first)
+#'   )
 NULL
 
 # Format a list of orderings as a "preferences" vctr with vctrs::list_of
@@ -346,8 +348,8 @@ levels.preferences <- function(x, ...) {
 `levels<-.preferences` <- function(x, value) {
   if (
     anyNA(value) ||
-    !identical(unique(value), value) ||
-    length(value) != nlevels(x)
+      !identical(unique(value), value) ||
+      length(value) != nlevels(x)
   ) {
     warning(
       "No action taken: item names must be unique and with length ",
@@ -357,4 +359,79 @@ levels.preferences <- function(x, ...) {
   }
   attr(x, "item_names") <- value
   x
+}
+
+.validate_preferences_frequencies <- function(x,
+                                              preferences_col = NULL,
+                                              frequency_col = NULL) {
+  if (inherits(x, "preferences")) {
+    # Convert vector preferences into a tibble with columns `preferences`
+    # and `frequency`.
+    x <- tibble(preferences = x) |>
+      group_by(preferences) |>
+      summarise(frequency = n()) |>
+      arrange(-frequency)
+  } else if (inherits(x, "tbl_df")) {
+    # Process tibble.
+    # If `preferences_col` is passed, select the appropriate column. Otherwise
+    # just look for a preferences-typed column.
+
+    # Get preferences column
+    preferences_col <- rlang::enquo(preferences_col)
+    if (rlang::quo_is_null(preferences_col)) {
+      preferences_col <- rlang::expr(where(~ inherits(.x, "preferences")))
+    }
+    x_preferences <- x |>
+      select(!!preferences_col)
+    # Ensure result has one column of "preferences" data.
+    preferences_colnames <- x_preferences |>
+      sapply(inherits, what = "preferences") |>
+      which() |>
+      names()
+    if (length(preferences_colnames) == 0L) {
+      stop(
+        "Expected one column of \"preferences\" for ",
+        "`write_preflib`, but got 0."
+      )
+    } else if (length(preferences_colnames) > 1L) {
+      warning(
+        "Expected one column of \"preferences\" for `write_preflib`, ",
+        "but got ", length(preferences_colnames), ". Using `",
+        preferences_colnames[1L], "`."
+      )
+    }
+    x_preferences <- x_preferences |>
+      select(preferences = preferences_colnames[1L])
+
+    # Get frequency column
+    frequency_col <- rlang::enquo(frequency_col)
+    if (rlang::quo_is_null(frequency_col)) {
+      frequency_col <- NULL
+    }
+    x_frequency <- x |>
+      select(!!frequency_col)
+    # Ensure result has one column of "numeric" data.
+    if (!is.null(frequency_col)) {
+      numeric_colnames <- x_frequency |>
+        sapply(is.numeric) |>
+        which() |>
+        names()
+      if (length(numeric_colnames) > 1L) {
+        warning(
+          "Expected only one column of frequency for `write_preflib`. ",
+          "Using `", numeric_colnames[1L], "`."
+        )
+      }
+      x_frequency <- x_frequency |>
+        select(frequency = numeric_colnames[1L])
+    } else {
+      x_frequency <- 1L
+    }
+
+    x <- cbind(x_preferences, frequency = x_frequency) |>
+      group_by(preferences) |>
+      summarise(frequency = sum(frequency)) |>
+      arrange(-frequency)
+  }
+  return(x)
 }
