@@ -22,32 +22,12 @@ pref_length <- function(x) {
   )
 }
 
-#' Get the name of each first preference in a vector of preferences.
-#' @param x A vector of preferences.
-#' @return The name(s) of the item(s) assigned first preference.
-#' @export
-first_pref <- function(x) {
-  nms <- levels(x)
-  vapply(
-    x,
-    \(pref) {
-      res <- nms[pref[which(pref[, 2L] == 1L), 1L]]
-      if (length(res) == 0) {
-        NA
-      } else {
-        res
-      }
-    },
-    character(1L)
-  )
-}
-
 #' Get the rank assigned to a specific item in a set of preferences.
 #' @param x A vector of preferences.
 #' @param item_name The name of the item to extract the rank for.
 #' @return The rank of `item_name` for each of the preferences in `x`.
 #' @export
-get_rank <- function(x, item_name) {
+rank_of_item <- function(x, item_name) {
   idx <- match(item_name, levels(x))[1L]
   if (length(idx) != 1L) {
     stop("`item_name` must name exactly one item in the preferences.")
@@ -72,10 +52,10 @@ get_rank <- function(x, item_name) {
 #' @return A list containing the name(s) of the item(s) ranked `rank` in each of
 #' the preferences in `x`.
 #' @export
-get_items <- function(x, rank) {
+items_at_rank <- function(x, rank) {
   vapply(
     x,
-    \(pref) list(rownames(pref)[pref[which(pref[, 2L] == rank), 2L]]),
+    \(pref) list(levels(x)[pref[which(pref[, 2L] == rank), 1L]]),
     list(1L)
   )
 }
@@ -114,7 +94,7 @@ pref_complete <- function(x) {
 #' @param top_ranks If `TRUE`, output the top `n_ranks`, otherwise the bottom
 #' `n_ranks`.
 #' @return A vector of preferences with each selection equal to `x` but omitting
-#' the top (if `top_ranks` is `TRUE`, otherwise bottom) selections so that the
+#' the bottom (if `top_ranks` is `TRUE`, otherwise top) selections so that the
 #' new vector has at most `n_ranks` selections.
 #' @export
 pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
@@ -122,10 +102,10 @@ pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
     vapply(
       \(pref) {
         if (top_ranks) {
-          pref[pref[, 2L] <= max_rank, , drop = FALSE] |>
+          pref[pref[, 2L] <= n_ranks, , drop = FALSE] |>
             list()
         } else {
-          pref[pref[, 2L] >= max(pref[, 2L]) - max_rank + 1L, , drop = FALSE] |>
+          pref[pref[, 2L] >= max(pref[, 2L]) - n_ranks + 1L, , drop = FALSE] |>
             .densify_col2() |>
             list()
         }
@@ -140,7 +120,7 @@ pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
 #' @param items The names of the items which should be removed from the preferences in `x`.
 #' @return A new vector of preferences, but with `items` removed from each selection.
 #' @export
-pref_remove <- function(x, items) {
+rm_items <- function(x, items) {
   idxs <- match(items, levels(x))
   x |>
     vapply(
@@ -162,25 +142,51 @@ pref_remove <- function(x, items) {
     vctr_preferences(item_names = levels(x))
 }
 
-#' Eliminate items from preference selections.
+#' Remove all but specified items from preferences.
 #' @param x A vector of preferences.
-#' @param lowest If `TRUE`, eliminates the lowest ranked items from each
+#' @param items The names of the items which should be kept from the preferences in `x`.
+#' @return A new vector of preferences, but with any item not in `items`
+#' removed from each selection.
+#' @export
+pref_project <- function(x, items) {
+  idxs <- match(items, levels(x))
+  x |>
+    vapply(
+      \(pref) {
+        pref[na.omit(match(idxs, pref[, 1L])), , drop = FALSE] |>
+          .densify_col2() |>
+          list()
+      },
+      list(integer())
+    ) |>
+    vctr_preferences(item_names = levels(x))
+}
+
+#' Eliminate lowest (or highest) ranked items from preferences.
+#' @param x A vector of preferences.
+#' @param n The number of times to remove the bottom rank.
+#' @param lowest If `TRUE`, eliminates the lowest ranked item(s) for each
 #' selection.
-#' @param drop If `TRUE`, drops all blank preferences.
+#' @param drop If `TRUE`, drops blank preferences from the output.
 #' @return A new vector of preferences which is equal to `x` but with the least
 #' preferred selection dropped for each selection.
 #' @export
-pref_elim <- function(x, lowest = TRUE, drop = FALSE) {
+pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
+  n <- as.integer(n)
+  if (length(n) != 1L && is.integer(n) && n > 0L) {
+    stop("`n` must be a single, positive integer.")
+  }
   result <- x |>
     vapply(
       \(pref) {
-        if (pref_length(pref) == 0L) {
-          pref
+        if (dim(pref)[1L] == 0L) {
+          pref |>
+            list()
         } else if (lowest) {
-          pref[pref[, 2L] != max(pref[, 2L]), , drop = FALSE] |>
+          pref[pref[, 2L] < max(pref[, 2L]) - n + 1L, , drop = FALSE] |>
             list()
         } else {
-          pref[pref[, 2L] != 1L, , drop = FALSE] |>
+          pref[pref[, 2L] > n, , drop = FALSE] |>
             .densify_col2() |>
             list()
         }
@@ -194,7 +200,6 @@ pref_elim <- function(x, lowest = TRUE, drop = FALSE) {
     result
   }
 }
-
 
 # Helper function to make second column a dense ranking. Not exported.
 .densify_col2 <- function(x) {
