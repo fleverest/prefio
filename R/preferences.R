@@ -28,8 +28,6 @@
 #' preferences, but are important for upstream modelling. See
 #' <[`pivot_wider`][pivot_wider]> for more details.
 #' @param ... Unused.
-#' 
-#' @return A new tibble with a column of formatted [`preferences`][preferences].
 #'
 #' @examples
 #' # Votes cast by two animals ranking a variety of fruits and vegetables.
@@ -104,7 +102,6 @@ long_preferences <- function(data,
     {{ item_col }},
     {{ rank_col }},
     item_names,
-    aggregate,
     verbose,
     unused_fn
   )
