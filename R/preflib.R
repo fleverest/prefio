@@ -16,17 +16,15 @@
 #' }
 #'
 #' The numerically coded orderings and their frequencies are read into a
-#' data frame, storing the item names as an attribute. The
-#' `as.aggregated_preferences` method converts these to an
-#' [`aggregated_preferences`][aggregate.preferences] object with the
-#' items labelled by name.
+#' tibble, storing all original metadata in a "preflib" attribute.
 #'
 #' A PrefLib file may be corrupt, in the sense that the ordered alternatives do
-#' not match their names. In this case, the file can be read in as a data
-#' frame (with a warning), but `as.aggregated_preferences` will throw an error.
+#' not match their names. In this case, the file will still be read, but with a
+#' warning.
 #'
-#' @return An [`aggregated_preferences`][aggregate.preferences] object
-#' containing the PrefLib data.
+#' @return A tibble with two columns: `preferences` and `frequency`. The
+#' `preferences` column contains all the preferential orderings in the file, and
+#' the `frequency` column the relative frequency of this selection.
 #'
 #' @param file A preferential data file, conventionally with extension `.soc`,
 #' `.soi`, `.toc` or `.toi` according to data type.
@@ -53,12 +51,13 @@
 #' # strict complete orderings of four films on Netflix
 #' netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
 #' head(netflix)
-#' names(netflix$preferences)
+#' levels(netflix$preferences)
 #'
 #' # strict incomplete orderings of 6 random cities from 36 in total
 #' cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
 #' }
 #' @importFrom utils read.csv
+#' @importFrom tibble tibble
 #' @export
 read_preflib <- function(file,
                          from_preflib = FALSE,
@@ -172,45 +171,49 @@ read_preflib <- function(file,
     as.integer,
     how = "replace"
   )
-  names(preferences) <- c(
-    "Frequency",
-    paste("Rank", seq_len(ncol(preferences) - 1L))
-  )
   frequency <- preferences[, 1L]
-  preferences <- preferences[, -1L]
-  preferences <- as.preferences(
-    preferences,
-    "ordering",
-    item_names = alternative_names
-  )
-  aggregated_prefs <- aggregate(preferences, frequency = frequency)
-  attr(aggregated_prefs, "preflib") <- preflib_attributes
+  # Convert orderings to vctrs format
+  preferences <- preferences[, -1L] |>
+    apply(
+      1L,
+      \(ord) {
+        lapply(
+          seq_along(ord),
+          \(r) cbind(ord[[r]], rep(r, length(ord[[r]])))
+        ) |>
+          do.call(what = rbind)
+      }
+    ) |>
+    vctr_preferences(item_names = alternative_names)
+
+  output_tibble <- tibble(preferences = preferences, frequency = frequency)
+  attr(output_tibble, "preflib") <- preflib_attributes
 
   # Ensure we have the expected number of unique and total orderings.
   n_unique_orders <- as.integer(preflib_attributes[["NUMBER UNIQUE ORDERS"]])
   n_voters <- as.integer(preflib_attributes[["NUMBER VOTERS"]])
-  if (length(aggregated_prefs$preferences) != n_unique_orders) {
+  if (length(preferences) != n_unique_orders) {
     warning(
       "Expected ",
       n_unique_orders,
       " unique orderings but only ",
-      length(aggregated_prefs$preferences),
+      length(preferences),
       " were recovered when reading the PrefLib datafile.",
       " The file may be corrupt."
     )
   }
-  if (sum(aggregated_prefs$frequency) != n_voters) {
+  if (sum(frequency) != n_voters) {
     warning(
       "Expected ",
       n_voters,
       " total orderings but only ",
-      sum(aggregated_prefs$frequency),
+      sum(frequency),
       " were recovered when reading the PrefLib datafile.",
       " The file may be corrupt."
     )
   }
 
-  return(aggregated_prefs)
+  return(output_tibble)
 }
 
 #' Write Ordinal Preference Data to PrefLib Formats
@@ -520,7 +523,7 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
     paste("#", "PUBLICATION DATE:", publication_date),
     paste("#", "MODIFICATION DATE:", modification_date),
     # Derived metadata
-    paste("#", "NUMBER ALTERNATIVES:", length(levels(x$preferences))),
+    paste("#", "NUMBER ALTERNATIVES:", nlevels(x$preferences)),
     paste("#", "NUMBER VOTERS:", sum(x$frequency)),
     paste("#", "NUMBER UNIQUE ORDERS:", length(x$preferences))
   )
