@@ -4,15 +4,21 @@
 \alias{adjacency}
 \title{Create an Adjacency Matrix for a set of Preferences}
 \usage{
-adjacency(object, weights = NULL, ...)
+adjacency(x, preferences_col = NULL, frequency_col = NULL, ...)
 }
 \arguments{
-\item{object}{a \code{\link{preferences}} object, or an object that can be
-coerced by \code{as.preferences}.}
+\item{x}{A \code{\link{preferences}} object or a \code{tibble} with a
+\code{preferences}-typed column to write to file.}
 
-\item{weights}{an optional vector of weights for the preferences.}
+\item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\code{tibble}, the column containing the preferences to be written to file.
+If not provided and \code{x} is a \code{tibble}, then}
 
-\item{...}{further arguments passed to/from methods.}
+\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\code{tibble}, the column containing the frequency of the preferences. If not
+provided, each row is considered to be observed a single time.}
+
+\item{...}{Currently unused.}
 }
 \value{
 An \eqn{N} by \eqn{N} matrix, where \eqn{N} is the number of
@@ -33,14 +39,20 @@ If \code{weights} is specified, the values in the adjacency matrix are the
 weighted counts.
 }
 \examples{
-X <- matrix(c(
-  2, 1, 2, 1, 2,
-  3, 2, 0, 0, 1,
-  1, 0, 2, 2, 3
-), nrow = 3, byrow = TRUE)
-X <- as.preferences(X, format = "ranking", item_names = LETTERS[1:5])
-adjacency(X)
-
-adjacency(X, weights = c(1, 1, 2))
+x <- tribble(
+  ~voter_id, ~species, ~food,   ~ranking,
+  1,         "Rabbit", "Apple",  1,
+  1,         "Rabbit", "Banana", 2,
+  1,         "Rabbit", "Carrot", 3,
+  2,         "Monkey", "Banana", 1,
+  2,         "Monkey", "Apple",  2,
+  2,         "Monkey", "Carrot", 3
+) |>
+  long_preferences(food_preference,
+                   id_cols = voter_id,
+                   item_col = fruit,
+                   rank_col = ranking) |>
+  pull(food_preference) |>
+  adjacency()
 
 }

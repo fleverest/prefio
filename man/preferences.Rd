@@ -2,67 +2,28 @@
 % Please edit documentation in R/preferences.R
 \name{preferences}
 \alias{preferences}
-\alias{new_preferences}
-\alias{as.preferences}
-\alias{as.preferences.grouped_preferences}
-\alias{as.preferences.default}
+\alias{long_preferences}
 \alias{format.preferences}
 \title{Preferences Objects}
 \usage{
-new_preferences(
+long_preferences(
   data,
-  format = c("long", "ordering", "ranking"),
+  col,
   id_cols = NULL,
   rank_col = NULL,
   item_col = NULL,
-  frequency_col = NULL,
   item_names = NULL,
-  aggregate = FALSE,
   verbose = TRUE,
-  ...
-)
-
-as.preferences(x, ...)
-
-\method{as.preferences}{grouped_preferences}(x, aggregate = FALSE, verbose = TRUE, ...)
-
-\method{as.preferences}{default}(
-  x,
-  format = c("long", "ranking", "ordering"),
-  id = NULL,
-  item = NULL,
-  rank = NULL,
-  item_names = NULL,
-  aggregate = FALSE,
-  verbose = TRUE,
+  unused_fn = NULL,
   ...
 )
 
 \method{format}{preferences}(x, ...)
 }
 \arguments{
-\item{data}{A \code{list}, \code{matrix} or \code{tibble} in one of three formats:
-\describe{
-\item{\code{ordering}}{\code{list} elements represent a preference, with its' values
-the item(s) (multiple in the case of a tie) assigned
-to a rank by order of first to last preference, so
-with no repetitions. If elements are \code{integer}s, then
-the \code{item_names} parameter should be set, otherwise
-the integers themselves will be treated as names.}
-\item{\code{ranking}}{Columns are associated with a single item, with values
-representing the rank assigned to the item for each
-preference. Conventionally, ranks are integers in
-increasing order (with larger values indicating lower
-preference), but they can be any ordinal values. Any
-rankings will be converted to 'dense' integer
-rankings, as implemented by \code{dplyr::dense_rank()}.}
-\item{\code{long}}{Like \code{ranking} but in a long format: three columns (\code{id},
-\code{item}, \code{rank}) are used to infer the \code{ranking}
-structure.}
-}}
+\item{data}{A \code{data.frame} or \code{tibble} to extract preferences from}
 
-\item{format}{The format of the data: one of "ordering", "ranking", or
-"long" (see above). By default, \code{data} is assumed to be in "long" format.}
+\item{col}{The name of the new column, as a string or symbol.}
 
 \item{id_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> The columns by which to
 group the dataset to extract a single preference selection.}
@@ -74,117 +35,53 @@ long-format: the column representing the rank for the associated item.}
 long-format: the column representing the items by name or by index, in which
 case the \code{item_names} parameter should also be passed.}
 
-\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Optionally, for
-\code{data} in ordering or ranking formats: column representing the frequency of
-occurance for the associated preference selection.}
-
 \item{item_names}{The names of the full set of items. This is necessary when
 the dataset specifies items by index rather than by name, or when there are
 items which do not appear in any preference selection.}
 
-\item{aggregate}{If \code{TRUE}, aggregates identical preference selections and
-counts repetitions. When enabled, \code{new_preferences} will return a \code{tibble}.}
-
 \item{verbose}{If \code{TRUE}, diagnostic messages will be sent to stdout.}
 
+\item{unused_fn}{When \code{format="long"}, passes parameter to
+\code{dplyr::pivot_wider} to summarise values from unused columns. This can be
+helpful to keep covariates from columns which are unused in processing
+preferences, but are important for upstream modelling. See
+<\code{\link{pivot_wider}}> for more details.}
+
 \item{...}{Unused.}
-}
-\value{
-A \code{preferences} object, or a \code{tibble} with
-columns \code{preferences} and \code{frequency} when \code{aggregate=TRUE}.
+
+\item{format}{The format of the data: one of "ordering", "ranking", or
+"long" (see above). By default, \code{data} is assumed to be in "long" format.}
+
+\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Optionally, for
+\code{data} in ordering or ranking formats: column representing the frequency of
+occurance for the associated preference selection.}
 }
 \description{
-Create \verb{*_preferences} objects for representing Ordinal Preference datasets.
-
-Ordinal preferences can order every item, or they can order a subset. Some
-ordinal preference datasets will contain ties between items at a given rank.
-Hence, there are four distinct types of preferential data:
-\describe{
-\item{\code{soc_preferences}}{Strict Orders - Complete List}
-\item{\code{soi_preferences}}{Strict Orders - Incomplete List}
-\item{\code{toc_preferences}}{Orders with Ties - Complete List}
-\item{\code{toi_preferences}}{Orders with Ties - Incomplete List}
-}
-The preferential data type is determined automatically.  If every preference
-ranks every item, then the data type will be \code{soc_preferences} or
-\code{soi_preferences}. Similarly, if no preference contains a tie the data type
-will be \code{toc_preferences} or \code{toi_preferences}.
-
-A preferential dataset can be represented in one of three formats:
-\code{ranking}, \code{long} or \code{ordering}.
+A tidy interface for working with ordinal preferences.
 }
 \examples{
-# create rankings from data in long format
-
-# Example long-form data
-x <- data.frame(
-  id = c(rep(1:4, each = 4), 5, 5, 5),
-  item = c(
-    LETTERS[c(1:3, 3, 1:4, 2:5, 1:2, 1)], NA,
-    LETTERS[3:5]
-  ),
-  rank = c(4:1, rep(NA, 4), 3:4, NA, NA, 1, 3, 4, 2, 2, 2, 3)
+# Votes cast by two animals ranking a variety of fruits and vegetables.
+# This is not real data, I made this up.
+x <- tribble(
+  ~voter_id, ~species, ~food,   ~ranking,
+  1,         "Rabbit", "Apple",  1,
+  1,         "Rabbit", "Banana", 2,
+  1,         "Rabbit", "Carrot", 3,
+  2,         "Monkey", "Banana", 1,
+  2,         "Monkey", "Apple",  2,
+  2,         "Monkey", "Carrot", 3
 )
-
-# * Set #1 has two different ranks for the same item (item C
-# has rank 1 and 2). This item will be excluded from the preferences.
-# * All ranks are missing in set #2, a technically valid partial ordering
-# * Some ranks are missing in set #3, a perfectly valid partial ordering
-# * Set #4 has inconsistent ranks for two items, and a rank with a
-# missing item.
-# * Set #5 is not a dense ranking. It will be converted to be dense and then
-# inferred to be a regular partial ordering with ties.
-split(x, x$rank)
-
-# Creating a preferences object with this data will attempt to resolve these
-# issues automatically, sending warnings when assumptions need to be made.
-new_preferences(x, id = "id", item = "item", rank = "rank")
-
-# Convert an existing matrix of rankings to a preferences object.
-rnk <- matrix(c(
-  1, 2, 0, 0,
-  4, 1, 2, 3,
-  2, 1, 1, 1,
-  1, 2, 3, 0,
-  2, 1, 1, 0,
-  1, 0, 3, 2
-), nrow = 6, byrow = TRUE)
-colnames(rnk) <- c("apple", "banana", "orange", "pear")
-
-rnk <- as_preferences(rnk, format = "ranking")
-
-# Convert an existing data frame of orderings to a preferences object.
-e <- character() # short-hand for empty ranks
-ord <- new_preferences(
-  as.data.frame(
-    rbind(
-      list(1, 2, e, e), # apple, banana
-      list("banana", "orange", "pear", "apple"),
-      list(c("banana", "orange", "pear"), "apple", e, e),
-      list("apple", "banana", "orange", e),
-      list(c("banana", "orange"), "apple", e, e),
-      list("apple", "pear", "orange", e)
-    )
-  ),
-  format = "ordering",
-  item_names = c("apple", "banana", "orange", "pear")
-)
-
-# Access the first three sets of preferences
-ord[1:3]
-
-# Truncate preferences to the top 2 ranks
-ord[, 1:2, by_rank = TRUE]
-
-# Exclude pear from the rankings
-ord[, -4]
-
-# Convert the preferences to a ranking matrix
-as.matrix(ord)
-
-# Get the rank of apple in the third preference-set
-as.matrix(ord)[3, 1]
-
-# Get all the ranks assigned to apple as a vector
-as.matrix(ord)[, "apple"]
+# Process preferencial data into a single column.
+x |>
+  long_preferences(food_preference,
+                   id_cols = voter_id,
+                   item_col = fruit,
+                   rank_col = ranking)
+# The same, but keep the species data.
+x |>
+  long_preferences(food_preference,
+                   id_cols = voter_id,
+                   item_col = fruit,
+                   rank_col = ranking,
+                   unused_col = list(species = first))
 }

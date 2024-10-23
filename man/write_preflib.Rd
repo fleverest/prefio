@@ -7,6 +7,8 @@
 write_preflib(
   x,
   file = "",
+  preferences_col = NULL,
+  frequency_col = NULL,
   title = NULL,
   publication_date = NULL,
   modification_type = NULL,
@@ -17,12 +19,19 @@ write_preflib(
 )
 }
 \arguments{
-\item{x}{An \code{aggregated_preferences} object to write to file. If \code{x} is of a
-different class, it attempts to coerce \code{x} into an \code{aggregated_preferences}
-object via \code{as.aggregated_preferences()}.}
+\item{x}{A \code{preferences} object or a \code{tibble} with a \code{preferences}-typed
+column to write to file.}
 
 \item{file}{Either a character string naming the a file or a writeable,
 open connection. The empty string \code{""} will write to stdout.}
+
+\item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\code{tibble}, the column containing the preferences to be written to file.
+If not provided and \code{x} is a \code{tibble}, then}
+
+\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\code{tibble}, the column containing the frequency of the preferences. If not
+provided, each row is considered to be observed a single time.}
 
 \item{title}{The title of the data file, for instance the name of the
 election represented in the data file. If not provided, we check for the
