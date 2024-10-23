@@ -21,8 +21,9 @@ the file from PrefLib by adding the database \code{HTTP} prefix.}
 \code{from_preflib} is \code{TRUE}.}
 }
 \value{
-An \code{\link[=aggregate.preferences]{aggregated_preferences}} object
-containing the PrefLib data.
+A tibble with two columns: \code{preferences} and \code{frequency}. The
+\code{preferences} column contains all the preferential orderings in the file, and
+the \code{frequency} column the relative frequency of this selection.
 }
 \description{
 Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} files storing
@@ -42,14 +43,11 @@ The file types supported are
 }
 
 The numerically coded orderings and their frequencies are read into a
-data frame, storing the item names as an attribute. The
-\code{as.aggregated_preferences} method converts these to an
-\code{\link[=aggregate.preferences]{aggregated_preferences}} object with the
-items labelled by name.
+tibble, storing all original metadata in a "preflib" attribute.
 
 A PrefLib file may be corrupt, in the sense that the ordered alternatives do
-not match their names. In this case, the file can be read in as a data
-frame (with a warning), but \code{as.aggregated_preferences} will throw an error.
+not match their names. In this case, the file will still be read, but with a
+warning.
 }
 \note{
 The Netflix and cities datasets used in the examples are from
@@ -64,7 +62,7 @@ data sets require a citation for re-use.
 # strict complete orderings of four films on Netflix
 netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
 head(netflix)
-names(netflix$preferences)
+levels(netflix$preferences)
 
 # strict incomplete orderings of 6 random cities from 36 in total
 cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
