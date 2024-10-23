@@ -230,7 +230,7 @@ format_long <- function(data,
 
   # Convert rankings into orderings format
   data[[rlang::as_name(col)]] <- data |>
-    dplyr::select(item_names) |>
+    dplyr::select(all_of(item_names)) |>
     apply(
       1L,
       function(x) {
@@ -240,7 +240,7 @@ format_long <- function(data,
     )
   # Drop rankings
   data <- data |>
-    dplyr::select(-item_names)
+    dplyr::select(-all_of(item_names))
 
   # Add frequency as an attribute if necessary
   attr(data[[rlang::as_name(col)]], "item_names") <- item_names
