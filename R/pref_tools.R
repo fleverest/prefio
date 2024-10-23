@@ -1,5 +1,5 @@
 #' Check if a preference is blank.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @return A logical vector indicating which preferences are blank, i.e., `[]`.
 #' @export
 pref_blank <- function(x) {
@@ -11,7 +11,7 @@ pref_blank <- function(x) {
 }
 
 #' Check the length (number of rankings) of a preference.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @return The number of items listed on each of the preferences.
 #' @export
 pref_length <- function(x) {
@@ -23,7 +23,7 @@ pref_length <- function(x) {
 }
 
 #' Get the rank assigned to a specific item in a set of preferences.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param item_name The name of the item to extract the rank for.
 #' @return The rank of `item_name` for each of the preferences in `x`.
 #' @export
@@ -47,7 +47,7 @@ rank_of_item <- function(x, item_name) {
 }
 
 #' Get the name of the item(s) assigned a specific rank, e.g., first.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param rank A single integer, the rank which you would like to inspect.
 #' @return A list containing the name(s) of the item(s) ranked `rank` in each of
 #' the preferences in `x`.
@@ -61,7 +61,7 @@ items_at_rank <- function(x, rank) {
 }
 
 #' Complete preferences by adding unselected items as last place occurrances.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @return A new vector of preferences, with each selection starting with the
 #' corresponding selections made in `x`, but with all unranked items placed
 #' last.
@@ -89,7 +89,7 @@ pref_complete <- function(x) {
 }
 
 #' Truncate preferences to a maximum number of ranks.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param n_ranks The number of rankings to include in the output.
 #' @param top_ranks If `TRUE`, output the top `n_ranks`, otherwise the bottom
 #' `n_ranks`.
@@ -116,7 +116,7 @@ pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
 }
 
 #' Remove specified items from preferences.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param items The names of the items which should be removed from the preferences in `x`.
 #' @return A new vector of preferences, but with `items` removed from each selection.
 #' @export
@@ -143,7 +143,7 @@ rm_items <- function(x, items) {
 }
 
 #' Remove all but specified items from preferences.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param items The names of the items which should be kept from the preferences in `x`.
 #' @return A new vector of preferences, but with any item not in `items`
 #' removed from each selection.
@@ -163,7 +163,7 @@ pref_project <- function(x, items) {
 }
 
 #' Eliminate lowest (or highest) ranked items from preferences.
-#' @param x A vector of preferences.
+#' @param x A vector of [`preferences`][preferences].
 #' @param n The number of times to remove the bottom rank.
 #' @param lowest If `TRUE`, eliminates the lowest ranked item(s) for each
 #' selection.
