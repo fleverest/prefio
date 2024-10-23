@@ -347,7 +347,7 @@ levels.preferences <- function(x, ...) {
   if (
     anyNA(value) ||
     !identical(unique(value), value) ||
-    length(value) != length(levels(x))
+    length(value) != nlevels(x)
   ) {
     warning(
       "No action taken: item names must be unique and with length ",
