@@ -242,9 +242,6 @@ new_preferences <- function(data,
       unused_fn
     )
     return(ordering)
-    if (aggregate) {
-      frequency <- attr(ordering, "frequency")
-    }
   } else if (fmt == "ranking") {
     ordering <- ranking_to_ordering(
       data
@@ -316,10 +313,9 @@ validate_ordering <- function(x,
     # Convert `character` items to index in `item_names`
     x <- lapply(
       x,
-      \(pref) lapply(pref,
-        match,
-        table = item_names
-      )
+      lapply,
+      FUN = match,
+      table = item_names
     )
   }
 
