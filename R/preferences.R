@@ -522,7 +522,7 @@ pref_type <- function(x, n_items = NULL, long = FALSE) {
   }
   has_tie <- function(pref) as.logical(anyDuplicated(pref[, 2L]))
   ties <- any(vapply(vctrs::vec_data(x), has_tie, logical(1L)))
-  is_complete <- function(pref) ncol(pref) == n_items
+  is_complete <- function(pref) nrow(pref) == n_items
   complete <- all(vapply(vctrs::vec_data(x), is_complete, logical(1L)))
   if (complete) {
     if (ties) {
