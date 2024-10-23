@@ -1,5 +1,5 @@
-syd <- "../prefio_tidy/data//SG2301 LA Pref Data Sydney.txt" |>
-  read_tsv() |>
+syd <- "../data/sydney_2023.tsv" |>
+  read_tsv(show_col_types = FALSE) |>
   drop_na() |>
   long_preferences(
     ballot_type,
@@ -10,7 +10,6 @@ syd <- "../prefio_tidy/data//SG2301 LA Pref Data Sydney.txt" |>
   )
 
 test_that("`adjacency` works on `preferences`", {
-  expect_success(adjacency(syd))
   expect_true(all(adjacency(syd) >= 0))
 })
 
@@ -18,7 +17,7 @@ test_that("`adjacency` is consistent when aggregating", {
   adj1 <- adjacency(syd)
   adj2 <- syd |>
     group_by(ballot_type) |>
-    summary(frequency = n()) |>
+    summarise(frequency = n()) |>
     adjacency(x = _, preferences_col = ballot_type, frequency_col = frequency)
   # Should be same
   expect_equal(adj1, adj2)
