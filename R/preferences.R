@@ -253,7 +253,11 @@ Ops.preferences <- function(e1, e2) {
   op <- .Generic[[1L]] # nolint: object_usage_linter
   switch(op,
     `==` = {
-      vctrs::vec_equal(e1, e2)
+      if (all(levels(e1) == levels(e2))) {
+        vctrs::vec_equal(e1, e2)
+      } else {
+        rep(FALSE, max(length(e1), length(e2)))
+      }
     },
     `!=` = {
       return(!e1 == e2)
