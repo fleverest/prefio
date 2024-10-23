@@ -368,9 +368,11 @@ levels.preferences <- function(x, ...) {
 #' @method "levels<-" preferences
 #' @export
 `levels<-.preferences` <- function(x, value) {
-  if (anyNA(value) ||
+  if (
+    anyNA(value) ||
     !identical(unique(value), value) ||
-    length(value) != length(names(x))) {
+    length(value) != length(levels(x))
+  ) {
     warning(
       "No action taken: item names must be unique and with length ",
       "equal to the total number of items."
