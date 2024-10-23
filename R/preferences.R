@@ -333,12 +333,14 @@ validate_ordering <- function(x,
   # Convert list-of-lists format to list of integer-valued matrices
   x <- lapply(
     x,
-    \(pref) cbind(
-      unlist(pref),
-      rep(seq_along(pref),
-        times = lengths(pref)
+    \(pref) {
+      cbind(
+        unlist(pref),
+        rep(seq_along(pref),
+          times = lengths(pref)
+        )
       )
-    )
+    }
   )
 
   # Return validated, cleaned data along with item_names
