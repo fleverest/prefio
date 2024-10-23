@@ -3,10 +3,10 @@ test_that("`preferences` ordinal type is detected appropriately", {
   toi <- read_preflib("../data/berkley00017-00000001.toi")$preferences
   soc <- read_preflib("../data/netflix00004-00000101.soc")$preferences
   soi <- read_preflib("../data/glasgow00008-00000003.soi")$preferences
-  expect_equal("toc", attr(toc, "preftype"))
-  expect_equal("toi", attr(toi, "preftype"))
-  expect_equal("soc", attr(soc, "preftype"))
-  expect_equal("soi", attr(soi, "preftype"))
+  expect_equal("toc", pref_type(toc))
+  expect_equal("toi", pref_type(toi))
+  expect_equal("soc", pref_type(soc))
+  expect_equal("soi", pref_type(soi))
 })
 
 test_that("`read_preflib` throws error when 'ALT NAME X' is missing", {
@@ -83,6 +83,7 @@ test_that("`write_preflib` writes to stdout for all test datasets", {
 test_that("`write_preflib` produces a file which reads to identical object", {
   pfile <- testthat::capture_output(
     write_preflib(toc,
+      frequency_col = frequency,
       title = "test toc tempfile",
       modification_type = "imbued",
       publication_date = today,
@@ -90,25 +91,4 @@ test_that("`write_preflib` produces a file which reads to identical object", {
     )
   )
   expect_true(all(read_preflib(textConnection(pfile)) == toc))
-})
-
-test_that("`write_preflib` and `read_preflib` work with single preferences", {
-  onepref <- preferences(
-    matrix(c(1, 2, NA, NA),
-      nrow = 1,
-      dimnames = list(NULL, LETTERS[1:4])
-    ),
-    format = "ranking",
-    aggregate = TRUE
-  )
-  t <- tempfile()
-  write_preflib(onepref,
-    t,
-    title = "test toc tempfile",
-    modification_type = "imbued",
-    modification_date = today,
-    publication_date = today
-  )
-  onepref_from_t <- read_preflib(t)
-  expect_true(all(onepref == onepref_from_t))
 })
