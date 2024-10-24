@@ -1,7 +1,7 @@
-#' Create an Adjacency Matrix for a set of Preferences
+#' Compute the Adjacency Matrix for a vector of preferences
 #'
 #' Convert a set of preferences to an adjacency matrix summarising wins
-#' and losses between pairs of items
+#' and losses between pairs of items.
 #'
 #' For a `preferences` object with \eqn{N} items, the adjacency
 #' matrix is an \eqn{N} by \eqn{N} matrix, with element \eqn{(i, j)} being the
@@ -13,10 +13,9 @@
 #' weighted counts.
 #'
 #' @param x A [`preferences`][preferences] object or a `tibble` with a
-#' `preferences`-typed column to write to file.
+#' `preferences`-typed column.
 #' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
-#' `tibble`, the column containing the preferences to be written to file.
-#' If not provided and `x` is a `tibble`, then
+#' `tibble`, the column containing the preferences.
 #' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the frequency of the preferences. If not
 #' provided, each row is considered to be observed a single time.
