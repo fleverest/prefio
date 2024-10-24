@@ -46,6 +46,6 @@ x <- tibble::tribble(
     rank_col = ranking
   ) |>
   dplyr::pull(food_preference) |>
-  rankings_matrix()
+  ranking_matrix()
 
 }

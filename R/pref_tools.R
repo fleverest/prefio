@@ -220,5 +220,5 @@ pref_cov <- function(x, ...) {
       2L,
       \(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)
     ) |>
-    cov.wt(...)
+    stats::cov.wt(...)
 }
