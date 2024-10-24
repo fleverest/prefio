@@ -26,7 +26,7 @@
 #' items.
 #'
 #' @examples
-#' x <- tribble(
+#' x <- tibble::tribble(
 #'   ~voter_id, ~species, ~food, ~ranking,
 #'   1, "Rabbit", "Apple", 1,
 #'   1, "Rabbit", "Banana", 2,
@@ -35,12 +35,13 @@
 #'   2, "Monkey", "Apple", 2,
 #'   2, "Monkey", "Carrot", 3
 #' ) |>
-#'   long_preferences(food_preference,
+#'   long_preferences(
+#'     food_preference,
 #'     id_cols = voter_id,
-#'     item_col = fruit,
+#'     item_col = food,
 #'     rank_col = ranking
 #'   ) |>
-#'   pull(food_preference) |>
+#'   dplyr::pull(food_preference) |>
 #'   adjacency()
 #'
 #' @export
@@ -54,8 +55,12 @@ adjacency <- function(x,
     {{ preferences_col }},
     {{ frequency_col }}
   ) |>
-    dplyr::mutate(preferences = pref_complete(preferences))
-
+    dplyr::mutate( # Ensure preferences are complete to give matrice without NAs
+      dplyr::across(
+        dplyr::where(~ inherits(.x, "preferences")),
+        pref_complete
+      )
+    )
 
   n <- nlevels(x$preferences)
   m <- x$preferences |>
