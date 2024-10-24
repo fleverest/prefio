@@ -15,9 +15,6 @@
 #' case the `item_names` parameter should also be passed.
 #' @param rank_col <[`tidy-select`][dplyr_tidy_select]> For `data` in
 #' long-format: the column representing the rank for the associated item.
-#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> Optionally, for
-#' `data` in ordering or ranking formats: column representing the frequency of
-#' occurance for the associated preference selection.
 #' @param item_names The names of the full set of items. This is necessary when
 #' the dataset specifies items by index rather than by name, or when there are
 #' items which do not appear in any preference selection.
@@ -32,7 +29,7 @@
 #' @examples
 #' # Votes cast by two animals ranking a variety of fruits and vegetables.
 #' # This is not real data, I made this up.
-#' x <- tribble(
+#' x <- tibble::tribble(
 #'   ~voter_id, ~species, ~food, ~ranking,
 #'   1, "Rabbit", "Apple", 1,
 #'   1, "Rabbit", "Banana", 2,
@@ -43,18 +40,20 @@
 #' )
 #' # Process preferencial data into a single column.
 #' x |>
-#'   long_preferences(food_preference,
+#'   long_preferences(
+#'     food_preference,
 #'     id_cols = voter_id,
-#'     item_col = fruit,
+#'     item_col = food,
 #'     rank_col = ranking
 #'   )
 #' # The same, but keep the species data.
 #' x |>
-#'   long_preferences(food_preference,
+#'   long_preferences(
+#'     food_preference,
 #'     id_cols = voter_id,
-#'     item_col = fruit,
+#'     item_col = food,
 #'     rank_col = ranking,
-#'     unused_col = list(species = first)
+#'     unused_col = list(species = dplyr::first)
 #'   )
 NULL
 
@@ -125,10 +124,12 @@ validate_long <- function(data,
 
   # Find duplicated items
   if (
-    data |>
-      dplyr::group_by({{ id_cols }}) |>
-      dplyr::summarise(dupes = anyDuplicated({{ item_col }})) |>
-      dplyr::select(dupes) |>
+    (
+      data |>
+        dplyr::group_by({{ id_cols }}) |>
+        dplyr::filter(anyDuplicated({{ item_col }}) != 0L) |>
+        nrow() > 0L
+    ) |>
       any() &&
       verbose
   ) {
@@ -238,7 +239,8 @@ format_long <- function(data,
       function(x) {
         o <- order(x, na.last = NA)
         cbind(o, x[o])
-      }
+      },
+      simplify = FALSE
     )
   # Drop rankings
   data <- data |>
@@ -281,9 +283,17 @@ Ops.preferences <- function(e1, e2) {
 #' }
 #'
 #' @param x A `preferences` object (or vector data representing preferences)
-pref_type <- function(x, n_items = NULL, long = FALSE) {
+#' @param n_items The number of items, needed to assess whether a selection is
+#' complete or not. Defaults to `nlevels(x)` if `x` has class `preferences`,
+#' otherwise defaults to the length of the longest preference.
+#' @export
+pref_type <- function(x, n_items = NULL) {
   if (is.null(n_items)) {
-    n_items <- max(vapply(vctrs::vec_data(x), function(p) max(p[, 1L]), integer(1L)))
+    if (inherits(x, "preferences")) {
+      n_items <- nlevels(x)
+    } else {
+      n_items <- max(vapply(vctrs::vec_data(x), function(p) max(p[, 1L]), integer(1L)))
+    }
   }
   has_tie <- function(pref) as.logical(anyDuplicated(pref[, 2L]))
   ties <- any(vapply(vctrs::vec_data(x), has_tie, logical(1L)))
@@ -291,21 +301,16 @@ pref_type <- function(x, n_items = NULL, long = FALSE) {
   complete <- all(vapply(vctrs::vec_data(x), is_complete, logical(1L)))
   if (complete) {
     if (ties) {
-      preftype <- "toc"
+      "toc"
     } else {
-      preftype <- "soc"
+      "soc"
     }
   } else {
     if (ties) {
-      preftype <- "toi"
+      "toi"
     } else {
-      preftype <- "soi"
+      "soi"
     }
-  }
-  if (long) {
-    paste0(preftype, "_preferences")
-  } else {
-    preftype
   }
 }
 
@@ -321,6 +326,7 @@ print.preferences <- function(x, ...) {
 
 #' @method format preferences
 #' @rdname preferences
+#' @param x A vector of preferences.
 #' @export
 format.preferences <- function(x, ...) {
   item_names <- levels(x)
@@ -329,7 +335,7 @@ format.preferences <- function(x, ...) {
     paste0(
       "[",
       split(pref[, 1], pref[, 2]) |>
-        sapply(paste0, collapse = " = ") |>
+        sapply(FUN = paste0, collapse = " = ") |>
         paste0(collapse = " > "),
       "]"
     )
@@ -338,12 +344,17 @@ format.preferences <- function(x, ...) {
 }
 
 #' @method levels preferences
+#' @rdname preferences
+#' @param x A vector of preferences.
 #' @export
 levels.preferences <- function(x, ...) {
   attr(x, "item_names")
 }
 
 #' @method "levels<-" preferences
+#' @rdname preferences
+#' @param x A vector of preferences.
+#' @param value The new names for the items.
 #' @export
 `levels<-.preferences` <- function(x, value) {
   if (
@@ -364,6 +375,14 @@ levels.preferences <- function(x, ...) {
 .validate_preferences_frequencies <- function(x,
                                               preferences_col = NULL,
                                               frequency_col = NULL) {
+  # Resolve R CMD Check note
+  preferences <- frequency <- NULL
+  if (is.null(x)) {
+    stop(
+      "Expected `x` to be of class 'preferences' or a 'tibble' with a ",
+      "'preferences' column."
+    )
+  }
   if (inherits(x, "preferences")) {
     # Convert vector preferences into a tibble with columns `preferences`
     # and `frequency`.
@@ -381,11 +400,22 @@ levels.preferences <- function(x, ...) {
     if (rlang::quo_is_null(preferences_col)) {
       preferences_col <- rlang::expr(dplyr::where(~ inherits(.x, "preferences")))
     }
-    x_preferences <- x |>
-      dplyr::select(!!preferences_col)
+    # Get frequency column
+    frequency_col <- rlang::enquo(frequency_col)
+    if (rlang::quo_is_null(frequency_col)) {
+      x <- x |>
+        dplyr::select(preferences = !!preferences_col) |>
+        dplyr::mutate(frequency = 1L)
+    } else {
+      x <- x |>
+        dplyr::select(
+          preferences = !!preferences_col,
+          frequency = !!frequency_col
+        )
+    }
     # Ensure result has one column of "preferences" data.
-    preferences_colnames <- x_preferences |>
-      sapply(inherits, what = "preferences") |>
+    preferences_colnames <- x |>
+      sapply(FUN = inherits, what = "preferences") |>
       which() |>
       names()
     if (length(preferences_colnames) == 0L) {
@@ -400,20 +430,11 @@ levels.preferences <- function(x, ...) {
         preferences_colnames[1L], "`."
       )
     }
-    x_preferences <- x_preferences |>
-      dplyr::select(preferences = preferences_colnames[1L])
-
-    # Get frequency column
-    frequency_col <- rlang::enquo(frequency_col)
-    if (rlang::quo_is_null(frequency_col)) {
-      frequency_col <- NULL
-    }
-    x_frequency <- x |>
-      dplyr::select(!!frequency_col)
     # Ensure result has one column of "numeric" data.
-    if (!is.null(frequency_col)) {
-      numeric_colnames <- x_frequency |>
-        sapply(is.numeric) |>
+    if (!rlang::quo_is_null(frequency_col)) {
+      numeric_colnames <- x |>
+        dplyr::select(frequency) |>
+        sapply(FUN = is.numeric) |>
         which() |>
         names()
       if (length(numeric_colnames) > 1L) {
@@ -422,13 +443,9 @@ levels.preferences <- function(x, ...) {
           "Using `", numeric_colnames[1L], "`."
         )
       }
-      x_frequency <- x_frequency |>
-        dplyr::select(frequency = numeric_colnames[1L])
-    } else {
-      x_frequency <- 1L
     }
 
-    x <- cbind(x_preferences, frequency = x_frequency) |>
+    x <- x |>
       dplyr::group_by(preferences) |>
       dplyr::summarise(frequency = sum(frequency)) |>
       dplyr::arrange(-frequency)
