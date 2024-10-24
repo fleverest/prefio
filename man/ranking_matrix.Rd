@@ -4,7 +4,7 @@
 \alias{ranking_matrix}
 \title{Compute the Rankings Matrix for a vector of preferences}
 \usage{
-ranking_matrix(x, preferences_col = NULL, ...)
+ranking_matrix(x, preferences_col = NULL, frequency_col = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{\link{preferences}} object or a \code{tibble} with a
@@ -12,6 +12,10 @@ ranking_matrix(x, preferences_col = NULL, ...)
 
 \item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the preferences.}
+
+\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\code{tibble}, the column containing the frequency of the preferences. If not
+provided, each row is considered to be observed a single time.}
 
 \item{...}{Currently unused.}
 }

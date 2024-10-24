@@ -210,12 +210,20 @@ pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
 #' Covariance matrix for preferences, calculated using the rankings matrix.
 #'
 #' @param x A vector of preferences.
+#' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' `tibble`, the column containing the preferences.
+#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' `tibble`, the column containing the frequency of the preferences. If not
+#' provided, each row is considered to be observed a single time.
 #' @param ... Extra arguments to be passed to `stats::cov.wt`.
 #' @return A covariance matrix containing covariances for the ranks assigned to
 #' item pairs.
-pref_cov <- function(x, ...) {
+pref_cov <- function(x,
+                     preferences_col = NULL,
+                     frequency_col = NULL,
+                     ...) {
   x |>
-    ranking_matrix() |>
+    ranking_matrix({{ preferences_col }}, {{ frequency_col }}) |>
     apply(
       2L,
       \(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)
