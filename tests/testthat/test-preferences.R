@@ -1,21 +1,30 @@
-
-
 test_that("`preferences` can be constructed from long format", {
   syd <- "../data/sydney_2023.tsv" |>
-    read_tsv(show_col_types = FALSE) |>
-    drop_na() |>
+    readr::read_tsv(show_col_types = FALSE) |>
+    tidyr::drop_na() |>
     long_preferences(
       ballot_type,
       id_cols = BPNumber,
       item_col = CandidateName,
       rank_col = PrefCounted,
-      unused_fn = list(PollingPlaceName = first, District = first)
+      unused_fn = list(PollingPlaceName = dplyr::first, District = dplyr::first)
     )
   expect_true(
     syd$ballot_type |>
     inherits("preferences")
   )
 })
+
+syd <- "../data/sydney_2023.tsv" |>
+  readr::read_tsv(show_col_types = FALSE) |>
+  tidyr::drop_na() |>
+  long_preferences(
+    ballot_type,
+    id_cols = BPNumber,
+    item_col = CandidateName,
+    rank_col = PrefCounted,
+    unused_fn = list(PollingPlaceName = dplyr::first, District = dplyr::first)
+  )
 
 test_that("`preferences` with altered `item_names` are not equal", {
   prefs <- syd$ballot_type
@@ -34,14 +43,14 @@ test_that("Equality and inequality work for `preferences`", {
 
 test_that("`print.preference` formats correctly", {
   prefs <- syd |>
-    group_by(ballot_type) |>
-    summarise(n = n()) |>
-    mutate(ballot_type = pref_complete(ballot_type)) |>
+    dplyr::group_by(ballot_type) |>
+    dplyr::summarise(n = dplyr::n()) |>
+    dplyr::mutate(ballot_type = pref_complete(ballot_type)) |>
     head(1)
   expect_output(print(prefs$ballot_type), "\\[GREENWICH Alex > STANTON Phyllisse = TITO Skye = WARD Nick = WHITTON Mark\\]")
 
   prefs <- prefs |>
-    mutate(ballot_type = pref_trunc(ballot_type, 0)) 
+    dplyr::mutate(ballot_type = pref_trunc(ballot_type, 0)) 
   expect_output(
     print(prefs$ballot_type),
     "\\[\\]"

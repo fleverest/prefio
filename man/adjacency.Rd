@@ -39,7 +39,7 @@ If \code{weights} is specified, the values in the adjacency matrix are the
 weighted counts.
 }
 \examples{
-x <- tribble(
+x <- tibble::tribble(
   ~voter_id, ~species, ~food, ~ranking,
   1, "Rabbit", "Apple", 1,
   1, "Rabbit", "Banana", 2,
@@ -48,12 +48,13 @@ x <- tribble(
   2, "Monkey", "Apple", 2,
   2, "Monkey", "Carrot", 3
 ) |>
-  long_preferences(food_preference,
+  long_preferences(
+    food_preference,
     id_cols = voter_id,
-    item_col = fruit,
+    item_col = food,
     rank_col = ranking
   ) |>
-  pull(food_preference) |>
+  dplyr::pull(food_preference) |>
   adjacency()
 
 }
