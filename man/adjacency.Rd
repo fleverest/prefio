@@ -2,17 +2,16 @@
 % Please edit documentation in R/adjacency.R
 \name{adjacency}
 \alias{adjacency}
-\title{Create an Adjacency Matrix for a set of Preferences}
+\title{Compute the Adjacency Matrix for a vector of preferences}
 \usage{
 adjacency(x, preferences_col = NULL, frequency_col = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{\link{preferences}} object or a \code{tibble} with a
-\code{preferences}-typed column to write to file.}
+\code{preferences}-typed column.}
 
 \item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
-\code{tibble}, the column containing the preferences to be written to file.
-If not provided and \code{x} is a \code{tibble}, then}
+\code{tibble}, the column containing the preferences.}
 
 \item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the frequency of the preferences. If not
@@ -26,7 +25,7 @@ items.
 }
 \description{
 Convert a set of preferences to an adjacency matrix summarising wins
-and losses between pairs of items
+and losses between pairs of items.
 }
 \details{
 For a \code{preferences} object with \eqn{N} items, the adjacency

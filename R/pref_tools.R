@@ -206,3 +206,19 @@ pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
   x[, 2L] <- dplyr::dense_rank(x[, 2L])
   x
 }
+
+#' Covariance matrix for preferences, calculated using the rankings matrix.
+#'
+#' @param x A vector of preferences.
+#' @param ... Extra arguments to be passed to `stats::cov.wt`.
+#' @return A covariance matrix containing covariances for the ranks assigned to
+#' item pairs.
+pref_cov <- function(x, ...) {
+  x |>
+    ranking_matrix() |>
+    apply(
+      2L,
+      \(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)
+    ) |>
+    cov.wt(...)
+}
