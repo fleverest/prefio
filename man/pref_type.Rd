@@ -4,10 +4,14 @@
 \alias{pref_type}
 \title{pref_type}
 \usage{
-pref_type(x, n_items = NULL, long = FALSE)
+pref_type(x, n_items = NULL)
 }
 \arguments{
 \item{x}{A \code{preferences} object (or vector data representing preferences)}
+
+\item{n_items}{The number of items, needed to assess whether a selection is
+complete or not. Defaults to \code{nlevels(x)} if \code{x} has class \code{preferences},
+otherwise defaults to the length of the longest preference.}
 }
 \description{
 Ordinal preferences can order every item, or they can order a subset. Some

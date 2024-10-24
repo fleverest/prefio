@@ -352,9 +352,6 @@ levels.preferences <- function(x, ...) {
 }
 
 #' @method "levels<-" preferences
-#' @rdname preferences
-#' @param x A vector of preferences.
-#' @param value The new names for the items.
 #' @export
 `levels<-.preferences` <- function(x, value) {
   if (

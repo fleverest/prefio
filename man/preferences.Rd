@@ -4,6 +4,7 @@
 \alias{preferences}
 \alias{long_preferences}
 \alias{format.preferences}
+\alias{levels.preferences}
 \title{Preferences Objects}
 \usage{
 long_preferences(
@@ -19,6 +20,8 @@ long_preferences(
 )
 
 \method{format}{preferences}(x, ...)
+
+\method{levels}{preferences}(x, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} or \code{tibble} to extract preferences from}
@@ -49,12 +52,10 @@ preferences, but are important for upstream modelling. See
 
 \item{...}{Unused.}
 
+\item{x}{A vector of preferences.}
+
 \item{format}{The format of the data: one of "ordering", "ranking", or
 "long" (see above). By default, \code{data} is assumed to be in "long" format.}
-
-\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> Optionally, for
-\code{data} in ordering or ranking formats: column representing the frequency of
-occurance for the associated preference selection.}
 }
 \description{
 A tidy interface for working with ordinal preferences.
@@ -62,7 +63,7 @@ A tidy interface for working with ordinal preferences.
 \examples{
 # Votes cast by two animals ranking a variety of fruits and vegetables.
 # This is not real data, I made this up.
-x <- tribble(
+x <- tibble::tribble(
   ~voter_id, ~species, ~food, ~ranking,
   1, "Rabbit", "Apple", 1,
   1, "Rabbit", "Banana", 2,
@@ -73,17 +74,19 @@ x <- tribble(
 )
 # Process preferencial data into a single column.
 x |>
-  long_preferences(food_preference,
+  long_preferences(
+    food_preference,
     id_cols = voter_id,
-    item_col = fruit,
+    item_col = food,
     rank_col = ranking
   )
 # The same, but keep the species data.
 x |>
-  long_preferences(food_preference,
+  long_preferences(
+    food_preference,
     id_cols = voter_id,
-    item_col = fruit,
+    item_col = food,
     rank_col = ranking,
-    unused_col = list(species = first)
+    unused_col = list(species = dplyr::first)
   )
 }
