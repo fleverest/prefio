@@ -12,6 +12,9 @@
 #' `preferences`-typed column.
 #' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences.
+#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' `tibble`, the column containing the frequency of the preferences. If not
+#' provided, each row is considered to be observed a single time.
 #' @param ... Currently unused.
 #'
 #' @return An \eqn{N} by \eqn{M} matrix, where \eqn{N} is the number of
@@ -39,10 +42,12 @@
 #' @export
 ranking_matrix <- function(x,
                            preferences_col = NULL,
+                           frequency_col = NULL,
                            ...) {
   x <- .validate_preferences_frequencies(
     x,
-    {{ preferences_col }}
+    {{ preferences_col }},
+    {{ frequency_col }}
   )
 
   n_items <- nlevels(x$preferences)
