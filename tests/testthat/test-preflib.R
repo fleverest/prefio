@@ -92,3 +92,25 @@ test_that("`write_preflib` produces a file which reads to identical object", {
   )
   expect_true(all(read_preflib(textConnection(pfile)) == toc))
 })
+
+x <- tibble::tibble(
+  id = c(1, 1, 2, 2, 3, 3),
+  item = c("A", "B", "A", "B", "B", "A"),
+  rank = c(1, 2, 1, 2, 1, 2)
+) |>
+  long_preferences(
+    pref,
+    id_cols = id,
+    rank_col = rank,
+    item_col = item
+  ) |>
+  _$pref
+
+test_that("`write_preflib` warns when metadata parameters missing", {
+  skip_on_cran()
+  w <- capture_warnings(write_preflib(x, tempfile()))
+  expect_match(w, "Missing `title`.*", all = FALSE)
+  expect_match(w, "Missing `publication_date`.*", all = FALSE)
+  expect_match(w, "Missing `modification_date`.*", all = FALSE)
+  expect_match(w, "Missing `modification_type`.*", all = FALSE)
+})
