@@ -51,13 +51,13 @@ columns. For example, consider a dataset of votes
 |  ID | VoterLocation | Candidate | Rank |
 |----:|:--------------|:----------|-----:|
 |   1 | Melbourne     | Ali       |    1 |
-|   1 | Melbourne     | Ali       |    2 |
-|   1 | Melbourne     | Ali       |    3 |
-|   2 | Wangaratta    | Beatriz   |    3 |
+|   1 | Melbourne     | Beatriz   |    2 |
+|   1 | Melbourne     | Charles   |    3 |
+|   2 | Wangaratta    | Ali       |    3 |
 |   2 | Wangaratta    | Beatriz   |    2 |
-|   2 | Wangaratta    | Beatriz   |    1 |
-|   3 | Geelong       | Charles   |    2 |
-|   3 | Geelong       | Charles   |    1 |
+|   2 | Wangaratta    | Charles   |    1 |
+|   3 | Geelong       | Ali       |    2 |
+|   3 | Geelong       | Beatriz   |    1 |
 |   3 | Geelong       | Charles   |    3 |
 
 Three preferential votes, ranking three candidates in long-format.
@@ -72,7 +72,7 @@ across multiple rows, the syntax is quite similar to
 long <- tibble(
   ID = rep(1:3, each = 3),
   VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
-  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 
@@ -85,14 +85,12 @@ long |>
   )
 ```
 
-    ## Duplicated rankings per item detected: only the highest ranks will be used.
-
     ## # A tibble: 3 × 2
-    ##      ID       vote
-    ##   <int> <prefrncs>
-    ## 1     1      [Ali]
-    ## 2     2  [Beatriz]
-    ## 3     3  [Charles]
+    ##      ID                      vote
+    ##   <int>                <prefrncs>
+    ## 1     1 [Ali > Beatriz > Charles]
+    ## 2     2 [Charles > Beatriz > Ali]
+    ## 3     3 [Beatriz > Ali > Charles]
 
 But note that we lose the location data from the `VoterLocation` column.
 To resolve this, just like you would with `dplyr::pivot_wider`, we can
@@ -110,14 +108,12 @@ long |>
   )
 ```
 
-    ## Duplicated rankings per item detected: only the highest ranks will be used.
-
     ## # A tibble: 3 × 3
-    ##      ID VoterLocation       vote
-    ##   <int> <chr>         <prefrncs>
-    ## 1     1 Melbourne          [Ali]
-    ## 2     2 Wangaratta     [Beatriz]
-    ## 3     3 Geelong        [Charles]
+    ##      ID VoterLocation                      vote
+    ##   <int> <chr>                        <prefrncs>
+    ## 1     1 Melbourne     [Ali > Beatriz > Charles]
+    ## 2     2 Wangaratta    [Charles > Beatriz > Ali]
+    ## 3     3 Geelong       [Beatriz > Ali > Charles]
 
 #### Reading from PrefLib
 
@@ -153,9 +149,8 @@ head(netflix)
 
 Each row corresponds to a unique ordering of the four movies in the
 dataset. The number of Netflix users that assigned each ordering is
-given in the `frequencies` column. In this case, the most common
-ordering (with 68 voters specifying the same preferences) is the
-following:
+given in the `frequency` column. In this case, the most common ordering
+(with 68 voters specifying the same preferences) is the following:
 
 ``` r
 netflix$preferences[1]
@@ -183,8 +178,6 @@ long |>
   write_preflib(preferences_col = vote)
 ```
 
-    ## Duplicated rankings per item detected: only the highest ranks will be used.
-
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
     ## Rank, : Missing `title`: the PrefLib format requires a title to be specified.
     ## Using `NA`.
@@ -202,7 +195,7 @@ long |>
     ## # FILE NAME: NA
     ## # TITLE: NA
     ## # DESCRIPTION: 
-    ## # DATA TYPE: soi
+    ## # DATA TYPE: soc
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
@@ -214,9 +207,9 @@ long |>
     ## # ALTERNATIVE NAME 1: Ali
     ## # ALTERNATIVE NAME 2: Beatriz
     ## # ALTERNATIVE NAME 3: Charles
-    ## 1: 1
-    ## 1: 2
-    ## 1: 3
+    ## 1: 1,2,3
+    ## 1: 3,2,1
+    ## 1: 2,1,3
 
 Note that this produces four warnings. Each warning corresponds to a
 field which is required by the official PrefLib format, but may not be

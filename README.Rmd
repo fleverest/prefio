@@ -58,7 +58,7 @@ consider a dataset of votes
 long <- tibble(
   ID = rep(1:3, each = 3),
   VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
-  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 knitr::kable(
@@ -76,7 +76,7 @@ multiple rows, the syntax is quite similar to `dplyr::pivot_wider`.
 long <- tibble(
   ID = rep(1:3, each = 3),
   VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
-  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
 
@@ -126,7 +126,7 @@ head(netflix)
 
 Each row corresponds to a unique ordering of the four movies in the dataset.
 The number of Netflix users that assigned each ordering is given in the
-`frequencies` column. In this case, the most common ordering (with 68 voters
+`frequency` column. In this case, the most common ordering (with 68 voters
 specifying the same preferences) is the following:
 
 ```{r}
