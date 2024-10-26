@@ -11,7 +11,7 @@ test_that("`preferences` can be constructed from long format", {
     )
   expect_true(
     syd$ballot_type |>
-    inherits("preferences")
+      inherits("preferences")
   )
 })
 
@@ -50,7 +50,7 @@ test_that("`print.preference` formats correctly", {
   expect_output(print(prefs$ballot_type), "\\[GREENWICH Alex > STANTON Phyllisse = TITO Skye = WARD Nick = WHITTON Mark\\]")
 
   prefs <- prefs |>
-    dplyr::mutate(ballot_type = pref_trunc(ballot_type, 0)) 
+    dplyr::mutate(ballot_type = pref_trunc(ballot_type, 0))
   expect_output(
     print(prefs$ballot_type),
     "\\[\\]"
