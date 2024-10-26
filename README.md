@@ -16,12 +16,9 @@ including, but not limited to, those who work with recommender systems,
 computational social choice, voting systems and combinatorial
 optimization.
 
-The **prefio** R package provides a set of functions which enable users
-to perform a wide range of preference analysis tasks, including
-preference aggregation, pairwise comparison summaries and convenient IO
-operations. This makes it easier for researchers and other professionals
-to perform common data analysis and preprocessing tasks with such
-datasets.
+The **prefio** R package provides a tidy format for dealing with
+preferences, along with a set of functions which enable users to perform
+a wide range of preferential analyses.
 
 ## Installation
 
@@ -40,85 +37,87 @@ remotes::install_github("fleverest/prefio")
 
 ## Usage
 
-**prefio** provides a convenient interface for processing data from
-tabular formats as well as sourcing data from one of the unified
-[PrefLib formats](https://www.preflib.org/format/), including a
-convenient method for downloading data files directly from PrefLib to
-your R session.
+**prefio** provides a tidy interface for processing data from tabular
+formats as well as sourcing data from one of the unified [PrefLib
+formats](https://www.preflib.org/format/), including a convenient method
+for downloading data files directly from PrefLib to your R session.
 
-#### Processing tabular data
+#### Processing long-format data
 
-Preference data can come in many forms. Commonly preference data will be
-either represented in either *long*-format with each row corresponding
-to a particular *ranking* chosen for a single *item*:, e.g:
+Preference data can come in many forms. A very common way for
+preferential datasets to be stored is in long-formats with item/rank
+columns. For example, consider a dataset of votes
 
-|  ID | ItemName | Rank |
-|----:|:---------|-----:|
-|   1 | A        |    1 |
-|   1 | B        |    2 |
-|   1 | C        |    3 |
-|   2 | A        |    3 |
-|   2 | B        |    2 |
-|   2 | C        |    1 |
-|   3 | A        |    2 |
-|   3 | B        |    1 |
-|   3 | C        |    3 |
+|  ID | VoterLocation | Candidate | Rank |
+|----:|:--------------|:----------|-----:|
+|   1 | Melbourne     | Ali       |    1 |
+|   1 | Melbourne     | Ali       |    2 |
+|   1 | Melbourne     | Ali       |    3 |
+|   2 | Wangaratta    | Beatriz   |    3 |
+|   2 | Wangaratta    | Beatriz   |    2 |
+|   2 | Wangaratta    | Beatriz   |    1 |
+|   3 | Geelong       | Charles   |    2 |
+|   3 | Geelong       | Charles   |    1 |
+|   3 | Geelong       | Charles   |    3 |
 
-Three orderings on items {A, B, C} in long-format.
+Three preferential votes, ranking three candidates in long-format.
 
-This data can be converted from a `data.frame` into a `preferences`
-object:
+Here, we summarise the votes in a new column of type `preferences`.
+
+Note that, since we are essentially gathering preferential data from
+across multiple rows, the syntax is quite similar to
+`dplyr::pivot_wider`.
 
 ``` r
-long <- data.frame(
+long <- tibble(
   ID = rep(1:3, each = 3),
-  ItemName = LETTERS[rep(1:3, 3)],
+  VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
-prefs <- preferences(long,
-  format = "long",
-  id = "ID",
-  item = "ItemName",
-  rank = "Rank"
-)
-print(prefs)
+
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate
+  )
 ```
 
-    ## [1] [A > B > C] [C > B > A] [B > A > C]
+    ## Duplicated rankings per item detected: only the highest ranks will be used.
 
-Another way of tabulating orderings is with each unique ordering on a
-single row, with each column representing the rank given to a particular
-item:
+    ## # A tibble: 3 × 2
+    ##      ID       vote
+    ##   <int> <prefrncs>
+    ## 1     1      [Ali]
+    ## 2     2  [Beatriz]
+    ## 3     3  [Charles]
 
-|   A |   B |   C |
-|----:|----:|----:|
-|   1 |   2 |   3 |
-|   3 |   2 |   1 |
-|   2 |   1 |   3 |
-
-Three orderings on items {A, B, C} in a “rankings” format.
-
-This data can be converted from a `data.frame` into a `preferences`
-object:
+But note that we lose the location data from the `VoterLocation` column.
+To resolve this, just like you would with `dplyr::pivot_wider`, we can
+define the `unused_fn` argument to keep just one of the three duplicated
+locations:
 
 ``` r
-rankings <- matrix(
-  c(
-    1, 2, 3,
-    3, 2, 1,
-    2, 1, 3
-  ),
-  nrow = 3,
-  byrow = TRUE
-)
-colnames(rankings) <- LETTERS[1:3]
-prefs <- preferences(rankings,
-  format = "ranking"
-)
-print(prefs)
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate,
+    unused_fn = list(VoterLocation = dplyr::first)
+  )
 ```
 
-    ## [1] [A > B > C] [C > B > A] [B > A > C]
+    ## Duplicated rankings per item detected: only the highest ranks will be used.
+
+    ## # A tibble: 3 × 3
+    ##      ID VoterLocation       vote
+    ##   <int> <chr>         <prefrncs>
+    ## 1     1 Melbourne          [Ali]
+    ## 2     2 Wangaratta     [Beatriz]
+    ## 3     3 Geelong        [Charles]
 
 #### Reading from PrefLib
 
@@ -141,13 +140,16 @@ netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
 head(netflix)
 ```
 
-    ##                                preferences frequencies
-    ## 1 [Beverly Hills Cop > Mean Girls > M ...]          68
-    ## 2 [Mean Girls > Beverly Hills Cop > M ...]          53
-    ## 3 [Beverly Hills Cop > Mean Girls > T ...]          49
-    ## 4 [Mean Girls > Beverly Hills Cop > T ...]          44
-    ## 5 [Beverly Hills Cop > Mission: Impos ...]          39
-    ## 6 [The Mummy Returns > Beverly Hills  ...]          37
+    ## # A tibble: 6 × 2
+    ##                                                                     preferences
+    ##                                                                      <prefrncs>
+    ## 1 [Beverly Hills Cop > Mean Girls > Mission: Impossible II > The Mummy Returns]
+    ## 2 [Mean Girls > Beverly Hills Cop > Mission: Impossible II > The Mummy Returns]
+    ## 3 [Beverly Hills Cop > Mean Girls > The Mummy Returns > Mission: Impossible II]
+    ## 4 [Mean Girls > Beverly Hills Cop > The Mummy Returns > Mission: Impossible II]
+    ## 5 [Beverly Hills Cop > Mission: Impossible II > Mean Girls > The Mummy Returns]
+    ## 6 [The Mummy Returns > Beverly Hills Cop > Mean Girls > Mission: Impossible II]
+    ## # ℹ 1 more variable: frequency <int>
 
 Each row corresponds to a unique ordering of the four movies in the
 dataset. The number of Netflix users that assigned each ordering is
@@ -156,7 +158,7 @@ ordering (with 68 voters specifying the same preferences) is the
 following:
 
 ``` r
-print(netflix$preferences[1], width = 100)
+netflix$preferences[1]
 ```
 
     ## [1] [Beverly Hills Cop > Mean Girls > Mission: Impossible II > The Mummy Returns]
@@ -167,39 +169,54 @@ print(netflix$preferences[1], width = 100)
 datasets to PrefLib formats. To aid the user, the `preferences()`
 function automatically calculates metrics of the dataset which are
 required for producing valid PrefLib files. For example, we can write
-our `prefs` from earlier:
+our example from earlier to a PrefLib format:
 
 ``` r
-write_preflib(prefs)
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate,
+    unused_fn = list(VoterLocation = dplyr::first)
+  ) |>
+  write_preflib(preferences_col = vote)
 ```
 
-    ## Warning in write_preflib(prefs): Missing `title`: the PrefLib format requires a title to be specified. Using `NA`.
+    ## Duplicated rankings per item detected: only the highest ranks will be used.
 
-    ## Warning in write_preflib(prefs): Missing `publication_date`, using today's date(2023-06-14).
+    ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
+    ## Rank, : Missing `title`: the PrefLib format requires a title to be specified.
+    ## Using `NA`.
 
-    ## Warning in write_preflib(prefs): Missing `modification_date`, using today's date(2023-06-14).
+    ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
+    ## Rank, : Missing `publication_date`, using today's date(2024-10-27).
 
-    ## Warning in write_preflib(prefs): Missing `modification_type`: the PrefLib format requires this to be specified. Using
-    ## `NA`.
+    ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
+    ## Rank, : Missing `modification_date`, using today's date(2024-10-27).
+
+    ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
+    ## Rank, : Missing `modification_type`: the PrefLib format requires this to be
+    ## specified. Using `NA`.
 
     ## # FILE NAME: NA
     ## # TITLE: NA
     ## # DESCRIPTION: 
-    ## # DATA TYPE: soc
+    ## # DATA TYPE: soi
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2023-06-14
-    ## # MODIFICATION DATE: 2023-06-14
+    ## # PUBLICATION DATE: 2024-10-27
+    ## # MODIFICATION DATE: 2024-10-27
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
-    ## # ALTERNATIVE NAME 1: A
-    ## # ALTERNATIVE NAME 2: B
-    ## # ALTERNATIVE NAME 3: C
-    ## 1: 1,2,3
-    ## 1: 3,2,1
-    ## 1: 2,1,3
+    ## # ALTERNATIVE NAME 1: Ali
+    ## # ALTERNATIVE NAME 2: Beatriz
+    ## # ALTERNATIVE NAME 3: Charles
+    ## 1: 1
+    ## 1: 2
+    ## 1: 3
 
 Note that this produces four warnings. Each warning corresponds to a
 field which is required by the official PrefLib format, but may not be
@@ -222,9 +239,9 @@ The R package
 
 <div id="ref-Bennett2007" class="csl-entry">
 
-Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In
-*<span class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*,
-3–6. ACM.
+Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *<span
+class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*, 3–6.
+ACM.
 
 </div>
 
