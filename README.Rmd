@@ -5,6 +5,8 @@ bibliography: ["readme.bib"]
 
 ```{r rmd-setup, include = FALSE}
 library(prefio)
+library(tibble)
+library(dplyr)
 knitr::opts_chunk$set(fig.path = "man/figures/")
 ```
 
@@ -20,7 +22,7 @@ knitr::opts_chunk$set(fig.path = "man/figures/")
 
 Ordinal Preference datasets are used by many research communities including, but not limited to, those who work with recommender systems, computational social choice, voting systems and combinatorial optimization.
 
-The **prefio** R package provides a set of functions which enable users to perform a wide range of preference analysis tasks, including preference aggregation, pairwise comparison summaries and convenient IO operations. This makes it easier for researchers and other professionals to perform common data analysis and preprocessing tasks with such datasets.
+The **prefio** R package provides a tidy format for dealing with preferences, along with a set of functions which enable users to perform a wide range of preferential analyses.
 
 
 ## Installation
@@ -40,85 +42,68 @@ remotes::install_github("fleverest/prefio")
 
 ## Usage
 
-**prefio** provides a convenient interface for processing data from tabular
+**prefio** provides a tidy interface for processing data from tabular
 formats as well as sourcing data from one of the unified
 [PrefLib formats](https://www.preflib.org/format/), including a convenient
 method for downloading data files directly from PrefLib to your R session.
 
-#### Processing tabular data
 
-Preference data can come in many forms. Commonly preference data will be
-either represented in either *long*-format with each row corresponding to a
-particular *ranking* chosen for a single *item*:, e.g:
+#### Processing long-format data
+
+Preference data can come in many forms. A very common way for preferential
+datasets to be stored is in long-formats with item/rank columns. For example,
+consider a dataset of votes
 
 ```{r echo = FALSE, results = 'asis'}
-long <- data.frame(
+long <- tibble(
   ID = rep(1:3, each = 3),
-  ItemName = LETTERS[rep(1:3, 3)],
+  VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
-knitr::kable(long,
-  caption = "Three orderings on items {A, B, C} in long-format."
+knitr::kable(
+  long,
+  caption = "Three preferential votes, ranking three candidates in long-format."
 )
 ```
 
-This data can be converted from a `data.frame` into a `preferences` object:
+Here, we summarise the votes in a new column of type `preferences`.
+
+Note that, since we are essentially gathering preferential data from across
+multiple rows, the syntax is quite similar to `dplyr::pivot_wider`.
 
 ```{r}
-long <- data.frame(
+long <- tibble(
   ID = rep(1:3, each = 3),
-  ItemName = LETTERS[rep(1:3, 3)],
+  VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
+  Candidate = rep(c("Ali", "Beatriz", "Charles"), each = 3),
   Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
 )
-prefs <- preferences(long,
-  format = "long",
-  id = "ID",
-  item = "ItemName",
-  rank = "Rank"
-)
-print(prefs)
-```
 
-Another way of tabulating orderings is with each unique ordering on a single
-row, with each column representing the rank given to a particular item:
-
-```{r echo = FALSE, results = 'asis'}
-rankings <- matrix(
-  c(
-    1, 2, 3,
-    3, 2, 1,
-    2, 1, 3
-  ),
-  nrow = 3,
-  byrow = TRUE
-)
-colnames(rankings) <- LETTERS[1:3]
-knitr::kable(rankings,
-  caption = paste0(
-    "Three orderings on items ",
-    "{A, B, C} in a \"rankings\" format."
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate
   )
-)
 ```
 
-This data can be converted from a `data.frame` into a `preferences` object:
+But note that we lose the location data from the `VoterLocation` column. To
+resolve this, just like you would with `dplyr::pivot_wider`, we can define
+the `unused_fn` argument to keep just one of the three duplicated locations:
 
 ```{r}
-rankings <- matrix(
-  c(
-    1, 2, 3,
-    3, 2, 1,
-    2, 1, 3
-  ),
-  nrow = 3,
-  byrow = TRUE
-)
-colnames(rankings) <- LETTERS[1:3]
-prefs <- preferences(rankings,
-  format = "ranking"
-)
-print(prefs)
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate,
+    unused_fn = list(VoterLocation = dplyr::first)
+  )
 ```
+
 
 #### Reading from PrefLib
 
@@ -145,7 +130,7 @@ The number of Netflix users that assigned each ordering is given in the
 specifying the same preferences) is the following:
 
 ```{r}
-print(netflix$preferences[1], width = 100)
+netflix$preferences[1]
 ```
 
 
@@ -154,10 +139,18 @@ print(netflix$preferences[1], width = 100)
 **prefio** provides a convenient interface for writing preferential datasets to
 PrefLib formats. To aid the user, the `preferences()` function automatically
 calculates metrics of the dataset which are required for producing valid PrefLib
-files. For example, we can write our `prefs` from earlier:
+files. For example, we can write our example from earlier to a PrefLib format:
 
 ```{r}
-write_preflib(prefs)
+long |>
+  long_preferences(
+    vote,
+    id_cols = ID,
+    rank_col = Rank,
+    item_col = Candidate,
+    unused_fn = list(VoterLocation = dplyr::first)
+  ) |>
+  write_preflib(preferences_col = vote)
 ```
 
 Note that this produces four warnings. Each warning corresponds to a field which
