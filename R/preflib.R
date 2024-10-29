@@ -478,13 +478,15 @@ write_preflib <- function(x, # nolint: cyclocomp_linter
 
   ordering_str <- vctrs::vec_data(x$preferences) |>
     sapply(
-      \(o) paste0(
-        sapply(
-          split(o[, 1L], o[, 2L]),
-          fmt_eql_items # Formats ties ~ {1,2,3,...}
-        ),
-        collapse = ","
-      )
+      \(o) {
+        paste0(
+          sapply(
+            split(o[, 1L], o[, 2L]),
+            fmt_eql_items # Formats ties ~ {1,2,3,...}
+          ),
+          collapse = ","
+        )
+      }
     )
   lines <- c(lines, paste0(x$frequency, ": ", ordering_str))
 

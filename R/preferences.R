@@ -334,7 +334,7 @@ format.preferences <- function(x, ...) {
     pref[, 1L] <- item_names[pref[, 1L]]
     paste0(
       "[",
-      split(pref[, 1], pref[, 2]) |>
+      split(pref[, 1L], pref[, 2L]) |>
         sapply(FUN = paste0, collapse = " = ") |>
         paste0(collapse = " > "),
       "]"
