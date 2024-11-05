@@ -1,5 +1,5 @@
 
-# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" width="181px" align="right" />
+# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" height="138" align="right" />
 
 <!-- badges: start -->
 
