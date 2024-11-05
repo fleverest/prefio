@@ -10,7 +10,7 @@ library(dplyr)
 knitr::opts_chunk$set(fig.path = "man/figures/")
 ```
 
-# [prefio](https://fleverest.github.io/prefio/)
+# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" width="181px" align="right" />
 
 <!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/prefio)](https://cran.r-project.org/package=prefio)
