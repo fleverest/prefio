@@ -1,9 +1,9 @@
 
-# [prefio](https://fleverest.github.io/prefio/)
+# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" width="181px" align="right" />
 
 <!-- badges: start -->
 
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/prefio)](https://cran.r-project.org/package=prefio)
+[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/prefio)](https://cran.r-project.org/package=prefio)
 [![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/fleverest/prefio/branch/main/graph/badge.svg)](https://app.codecov.io/gh/fleverest/prefio?branch=main)
@@ -48,17 +48,17 @@ Preference data can come in many forms. A very common way for
 preferential datasets to be stored is in long-formats with item/rank
 columns. For example, consider a dataset of votes
 
-|  ID | VoterLocation | Candidate | Rank |
-|----:|:--------------|:----------|-----:|
-|   1 | Melbourne     | Ali       |    1 |
-|   1 | Melbourne     | Beatriz   |    2 |
-|   1 | Melbourne     | Charles   |    3 |
-|   2 | Wangaratta    | Ali       |    3 |
-|   2 | Wangaratta    | Beatriz   |    2 |
-|   2 | Wangaratta    | Charles   |    1 |
-|   3 | Geelong       | Ali       |    2 |
-|   3 | Geelong       | Beatriz   |    1 |
-|   3 | Geelong       | Charles   |    3 |
+| ID | VoterLocation | Candidate | Rank |
+| -: | :------------ | :-------- | ---: |
+|  1 | Melbourne     | Ali       |    1 |
+|  1 | Melbourne     | Beatriz   |    2 |
+|  1 | Melbourne     | Charles   |    3 |
+|  2 | Wangaratta    | Ali       |    3 |
+|  2 | Wangaratta    | Beatriz   |    2 |
+|  2 | Wangaratta    | Charles   |    1 |
+|  3 | Geelong       | Ali       |    2 |
+|  3 | Geelong       | Beatriz   |    1 |
+|  3 | Geelong       | Charles   |    3 |
 
 Three preferential votes, ranking three candidates in long-format.
 
@@ -183,10 +183,10 @@ long |>
     ## Using `NA`.
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `publication_date`, using today's date(2024-10-27).
+    ## Rank, : Missing `publication_date`, using today's date(2024-11-05).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `modification_date`, using today's date(2024-10-27).
+    ## Rank, : Missing `modification_date`, using today's date(2024-11-05).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
     ## Rank, : Missing `modification_type`: the PrefLib format requires this to be
@@ -199,8 +199,8 @@ long |>
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2024-10-27
-    ## # MODIFICATION DATE: 2024-10-27
+    ## # PUBLICATION DATE: 2024-11-05
+    ## # MODIFICATION DATE: 2024-11-05
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
@@ -228,13 +228,12 @@ The R package
 
 ## References
 
-<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="refs" class="references hanging-indent">
 
-<div id="ref-Bennett2007" class="csl-entry">
+<div id="ref-Bennett2007">
 
-Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *<span
-class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*, 3–6.
-ACM.
+Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *Proceedings
+of the KDD Cup Workshop 2007*, 3–6. ACM.
 
 </div>
 
