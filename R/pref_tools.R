@@ -82,7 +82,7 @@ pref_complete <- function(x) {
         },
         list(integer())
       ) |>
-      vctr_preferences(item_names = levels(x))
+      .vctr_preferences(item_names = levels(x))
   } else {
     x
   }
@@ -112,7 +112,7 @@ pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
       },
       list(integer())
     ) |>
-    vctr_preferences(item_names = levels(x))
+    .vctr_preferences(item_names = levels(x))
 }
 
 #' Remove specified items from preferences.
@@ -139,7 +139,7 @@ rm_items <- function(x, items) {
       },
       list(integer())
     ) |>
-    vctr_preferences(item_names = levels(x))
+    .vctr_preferences(item_names = levels(x))
 }
 
 #' Remove all but specified items from preferences.
@@ -159,7 +159,7 @@ pref_project <- function(x, items) {
       },
       list(integer())
     ) |>
-    vctr_preferences(item_names = levels(x))
+    .vctr_preferences(item_names = levels(x))
 }
 
 #' Eliminate lowest (or highest) ranked items from preferences.
@@ -193,7 +193,7 @@ pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
       },
       list(integer())
     ) |>
-    vctr_preferences(item_names = levels(x))
+    .vctr_preferences(item_names = levels(x))
   if (drop) {
     result[!pref_blank(result)]
   } else {
@@ -229,4 +229,24 @@ pref_cov <- function(x,
       \(x) ifelse(is.na(x), mean(x, na.rm = TRUE), x)
     ) |>
     stats::cov.wt(...)
+}
+
+
+#' Reverse preference rankings
+#' @param x A vector of [`preferences`][preferences].
+#' @return A vector of preferences with rankings reversed (first becomes last, etc.)
+#' @export...
+#' @examples
+#' reverse_preferences(c("a > b > c", "b > c > a"))
+#' reverse_preferences(c("a > b > c", "b > c > a"), format = "long")
+reverse_preferences <- function(x, ...) {
+  x |>
+    vctrs::vec_cast(preferences()) |>
+    vctrs::vec_map(\(x) {
+      x |>
+        vctrs::vec_rev() |>
+        vctrs::vec_as_names() |>
+        vctrs::vec_as_list_of(preferences())
+    }) |>
+    vctrs::vec_c()
 }
