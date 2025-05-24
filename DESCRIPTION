@@ -27,7 +27,8 @@ Imports:
     tibble,
     vctrs,
     stats,
-    rlang
+    rlang,
+    purrr
 Suggests:
     readr,
     covr,

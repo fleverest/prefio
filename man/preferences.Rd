@@ -3,6 +3,7 @@
 \name{preferences}
 \alias{preferences}
 \alias{long_preferences}
+\alias{wide_preferences}
 \alias{format.preferences}
 \alias{levels.preferences}
 \title{Preferences Objects}
@@ -16,6 +17,16 @@ long_preferences(
   item_names = NULL,
   verbose = TRUE,
   unused_fn = NULL,
+  na_action = c("drop_rows", "drop_preferences"),
+  ...
+)
+
+wide_preferences(
+  data,
+  col = NULL,
+  ranking_cols = NULL,
+  verbose = TRUE,
+  na_action = c("keep_as_partial", "drop_preferences"),
   ...
 )
 
@@ -47,10 +58,29 @@ items which do not appear in any preference selection.}
 \item{unused_fn}{When \code{format="long"}, passes parameter to
 \code{dplyr::pivot_wider} to summarise values from unused columns. This can be
 helpful to keep covariates from columns which are unused in processing
-preferences, but are important for upstream modelling. See
-<\code{\link{pivot_wider}}> for more details.}
+preferences, but are important for upstream tasks. See
+<\code{\link{pivot_wider}}> for more details and other uses.}
+
+\item{na_action}{Specifies how to handle NA values.
+\describe{
+\item{\code{long_preferences}}{
+\describe{
+\item{\code{"drop_rows"}}{Removes individual rows containing NA values before processing}
+\item{\code{"drop_preferences"}}{Removes the entire preference selection that contains any NA}
+}
+}
+\item{\code{wide_preferences}}{
+\describe{
+\item{\code{"keep"}}{Interprets rows containing NAs as partial orderings}
+\item{\code{"drop"}}{Removes preferences with any NA ranks}
+}
+}
+}}
 
 \item{...}{Unused.}
+
+\item{ranking_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> The columns from which
+to extract wide-format preferences.}
 
 \item{x}{A vector of preferences.}
 

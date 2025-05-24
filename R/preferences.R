@@ -8,6 +8,8 @@
 #' @param format The format of the data: one of "ordering", "ranking", or
 #' "long" (see above). By default, `data` is assumed to be in "long" format.
 #' @param col The name of the new column, as a string or symbol.
+#' @param ranking_cols <[`tidy-select`][dplyr_tidy_select]> The columns from which
+#' to extract wide-format preferences.
 #' @param id_cols <[`tidy-select`][dplyr_tidy_select]> The columns by which to
 #' group the dataset to extract a single preference selection.
 #' @param item_col <[`tidy-select`][dplyr_tidy_select]> For `data` in
@@ -22,8 +24,23 @@
 #' @param unused_fn When `format="long"`, passes parameter to
 #' `dplyr::pivot_wider` to summarise values from unused columns. This can be
 #' helpful to keep covariates from columns which are unused in processing
-#' preferences, but are important for upstream modelling. See
-#' <[`pivot_wider`][pivot_wider]> for more details.
+#' preferences, but are important for upstream tasks. See
+#' <[`pivot_wider`][pivot_wider]> for more details and other uses.
+#' @param na_action Specifies how to handle NA values.
+#' \describe{
+#'   \item{`long_preferences`}{
+#'     \describe{
+#'       \item{`"drop_rows"`}{Removes individual rows containing NA values before processing}
+#'       \item{`"drop_preferences"`}{Removes the entire preference selection that contains any NA}
+#'     }
+#'   }
+#'   \item{`wide_preferences`}{
+#'     \describe{
+#'       \item{`"keep"`}{Interprets rows containing NAs as partial orderings}
+#'       \item{`"drop"`}{Removes preferences with any NA ranks}
+#'     }
+#'   }
+#' }
 #' @param ... Unused.
 #'
 #' @examples
@@ -58,7 +75,7 @@
 NULL
 
 # Format a list of orderings as a "preferences" vctr with vctrs::list_of
-vctr_preferences <- function(orderings, item_names = NULL) {
+.vctr_preferences <- function(orderings, item_names = NULL) {
   if (is.null(item_names)) {
     item_names <- attr(orderings, "item_names")
   }
@@ -82,11 +99,13 @@ long_preferences <- function(data,
                              item_names = NULL,
                              verbose = TRUE,
                              unused_fn = NULL,
+                             na_action = c("drop_rows", "drop_preferences"),
                              ...) {
   col <- rlang::enquo(col)
   id_cols <- rlang::enquo(id_cols)
   item_col <- rlang::enquo(item_col)
   rank_col <- rlang::enquo(rank_col)
+  na_action <- match.arg(na_action)
 
   if (rlang::quo_is_null(id_cols) ||
     rlang::quo_is_null(item_col) ||
@@ -104,10 +123,11 @@ long_preferences <- function(data,
     {{ rank_col }},
     item_names,
     verbose,
-    unused_fn
+    unused_fn,
+    na_action
   )
   preferences |>
-    dplyr::mutate(dplyr::across({{ col }}, vctr_preferences))
+    dplyr::mutate(dplyr::across({{ col }}, .vctr_preferences))
 }
 
 # A helper function to validate ordinal preferences in long format.
@@ -119,14 +139,24 @@ validate_long <- function(data,
                           verbose = TRUE) {
   # Show warning if any columns contain NA
   if (anyNA(data) && verbose) {
-    message("Dropping rows containing `NA`.")
+    message("Found rows containing `NA`. These rows may be ignored.")
+  }
+
+  # Extract symbols/expressions
+  id_cols_quo <- rlang::enquo(id_cols)
+  if (rlang::quo_is_call(id_cols_quo, "c")) {
+    symbols <- rlang::call_args(rlang::quo_get_expr(id_cols_quo))
+    # Convert to quosures with proper environment
+    id_cols_quos <- purrr::map(symbols, rlang::new_quosure, env = rlang::quo_get_env(id_cols_quo))
+  } else {
+    id_cols_quos <- list(id_cols_quo)
   }
 
   # Find duplicated items
   if (
     (
       data |>
-        dplyr::group_by({{ id_cols }}) |>
+        dplyr::group_by(!!!id_cols_quos) |>
         dplyr::filter(anyDuplicated({{ item_col }}) != 0L) |>
         nrow() > 0L
     ) |>
@@ -143,30 +173,44 @@ validate_long <- function(data,
   if (is.null(item_names)) {
     item_names <- data |>
       dplyr::pull({{ item_col }}) |>
-      unique()
-  } else if (
-    data |>
-      dplyr::pull({{ item_col }}) |>
       unique() |>
-      stats::na.omit() |>
-      setdiff(item_names) |>
-      length() > 0L
-  ) {
-    stop(
-      "Found item not in `item_names`. `item_names` parameter must ",
-      "be a superset of items in preferences."
-    )
-  } else if (
-    data |> dplyr::pull({{ item_col }}) |> is.numeric() &&
-      any(data |> dplyr::pull({{ item_col }}) > length(item_names))) {
-    stop(
-      "`item` index out of bounds. `item_names` does not contain ",
-      "enough elements to assign a unique name per item index."
-    )
+      stats::na.omit()
+  } else {
+    # Check if the item column contains numeric values (potential indices)
+    is_numeric_items <- is.numeric(data |> dplyr::pull({{ item_col }}))
+
+    if (is_numeric_items) {
+      # Check if any index is out of bounds
+      max_index <- max(data |> dplyr::pull({{ item_col }}), na.rm = TRUE)
+      if (max_index > length(item_names)) {
+        stop(
+          "`item` index out of bounds. `item_names` does not contain ",
+          "enough elements to assign a unique name per item index."
+        )
+      }
+      # For numeric items, we'll handle the conversion to item_names later
+      # so we don't need additional validation here
+    } else {
+      # For non-numeric items, validate that all items exist in item_names
+      unknown_items <- data |>
+        dplyr::pull({{ item_col }}) |>
+        unique() |>
+        stats::na.omit() |>
+        setdiff(item_names)
+
+      if (length(unknown_items) > 0L) {
+        stop(
+          "Found item not in `item_names`. `item_names` parameter must ",
+          "be a superset of items in preferences."
+        )
+      }
+    }
   }
 
   # Validate rank
-  orig_rank <- data |> dplyr::pull({{ rank_col }})
+  orig_rank <- data |>
+    dplyr::pull({{ rank_col }}) |>
+    stats::na.omit()
   int_rank <- as.integer(orig_rank)
   if (anyNA(int_rank) || any(int_rank != orig_rank)) {
     stop("`rank` must be integer-valued.")
@@ -181,7 +225,8 @@ format_long <- function(data,
                         rank_col,
                         item_names = NULL,
                         verbose = TRUE,
-                        unused_fn = NULL) {
+                        unused_fn = NULL,
+                        na_action = c("drop_rows", "drop_preferences")) {
   # Validate the data adequately describes preferences
   validate_long(
     data,
@@ -205,18 +250,49 @@ format_long <- function(data,
     # Otherwise extract item_names from `item` column if `item_names` is null
     item_names <- data |>
       dplyr::pull({{ item_col }}) |>
-      unique()
+      unique() |>
+      stats::na.omit()
   }
   # Convert rank to integers
   data <- data |>
     dplyr::mutate(dplyr::across({{ rank_col }}, as.integer))
 
+  # Extract symbols/expressions
+  id_cols_quo <- rlang::enquo(id_cols)
+  if (rlang::quo_is_call(id_cols_quo, "c")) {
+    symbols <- rlang::call_args(rlang::quo_get_expr(id_cols_quo))
+    # Convert to quosures with proper environment
+    id_cols_quos <- purrr::map(symbols, rlang::new_quosure, env = rlang::quo_get_env(id_cols_quo))
+  } else {
+    id_cols_quos <- list(id_cols_quo)
+  }
+
+  # Handle NA values according to na_action parameter
+  if (na_action == "drop_rows") {
+    # Remove individual rows containing NA values
+    data <- data |> tidyr::drop_na()
+  } else if (na_action == "drop_preferences") {
+    # Identify preference selections containing any NA
+    na_groups <- data |>
+      dplyr::group_by(!!!id_cols_quos) |>
+      dplyr::summarize(
+        has_na = anyNA({{ item_col }}) || anyNA({{ rank_col }}),
+        .groups = "drop"
+      ) |>
+      dplyr::filter((has_na))
+
+    # Remove entire preference selections containing any NA
+    if (nrow(na_groups) > 0L) {
+      data <- data |>
+        dplyr::anti_join(na_groups |> dplyr::select(-has_na), by = gsub("~", "", as.character(id_cols_quos)))
+    }
+  }
+
   # Extract rankings
   data <- data |>
-    # Filter rows containing NA
-    tidyr::drop_na() |>
     # Filter duplicate rankings, keeping the highest ranking for an item.
-    dplyr::group_by({{ id_cols }}, {{ item_col }}) |>
+    dplyr::group_by(!!!id_cols_quos) |>
+    dplyr::group_by({{ item_col }}, .add = TRUE) |>
     dplyr::top_n(1L, -{{ rank_col }}) |>
     # Convert rankings to dense rankings
     dplyr::ungroup({{ item_col }}) |>
@@ -249,6 +325,135 @@ format_long <- function(data,
   # Add frequency as an attribute if necessary
   attr(data[[rlang::as_name(col)]], "item_names") <- item_names
   data
+}
+
+#' @rdname preferences
+#' @export
+wide_preferences <- function(data,
+                             col = NULL,
+                             ranking_cols = NULL,
+                             verbose = TRUE,
+                             na_action = c("keep_as_partial", "drop_preferences"),
+                             ...) {
+  col <- rlang::enquo(col)
+  ranking_cols <- rlang::enquo(ranking_cols)
+  na_action <- match.arg(na_action)
+
+  if (rlang::quo_is_null(ranking_cols)) {
+    stop(
+      "When creating \"preferences\" from wide-format data, `ranking_cols`, ",
+      "must specify the columns in `data` which represent rankings."
+    )
+  }
+
+  formatted <- format_wide(data, {{ ranking_cols }}, verbose, na_action, ...)
+
+  if (rlang::quo_is_null(col)) {
+    col_name <- "preferences"
+  } else {
+    col_name <- rlang::as_name(col)
+  }
+
+  # Convert to preferences vector with the proper class
+  formatted |>
+    dplyr::mutate(preferences = .vctr_preferences(preferences)) |>
+    dplyr::rename(!!col_name := preferences)
+}
+
+validate_wide <- function(data,
+                          cols,
+                          na_action,
+                          verbose = TRUE) {
+  # Show warning if any columns contain NA
+  if (anyNA(data) && verbose) {
+    if (na_action == "drop_preferences") {
+      message("Found rows containing `NA`. Any such preferences will be dropped.")
+    } else if (na_action == "keep_as_partial") {
+      message("Found rows containing `NA`. May result in incomplete preferences.")
+    }
+  }
+
+  # Get the ranking columns
+  ranking_cols <- data |>
+    dplyr::select({{ cols }})
+
+  # Check if any ranking values are non-integer
+  for (col_name in colnames(ranking_cols)) {
+    orig_rank <- data[[col_name]]
+    int_rank <- as.integer(orig_rank)
+    if (anyNA(int_rank) && !anyNA(orig_rank) || any(int_rank != orig_rank, na.rm = TRUE)) {
+      stop("`rank` must be integer-valued.")
+    }
+  }
+
+  # Check for inconsistent rankings (same rank for different items)
+  for (i in seq_len(nrow(data))) {
+    row_data <- ranking_cols[i, ]
+    if (verbose && anyDuplicated(stats::na.omit(as.numeric(row_data)))) {
+      message(
+        "Duplicate ranks detected in row ", i,
+        ": ties will be preserved in the preference ordering."
+      )
+    }
+  }
+}
+
+format_wide <- function(data,
+                        cols,
+                        verbose = TRUE,
+                        na_action = c("keep_as_partial", "drop_preferences"),
+                        ...) {
+  # Validate the data adequately describes preferences
+  validate_wide(
+    data,
+    {{ cols }},
+    na_action,
+    verbose
+  )
+
+  # Extract item names from column names
+  item_names <- data |>
+    dplyr::select({{ cols }}) |>
+    colnames()
+
+  # Handle NA values according to na_action parameter
+  if (na_action == "drop_preferences") {
+    # Identify rows with any NA in the ranking columns
+    ranking_data <- data |> dplyr::select({{ cols }})
+    rows_with_na <- apply(ranking_data, 1L, anyNA)
+
+    # Remove rows with any NA in the ranking columns
+    if (any(rows_with_na)) {
+      if (verbose) {
+        message("Removing ", sum(rows_with_na), " row(s) containing NA values in ranking columns.")
+      }
+      # Actually filter out the rows with NAs
+      data <- data[!rows_with_na, ]
+    }
+  }
+  # For "keep_as_partial", we'll handle NAs in the ordering function below
+  # by setting na.last = NA in order(), which will exclude NA items
+
+  # Create a new column with orderings
+  data$preferences <- data |>
+    dplyr::select({{ cols }}) |>
+    apply(
+      1L,
+      function(x) {
+        # NAs are handled here: with na.last = NA, NAs are excluded from the result
+        o <- order(x, na.last = NA)
+        cbind(o, x[o])
+      },
+      simplify = FALSE
+    )
+
+  # Remove the original ranking columns
+  result <- data |> dplyr::select(-{{ cols }})
+
+  # Add item_names as an attribute
+  attr(result$preferences, "item_names") <- item_names
+
+  return(result)
 }
 
 #' @method Ops preferences

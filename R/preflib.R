@@ -185,7 +185,7 @@ read_preflib <- function(file,
       },
       simplify = FALSE
     ) |>
-    vctr_preferences(item_names = alternative_names)
+    .vctr_preferences(item_names = alternative_names)
 
   output_tibble <- tibble(preferences = preferences, frequency = frequency)
   attr(output_tibble, "preflib") <- preflib_attributes
