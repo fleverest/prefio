@@ -8,14 +8,14 @@
 #' @param format The format of the data: one of "ordering", "ranking", or
 #' "long" (see above). By default, `data` is assumed to be in "long" format.
 #' @param col The name of the new column, as a string or symbol.
-#' @param ranking_cols <[`tidy-select`][dplyr_tidy_select]> The columns from which
+#' @param ranking_cols <[`tidy-select`][dplyr::dplyr_tidy_select]> The columns from which
 #' to extract wide-format preferences.
-#' @param id_cols <[`tidy-select`][dplyr_tidy_select]> The columns by which to
+#' @param id_cols <[`tidy-select`][dplyr::dplyr_tidy_select]> The columns by which to
 #' group the dataset to extract a single preference selection.
-#' @param item_col <[`tidy-select`][dplyr_tidy_select]> For `data` in
+#' @param item_col <[`tidy-select`][dplyr::dplyr_tidy_select]> For `data` in
 #' long-format: the column representing the items by name or by index, in which
 #' case the `item_names` parameter should also be passed.
-#' @param rank_col <[`tidy-select`][dplyr_tidy_select]> For `data` in
+#' @param rank_col <[`tidy-select`][dplyr::dplyr_tidy_select]> For `data` in
 #' long-format: the column representing the rank for the associated item.
 #' @param item_names The names of the full set of items. This is necessary when
 #' the dataset specifies items by index rather than by name, or when there are
@@ -25,7 +25,7 @@
 #' `dplyr::pivot_wider` to summarise values from unused columns. This can be
 #' helpful to keep covariates from columns which are unused in processing
 #' preferences, but are important for upstream tasks. See
-#' <[`pivot_wider`][pivot_wider]> for more details and other uses.
+#' <[`pivot_wider`][tidyr::pivot_wider]> for more details and other uses.
 #' @param na_action Specifies how to handle NA values.
 #' \describe{
 #'   \item{`long_preferences`}{
@@ -273,18 +273,18 @@ format_long <- function(data,
     data <- data |> tidyr::drop_na()
   } else if (na_action == "drop_preferences") {
     # Identify preference selections containing any NA
+    .has_na <- NULL # Sorry, NSE causes R CMD check to have a fit.
     na_groups <- data |>
       dplyr::group_by(!!!id_cols_quos) |>
-      dplyr::summarize(
-        has_na = anyNA({{ item_col }}) || anyNA({{ rank_col }}),
-        .groups = "drop"
+      dplyr::summarise(
+        .has_na = anyNA({{ item_col }}) || anyNA({{ rank_col }})
       ) |>
-      dplyr::filter((has_na))
+      dplyr::filter(.has_na)
 
     # Remove entire preference selections containing any NA
     if (nrow(na_groups) > 0L) {
       data <- data |>
-        dplyr::anti_join(na_groups |> dplyr::select(-has_na), by = gsub("~", "", as.character(id_cols_quos)))
+        dplyr::anti_join(na_groups |> dplyr::select(-.has_na), by = gsub("~", "", as.character(id_cols_quos)))
     }
   }
 
@@ -328,6 +328,7 @@ format_long <- function(data,
 }
 
 #' @rdname preferences
+#' @importFrom rlang :=
 #' @export
 wide_preferences <- function(data,
                              col = NULL,
@@ -643,11 +644,11 @@ validate_preferences <- function(x, sep, equality) {
 
 #' @rdname preferences
 #' @export
-preferences <- function(string = character(0L), sep = ">", equality = "=", descending = TRUE) {
-  if (length(string) == 0L) {
+preferences <- function(strings = character(0L), sep = ">", equality = "=", descending = TRUE) {
+  if (length(strings) == 0L) {
     return(.vctr_preferences(list(), character(0L)))
   }
-  as_preferences(string, sep, equality, descending)
+  as_preferences(strings, sep, equality, descending)
 }
 
 

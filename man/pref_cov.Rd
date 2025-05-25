@@ -9,10 +9,10 @@ pref_cov(x, preferences_col = NULL, frequency_col = NULL, ...)
 \arguments{
 \item{x}{A vector of preferences.}
 
-\item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\item{preferences_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the preferences.}
 
-\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\item{frequency_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the frequency of the preferences. If not
 provided, each row is considered to be observed a single time.}
 

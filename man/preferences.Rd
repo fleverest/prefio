@@ -36,7 +36,7 @@ wide_preferences(
 as_preferences(strings, sep = ">", equality = "=", descending = TRUE)
 
 preferences(
-  string = character(0L),
+  strings = character(0L),
   sep = ">",
   equality = "=",
   descending = TRUE
@@ -49,13 +49,13 @@ preferences(
 
 \item{col}{The name of the new column, as a string or symbol.}
 
-\item{id_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> The columns by which to
+\item{id_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The columns by which to
 group the dataset to extract a single preference selection.}
 
-\item{rank_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> For \code{data} in
+\item{rank_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> For \code{data} in
 long-format: the column representing the rank for the associated item.}
 
-\item{item_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> For \code{data} in
+\item{item_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> For \code{data} in
 long-format: the column representing the items by name or by index, in which
 case the \code{item_names} parameter should also be passed.}
 
@@ -69,7 +69,7 @@ items which do not appear in any preference selection.}
 \code{dplyr::pivot_wider} to summarise values from unused columns. This can be
 helpful to keep covariates from columns which are unused in processing
 preferences, but are important for upstream tasks. See
-<\code{\link{pivot_wider}}> for more details and other uses.}
+<\code{\link[tidyr:pivot_wider]{pivot_wider}}> for more details and other uses.}
 
 \item{na_action}{Specifies how to handle NA values.
 \describe{
@@ -89,7 +89,7 @@ preferences, but are important for upstream tasks. See
 
 \item{...}{Unused.}
 
-\item{ranking_cols}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> The columns from which
+\item{ranking_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The columns from which
 to extract wide-format preferences.}
 
 \item{x}{A vector of preferences.}

@@ -18,5 +18,5 @@ A vector of preferences with rankings reversed (first becomes last, etc.)
 Reverse preference rankings
 }
 \examples{
-reverse_preferences(preferences(c("a > b > c", "b > c > a")))
+pref_reverse(preferences(c("a > b > c", "b > c > a")))
 }

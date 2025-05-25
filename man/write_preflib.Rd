@@ -25,11 +25,11 @@ column to write to file.}
 \item{file}{Either a character string naming the a file or a writeable,
 open connection. The empty string \code{""} will write to stdout.}
 
-\item{preferences_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\item{preferences_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the preferences to be written to file.
 If not provided and \code{x} is a \code{tibble}, then}
 
-\item{frequency_col}{<\code{\link[=dplyr_tidy_select]{tidy-select}}> When \code{x} is a
+\item{frequency_col}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> When \code{x} is a
 \code{tibble}, the column containing the frequency of the preferences. If not
 provided, each row is considered to be observed a single time.}
 
