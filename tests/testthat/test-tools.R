@@ -11,9 +11,8 @@ x <- tibble::tibble(
   )
 
 test_that("Extracting first-preference works using `items_at_rank`", {
-  x |>
-    _$pref |>
-    items_at_rank(1) |>
+  x$pref |>
+    pref_items_at_rank(1) |>
     unlist() |>
     expect_equal(c("A", "A", "B"))
 })
@@ -21,7 +20,7 @@ test_that("Extracting first-preference works using `items_at_rank`", {
 test_that("Extracting rank works using `rank_of_item`", {
   x |>
     _$pref |>
-    rank_of_item("A") |>
+    pref_rank_of_item("A") |>
     expect_equal(c(1, 1, 2))
 })
 
@@ -35,7 +34,7 @@ test_that("`pref_trunc` keeps only the top preferences.", {
     expect_equal(c(1, 1, 1))
   # rank 1 item should be preserved
   test_pref |>
-    items_at_rank(1) |>
+    pref_items_at_rank(1) |>
     unlist() |>
     expect_equal(c("A", "A", "B"))
 })
@@ -56,7 +55,7 @@ test_that("`rm_items` removes items by name.", {
   # preferences identical (i.e., '[B]')
   x |>
     _$pref |>
-    rm_items("A") |>
+    pref_rm_items("A") |>
     unique() |>
     length() |>
     expect_equal(1L)
@@ -64,31 +63,30 @@ test_that("`rm_items` removes items by name.", {
   # preferences identical and blank (i.e., '[]')
   x |>
     _$pref |>
-    rm_items(c("A", "B")) |>
+    pref_rm_items(c("A", "B")) |>
     unique() |>
     length() |>
     expect_equal(1L)
 })
 
 test_that("`pref_project` achieves the same as `rm_items`", {
-  x |>
+  res1 <- x |>
     _$pref |>
-    rm_items("A") |>
-    expect_equal(
-      x |>
-        _$pref |>
-        pref_project("B")
-    )
+    pref_rm_items("A")
+  res2 <- x |>
+    _$pref |>
+    pref_project("B")
+  expect_equal(res1, res2)
 })
 
 test_that("Removing all items detected by `pref_blank`", {
   # Remove both A and B.
   x |>
     _$pref |>
-    rm_items(c("A", "B")) |>
+    pref_rm_items(c("A", "B")) |>
     pref_blank() |>
     all() |>
-    expect_equal(TRUE)
+    expect_true()
 })
 
 test_that("`pref_cov` doesn't return NA for simple example", {
@@ -103,8 +101,12 @@ test_that("`pref_cov` doesn't return NA for simple example", {
 
 # Tests based on examples from pref_tools.R
 test_that("pref_blank correctly identifies blank preferences", {
-  result <- pref_blank(preferences(c("a > b > c", "", "b > c")))
-  expect_equal(result, c(FALSE, TRUE, FALSE))
+  preferences(c("a > b > c", "", "b > c")) |>
+    pref_blank() |>
+    expect_equal(c(FALSE, TRUE, FALSE))
+  preferences("") |>
+    pref_blank() |>
+    expect_true()
 })
 
 test_that("pref_length correctly counts number of rankings", {
@@ -205,8 +207,8 @@ test_that("pref_pop correctly eliminates lowest ranked items", {
 
   # Remove blank preferences that result from popping
   result4 <- pref_pop(preferences(c("a > b", "c", "")), drop = TRUE)
-  expect_equal(length(result4), 2L) # The blank one should be gone
-  expect_equal(pref_length(result4), c(1L, 0L))
+  expect_equal(length(result4), 1L) # The blank ones should be gone
+  expect_equal(pref_length(result4), 1L)
 })
 
 test_that("pref_cov handles weighted calculations", {
