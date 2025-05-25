@@ -49,24 +49,42 @@
 #'
 #' \donttest{
 #' # strict complete orderings of four films on Netflix
-#' netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
+#' netflix <- read_preflib("00004 - netflix/00004-00000138.soc", from_preflib = TRUE)
 #' head(netflix)
 #' levels(netflix$preferences)
 #'
 #' # strict incomplete orderings of 6 random cities from 36 in total
-#' cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
+#' cities <- read_preflib("00034 - cities/00034-00000001.soi", from_preflib = TRUE)
 #' }
-#' @importFrom utils read.csv
+#' @importFrom utils read.csv URLencode
 #' @importFrom tibble tibble
 #' @export
 read_preflib <- function(file,
                          from_preflib = FALSE,
-                         preflib_url = "https://www.preflib.org/static/data") {
+                         preflib_url = "https://raw.githubusercontent.com/PrefLib/PrefLib-Data/main/datasets/") {
   if (from_preflib) {
-    file <- file.path(preflib_url, file)
+    tryCatch(
+      {
+        # Check if the URL is accessible before proceeding
+        lines <- readLines(paste0(preflib_url, URLencode(file)))
+      },
+      warning = function(w) {
+        stop(
+          "Could not access PrefLib resource.\n",
+          conditionMessage(w)
+        )
+      },
+      error = function(e) {
+        stop(
+          "Could not access PrefLib resource.\n",
+          conditionMessage(e)
+        )
+      }
+    )
+  } else {
+    # Read local file into memory
+    lines <- readLines(file)
   }
-  # Read the file into memory
-  lines <- readLines(file)
 
   # Filter the header lines and convert them to key:value attributes
   header_lines <- sub("# ", "", grep("^#", lines, value = TRUE))
@@ -293,10 +311,10 @@ read_preflib <- function(file,
 #' column to write to file.
 #' @param file Either a character string naming the a file or a writeable,
 #' open connection. The empty string `""` will write to stdout.
-#' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param preferences_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences to be written to file.
 #' If not provided and `x` is a `tibble`, then
-#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param frequency_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the frequency of the preferences. If not
 #' provided, each row is considered to be observed a single time.
 #' @param title The title of the data file, for instance the name of the

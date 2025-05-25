@@ -28,7 +28,8 @@ Imports:
     vctrs,
     stats,
     rlang,
-    purrr
+    purrr,
+    utils
 Suggests:
     readr,
     covr,

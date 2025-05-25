@@ -7,7 +7,7 @@
 read_preflib(
   file,
   from_preflib = FALSE,
-  preflib_url = "https://www.preflib.org/static/data"
+  preflib_url = "https://raw.githubusercontent.com/PrefLib/PrefLib-Data/main/datasets/"
 )
 }
 \arguments{
@@ -60,12 +60,12 @@ data sets require a citation for re-use.
 
 \donttest{
 # strict complete orderings of four films on Netflix
-netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
+netflix <- read_preflib("00004 - netflix/00004-00000138.soc", from_preflib = TRUE)
 head(netflix)
 levels(netflix$preferences)
 
 # strict incomplete orderings of 6 random cities from 36 in total
-cities <- read_preflib("cities/00034-00000001.soi", from_preflib = TRUE)
+cities <- read_preflib("00034 - cities/00034-00000001.soi", from_preflib = TRUE)
 }
 }
 \references{

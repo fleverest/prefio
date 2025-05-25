@@ -249,9 +249,9 @@ pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
 #' Covariance matrix for preferences, calculated using the rankings matrix.
 #'
 #' @param x A vector of preferences.
-#' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param preferences_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences.
-#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param frequency_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the frequency of the preferences. If not
 #' provided, each row is considered to be observed a single time.
 #' @param ... Extra arguments to be passed to `stats::cov.wt`.
@@ -288,7 +288,7 @@ pref_cov <- function(x,
 #' @param ... Not used.
 #' @return A vector of preferences with rankings reversed (first becomes last, etc.)
 #' @examples
-#' reverse_preferences(preferences(c("a > b > c", "b > c > a")))
+#' pref_reverse(preferences(c("a > b > c", "b > c > a")))
 #' @export
 pref_reverse <- function(x, ...) {
   x |>

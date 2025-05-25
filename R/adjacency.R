@@ -14,9 +14,9 @@
 #'
 #' @param x A [`preferences`][preferences] object or a `tibble` with a
 #' `preferences`-typed column.
-#' @param preferences_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param preferences_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences.
-#' @param frequency_col <[`tidy-select`][dplyr_tidy_select]> When `x` is a
+#' @param frequency_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the frequency of the preferences. If not
 #' provided, each row is considered to be observed a single time.
 #' @param ... Currently unused.
