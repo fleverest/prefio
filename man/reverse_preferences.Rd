@@ -8,6 +8,8 @@ reverse_preferences(x, ...)
 }
 \arguments{
 \item{x}{A vector of \code{\link{preferences}}.}
+
+\item{...}{Not used.}
 }
 \value{
 A vector of preferences with rankings reversed (first becomes last, etc.)

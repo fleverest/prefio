@@ -234,11 +234,12 @@ pref_cov <- function(x,
 
 #' Reverse preference rankings
 #' @param x A vector of [`preferences`][preferences].
+#' @param ... Not used.
 #' @return A vector of preferences with rankings reversed (first becomes last, etc.)
-#' @export...
 #' @examples
 #' reverse_preferences(c("a > b > c", "b > c > a"))
 #' reverse_preferences(c("a > b > c", "b > c > a"), format = "long")
+#' @export
 reverse_preferences <- function(x, ...) {
   x |>
     vctrs::vec_cast(preferences()) |>
