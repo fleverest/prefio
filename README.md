@@ -3,7 +3,7 @@
 
 <!-- badges: start -->
 
-[![CRAN\_Status\_Badge](https://www.r-pkg.org/badges/version/prefio)](https://cran.r-project.org/package=prefio)
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/prefio)](https://cran.r-project.org/package=prefio)
 [![R-CMD-check](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/fleverest/prefio/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/fleverest/prefio/branch/main/graph/badge.svg)](https://app.codecov.io/gh/fleverest/prefio?branch=main)
@@ -11,14 +11,13 @@ coverage](https://codecov.io/gh/fleverest/prefio/branch/main/graph/badge.svg)](h
 
 ## Overview
 
-Ordinal Preference datasets are used by many research communities
-including, but not limited to, those who work with recommender systems,
-computational social choice, voting systems and combinatorial
-optimization.
+Preferential datasets are used by many research communities including,
+but not limited to, those who work with elections, recommender systems,
+computational social choice, and combinatorial optimization.
 
-The **prefio** R package provides a tidy format for dealing with
-preferences, along with a set of functions which enable users to perform
-a wide range of preferential analyses.
+**prefio** provides a tidy format for dealing with preferences, along
+with a set of functions which enable users to perform a wide range of
+analyses.
 
 ## Installation
 
@@ -39,81 +38,111 @@ remotes::install_github("fleverest/prefio")
 
 **prefio** provides a tidy interface for processing data from tabular
 formats as well as sourcing data from one of the unified [PrefLib
-formats](https://www.preflib.org/format/), including a convenient method
-for downloading data files directly from PrefLib to your R session.
+formats](https://preflib.org/format), including a convenient method for
+downloading data files directly from PrefLib to your R session.
+
+#### Casting from character vectors
+
+The easiest way to try things out is to write preferences as strings,
+then cast to preferences. For example:
+
+``` r
+preferences(c("Apple > Banana > Carrot", "Carrot > Banana = Apple"))
+```
+
+    ## [1] [Apple > Banana > Carrot] [Carrot > Banana = Apple]
 
 #### Processing long-format data
 
-Preference data can come in many forms. A very common way for
-preferential datasets to be stored is in long-formats with item/rank
+Preferential datasets can come in many forms. A very common way for
+preferential datasets to be stored is in a long-format with item/rank
 columns. For example, consider a dataset of votes
 
-| ID | VoterLocation | Candidate | Rank |
-| -: | :------------ | :-------- | ---: |
-|  1 | Melbourne     | Ali       |    1 |
-|  1 | Melbourne     | Beatriz   |    2 |
-|  1 | Melbourne     | Charles   |    3 |
-|  2 | Wangaratta    | Ali       |    3 |
-|  2 | Wangaratta    | Beatriz   |    2 |
-|  2 | Wangaratta    | Charles   |    1 |
-|  3 | Geelong       | Ali       |    2 |
-|  3 | Geelong       | Beatriz   |    1 |
-|  3 | Geelong       | Charles   |    3 |
+|  ID | VoterLocation | Candidate | Rank |
+|----:|:--------------|:----------|-----:|
+|   1 | Melbourne     | Allie     |    1 |
+|   1 | Melbourne     | Beatriz   |    2 |
+|   1 | Melbourne     | Charles   |    3 |
+|   2 | Wangaratta    | Allie     |    3 |
+|   2 | Wangaratta    | Beatriz   |    2 |
+|   2 | Wangaratta    | Charles   |    1 |
+|   3 | Geelong       | Allie     |    2 |
+|   3 | Geelong       | Beatriz   |    1 |
+|   3 | Geelong       | Charles   |    3 |
 
 Three preferential votes, ranking three candidates in long-format.
 
 Here, we summarise the votes in a new column of type `preferences`.
 
-Note that, since we are essentially gathering preferential data from
-across multiple rows, the syntax is quite similar to
-`dplyr::pivot_wider`.
+Note that, since we are just gathering preferential data from across
+multiple rows here, the syntax is quite similar to `dplyr::pivot_wider`.
+Indeed, the function is based on this, and extra arguments will be
+passed directly to `dplyr::pivot_wider` via `...`.
 
 ``` r
-long <- tibble(
-  ID = rep(1:3, each = 3),
-  VoterLocation = rep(c("Melbourne", "Wangaratta", "Geelong"), each = 3),
-  Candidate = rep(c("Ali", "Beatriz", "Charles"), 3),
-  Rank = c(1, 2, 3, 3, 2, 1, 2, 1, 3)
+long <- tribble(
+  ~ID, ~VoterLocation, ~Candidate, ~Rank,
+  1, "Melbourne", "Allie", 1,
+  1, "Melbourne", "Beatriz", 2,
+  1, "Melbourne", "Charles", 3,
+  2, "Wangaratta", "Allie", 3,
+  2, "Wangaratta", "Beatriz", 2,
+  2, "Wangaratta", "Charles", 1,
+  3, "Geelong", "Allie", 2,
+  3, "Geelong", "Beatriz", 1,
+  3, "Geelong", "Charles", 3
 )
 
 long |>
   long_preferences(
     vote,
-    id_cols = ID,
+    id_cols = c(ID, VoterLocation),
     rank_col = Rank,
     item_col = Candidate
   )
 ```
 
-    ## # A tibble: 3 × 2
-    ##      ID                      vote
-    ##   <int>                <prefrncs>
-    ## 1     1 [Ali > Beatriz > Charles]
-    ## 2     2 [Charles > Beatriz > Ali]
-    ## 3     3 [Beatriz > Ali > Charles]
+    ## # A tibble: 3 × 3
+    ##      ID VoterLocation                        vote
+    ##   <dbl> <chr>                          <prefrncs>
+    ## 1     1 Melbourne     [Allie > Beatriz > Charles]
+    ## 2     2 Wangaratta    [Charles > Beatriz > Allie]
+    ## 3     3 Geelong       [Beatriz > Allie > Charles]
 
-But note that we lose the location data from the `VoterLocation` column.
-To resolve this, just like you would with `dplyr::pivot_wider`, we can
-define the `unused_fn` argument to keep just one of the three duplicated
-locations:
+#### Processing wide-format data
+
+Another common way to store preferential data is in wide-format, where
+each column represents a candidate/item and the values represent the
+rank assigned. Let’s recreate our previous example but in wide-format:
+
+|  ID | VoterLocation | Allie | Beatriz | Charles |
+|----:|:--------------|------:|--------:|--------:|
+|   1 | Melbourne     |     1 |       2 |       3 |
+|   2 | Wangaratta    |     3 |       2 |       1 |
+|   3 | Geelong       |     2 |       1 |       3 |
+
+Three preferential votes, ranking three candidates in wide-format.
+
+Here, we summarise the votes in a new column of type `preferences`.
 
 ``` r
-long |>
-  long_preferences(
-    vote,
-    id_cols = ID,
-    rank_col = Rank,
-    item_col = Candidate,
-    unused_fn = list(VoterLocation = dplyr::first)
-  )
+wide <- tribble(
+  ~ID, ~VoterLocation, ~Allie, ~Beatriz, ~Charles,
+  1, "Melbourne", 1, 2, 3,
+  2, "Wangaratta", 3, 2, 1,
+  3, "Geelong", 2, 1, 3
+)
+
+wide |>
+  wide_preferences(vote, Allie:Charles)
 ```
 
     ## # A tibble: 3 × 3
-    ##      ID VoterLocation                      vote
-    ##   <int> <chr>                        <prefrncs>
-    ## 1     1 Melbourne     [Ali > Beatriz > Charles]
-    ## 2     2 Wangaratta    [Charles > Beatriz > Ali]
-    ## 3     3 Geelong       [Beatriz > Ali > Charles]
+    ##      ID VoterLocation                        vote
+    ##   <dbl> <chr>                          <prefrncs>
+    ## 1     1 Melbourne     [Allie > Beatriz > Charles]
+    ## 2     2 Wangaratta    [Charles > Beatriz > Allie]
+    ## 3     3 Geelong       [Beatriz > Allie > Charles]
 
 #### Reading from PrefLib
 
@@ -132,7 +161,7 @@ specifying the argument `from_preflib = TRUE` in the `read_preflib`
 function:
 
 ``` r
-netflix <- read_preflib("netflix/00004-00000138.soc", from_preflib = TRUE)
+netflix <- read_preflib("00004 - netflix/00004-00000138.soc", from_preflib = TRUE)
 head(netflix)
 ```
 
@@ -183,10 +212,10 @@ long |>
     ## Using `NA`.
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `publication_date`, using today's date(2024-11-05).
+    ## Rank, : Missing `publication_date`, using today's date(2025-05-26).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `modification_date`, using today's date(2024-11-05).
+    ## Rank, : Missing `modification_date`, using today's date(2025-05-26).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
     ## Rank, : Missing `modification_type`: the PrefLib format requires this to be
@@ -199,12 +228,12 @@ long |>
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2024-11-05
-    ## # MODIFICATION DATE: 2024-11-05
+    ## # PUBLICATION DATE: 2025-05-26
+    ## # MODIFICATION DATE: 2025-05-26
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
-    ## # ALTERNATIVE NAME 1: Ali
+    ## # ALTERNATIVE NAME 1: Allie
     ## # ALTERNATIVE NAME 2: Beatriz
     ## # ALTERNATIVE NAME 3: Charles
     ## 1: 1,2,3
@@ -218,9 +247,9 @@ to PrefLib, these warnings must be resolved.
 
 ## Projects using **prefio**
 
-The [New South Wales Legislative Assembly Election
-Dataset](https://github.com/fleverest/nswla_preflib) uses **prefio** to
-process the public election datasets into PrefLib formats.
+The [PrefLib formatter for New South Wales Legislative Assembly
+Elections](https://github.com/fleverest/nswla_preflib) uses **prefio**
+to process the public election datasets into PrefLib formats.
 
 The R package
 [elections.dtree](https://github.com/fleverest/elections.dtree) uses
@@ -228,12 +257,13 @@ The R package
 
 ## References
 
-<div id="refs" class="references hanging-indent">
+<div id="refs" class="references csl-bib-body hanging-indent">
 
-<div id="ref-Bennett2007">
+<div id="ref-Bennett2007" class="csl-entry">
 
-Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In *Proceedings
-of the KDD Cup Workshop 2007*, 3–6. ACM.
+Bennett, J., and S. Lanning. 2007. “The Netflix Prize.” In
+*<span class="nocase">Proceedings of the KDD Cup Workshop 2007</span>*,
+3–6. ACM.
 
 </div>
 
