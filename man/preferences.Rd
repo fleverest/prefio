@@ -5,6 +5,7 @@
 \alias{long_preferences}
 \alias{wide_preferences}
 \alias{format.preferences}
+\alias{as_preferences}
 \alias{levels.preferences}
 \title{Preferences Objects}
 \usage{
@@ -31,6 +32,15 @@ wide_preferences(
 )
 
 \method{format}{preferences}(x, ...)
+
+as_preferences(strings, sep = ">", equality = "=", descending = TRUE)
+
+preferences(
+  string = character(0L),
+  sep = ">",
+  equality = "=",
+  descending = TRUE
+)
 
 \method{levels}{preferences}(x, ...)
 }
@@ -83,6 +93,14 @@ preferences, but are important for upstream tasks. See
 to extract wide-format preferences.}
 
 \item{x}{A vector of preferences.}
+
+\item{strings}{A character vector of preference strings}
+
+\item{sep}{Character separating the items in the string (default: ">")}
+
+\item{equality}{Character representing equality between items (default: "=")}
+
+\item{descending}{If TRUE, parse as descending order preferences.}
 
 \item{format}{The format of the data: one of "ordering", "ranking", or
 "long" (see above). By default, \code{data} is assumed to be in "long" format.}

@@ -548,6 +548,109 @@ format.preferences <- function(x, ...) {
   vapply(vctrs::vec_data(x), fmt_order, character(1L))
 }
 
+#' @rdname preferences
+#' @param strings A character vector of preference strings
+#' @param sep Character separating the items in the string (default: ">")
+#' @param equality Character representing equality between items (default: "=")
+#' @param descending If TRUE, parse as descending order preferences.
+#' @export
+as_preferences <- function(strings, sep = ">", equality = "=", descending = TRUE) {
+  if (length(strings) == 0L) {
+    return(.vctr_preferences(list(), character(0L)))
+  }
+
+  validate_preferences(strings, sep, equality)
+
+  # Get all unique items across all preference strings
+  items <- character(0L)
+  parsed_prefs <- vector("list", length(strings))
+
+  for (i in seq_along(strings)) {
+    if (is.na(strings[i]) || strings[i] == "") {
+      parsed_prefs[[i]] <- list()
+      next
+    }
+
+    # Split by rank using the separator
+    ranks <- strsplit(strings[i], sep, fixed = TRUE)[[1L]]
+    ranks <- trimws(ranks)
+
+    # Process each rank group, handling equalities
+    ranked_items <- vector("list", length(ranks))
+    for (j in seq_along(ranks)) {
+      # Split items at the same rank by equality character
+      equal_items <- strsplit(ranks[j], equality, fixed = TRUE)[[1L]]
+      equal_items <- trimws(equal_items)
+      ranked_items[[j]] <- equal_items
+
+      # Add to the overall item set
+      items <- union(items, equal_items)
+    }
+
+    # Store the parsed preference
+    parsed_prefs[[i]] <- ranked_items
+  }
+
+  # Create preference orderings
+  orderings <- lapply(parsed_prefs, function(pref) {
+    if (length(pref) == 0L) {
+      return(matrix(integer(), ncol = 2L))
+    }
+
+    # Create a mapping of items to their position and rank
+    item_positions <- integer(0L)
+    item_ranks <- integer(0L)
+
+    for (rank in seq_along(pref)) {
+      items_at_rank <- pref[[rank]]
+      for (item in items_at_rank) {
+        item_positions <- c(item_positions, match(item, items))
+        item_ranks <- c(item_ranks, rank)
+      }
+    }
+
+    # For descending=FALSE, reverse the ranks
+    if (!descending) {
+      max_rank <- max(item_ranks)
+      item_ranks <- max_rank - item_ranks + 1L
+    }
+
+    # Sort by rank
+    order_idx <- order(item_ranks)
+    result <- cbind(item_positions[order_idx], item_ranks[order_idx])
+    return(result)
+  })
+
+  # Create the preferences object
+  .vctr_preferences(orderings, items)
+}
+
+# Validation helper
+validate_preferences <- function(x, sep, equality) {
+  # Check for proper format (A>B>C pattern)
+  pattern <- paste0("^[A-Za-z0-9_ .,]+([", sep, equality, "][A-Za-z0-9_ .,]+)*$")
+  invalid <- !grepl(pattern, x) & !is.na(x) & x != ""
+
+  if (any(invalid)) {
+    stop(
+      "Invalid preference format. Expected format like 'A", sep, "B", equality, "C', got: ",
+      toString(x[invalid])
+    )
+  }
+
+  invisible(x)
+}
+
+#' @rdname preferences
+#' @export
+preferences <- function(string = character(0L), sep = ">", equality = "=", descending = TRUE) {
+  if (length(string) == 0L || (length(string) == 1L && string == "")) {
+    return(.vctr_preferences(list(), character(0L)))
+  }
+  as_preferences(string, sep, equality, descending)
+}
+
+
 #' @method levels preferences
 #' @rdname preferences
 #' @param x A vector of preferences.

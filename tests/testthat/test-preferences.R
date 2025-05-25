@@ -578,3 +578,94 @@ test_that("Some valid examples of `preferences` are not `na`", {
       ))
   )
 })
+
+test_that("as_preferences handles string input correctly", {
+  # Basic test with default separator
+  prefs <- as_preferences(c("A>B>C", "C>B>A", "B>A>C"))
+  expect_equal(length(prefs), 3)
+  expect_equal(levels(prefs), c("A", "B", "C"))
+
+  # Test formatting
+  expect_equal(format(prefs)[1], "[A > B > C]")
+  expect_equal(format(prefs)[2], "[C > B > A]")
+  expect_equal(format(prefs)[3], "[B > A > C]")
+})
+
+test_that("as_preferences handles custom separators", {
+  prefs <- as_preferences(c("A|B|C", "C|B|A"), sep = "|")
+  expect_equal(length(prefs), 2)
+  expect_equal(format(prefs)[1], "[A > B > C]")
+  expect_equal(format(prefs)[2], "[C > B > A]")
+})
+
+test_that("as_preferences handles equality between items", {
+  prefs <- as_preferences(c("A=B>C", "C>B=A"))
+  expect_equal(length(prefs), 2)
+  expect_equal(format(prefs)[1], "[A = B > C]")
+  expect_equal(format(prefs)[2], "[C > B = A]")
+
+  # Custom equality symbol
+  prefs <- as_preferences(c("A:B>C", "C>B:A"), equality = ":")
+  expect_equal(format(prefs)[1], "[A = B > C]")
+  expect_equal(format(prefs)[2], "[C > B = A]")
+})
+
+test_that("as_preferences handles descending parameter", {
+  # When descending=FALSE, the order is reversed
+  prefs_desc <- as_preferences(c("A>B>C", "C>B>A"), descending = TRUE)
+  prefs_asc <- as_preferences(c("A>B>C", "C>B>A"), descending = FALSE)
+
+  # The first preference should be opposite
+  expect_equal(format(prefs_desc)[1], "[A > B > C]")
+  expect_equal(format(prefs_asc)[1], "[C > B > A]")
+
+  # The second preference should be opposite
+  expect_equal(format(prefs_desc)[2], "[C > B > A]")
+  expect_equal(format(prefs_asc)[2], "[A > B > C]")
+})
+
+test_that("as_preferences handles mixed separators and equality", {
+  prefs <- as_preferences(c("A|B|C:D", "C|B|A"), sep = "|", equality = ":", descending = FALSE)
+  expect_equal(length(prefs), 2)
+  expect_equal(format(prefs)[1], "[C = D > B > A]") # Order reversed due to descending=FALSE
+  expect_equal(format(prefs)[2], "[A > B > C]") # Order reversed due to descending=FALSE
+})
+
+test_that("preferences() function creates single preference", {
+  pref <- preferences("A>B>C")
+  expect_equal(length(pref), 1)
+  expect_equal(format(pref), "[A > B > C]")
+})
+
+test_that("preferences() handles empty inputs", {
+  # Empty string vector
+  pref1 <- preferences()
+  expect_equal(length(pref1), 0)
+  expect_output(print(pref1), "preferences\\(0\\)")
+
+  # Single empty string
+  pref2 <- preferences("")
+  expect_equal(length(pref2), 0)
+  expect_output(print(pref2), "preferences\\(0\\)")
+})
+
+test_that("as_preferences handles empty and NA strings", {
+  prefs <- as_preferences(c("A>B>C", "", NA, "B>A>C"))
+  expect_equal(length(prefs), 4)
+
+  # First and fourth elements should be parsed correctly
+  expect_equal(format(prefs)[1], "[A > B > C]")
+  expect_equal(format(prefs)[4], "[B > A > C]")
+
+  # Second and third elements should be empty
+  expect_equal(format(prefs)[2], "[]")
+  expect_equal(format(prefs)[3], "[]")
+})
+
+test_that("as_preferences handles whitespace correctly", {
+  prefs <- as_preferences(c("A > B > C", " C>B>A ", "B> A >C"))
+  expect_equal(length(prefs), 3)
+  expect_equal(format(prefs)[1], "[A > B > C]")
+  expect_equal(format(prefs)[2], "[C > B > A]")
+  expect_equal(format(prefs)[3], "[B > A > C]")
+})
