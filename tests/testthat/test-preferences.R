@@ -277,7 +277,6 @@ test_that("long_preferences handles unused_fn parameter correctly", {
       age = dplyr::first
     )
   )
-
   # Check that unused columns are preserved
   expect_true(all(c("region", "age") %in% colnames(result)))
 
@@ -370,15 +369,14 @@ test_that("wide_preferences handles NA values with drop_preferences option", {
     Carrot = c(3, 1, NA)
   )
 
-  # Expect a message about dropping preferences with NAs
-  expect_message(
+  # Use expect_snapshot to capture both messages about NA handling
+  expect_snapshot({
     result <- wide_preferences(
       wide_data,
       ranking_cols = c(Apple, Banana, Carrot),
       na_action = "drop_preferences"
-    ),
-    "Found rows containing `NA`"
-  )
+    )
+  })
 
   # Check that only voter 1 is kept (the only one with no NAs)
   expect_equal(nrow(result), 1)
@@ -645,8 +643,8 @@ test_that("preferences() handles empty inputs", {
 
   # Single empty string
   pref2 <- preferences("")
-  expect_equal(length(pref2), 0)
-  expect_output(print(pref2), "preferences\\(0\\)")
+  expect_equal(length(pref2), 1)
+  expect_output(print(pref2), "\\[\\]")
 })
 
 test_that("as_preferences handles empty and NA strings", {

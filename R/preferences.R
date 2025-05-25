@@ -644,7 +644,7 @@ validate_preferences <- function(x, sep, equality) {
 #' @rdname preferences
 #' @export
 preferences <- function(string = character(0L), sep = ">", equality = "=", descending = TRUE) {
-  if (length(string) == 0L || (length(string) == 1L && string == "")) {
+  if (length(string) == 0L) {
     return(.vctr_preferences(list(), character(0L)))
   }
   as_preferences(string, sep, equality, descending)
