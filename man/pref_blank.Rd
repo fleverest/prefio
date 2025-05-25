@@ -15,3 +15,6 @@ A logical vector indicating which preferences are blank, i.e., \verb{[]}.
 \description{
 Check if a preference is blank.
 }
+\examples{
+pref_blank(preferences(c("a > b > c", "", "b > c")))
+}

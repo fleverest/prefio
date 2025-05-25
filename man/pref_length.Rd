@@ -15,3 +15,6 @@ The number of items listed on each of the preferences.
 \description{
 Check the length (number of rankings) of a preference.
 }
+\examples{
+pref_length(preferences(c("a > b > c", "", "b > c")))
+}

@@ -22,3 +22,9 @@ new vector has at most \code{n_ranks} selections.
 \description{
 Truncate preferences to a maximum number of ranks.
 }
+\examples{
+# Keep only the top 2 ranked items
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2)
+# Keep only the bottom 2 ranked items
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2, top_ranks = FALSE)
+}

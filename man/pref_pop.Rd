@@ -23,3 +23,16 @@ preferred selection dropped for each selection.
 \description{
 Eliminate lowest (or highest) ranked items from preferences.
 }
+\examples{
+# Remove the lowest ranked item from each preference
+pref_pop(preferences(c("a > b > c", "b > c > a")))
+
+# Remove the 2 lowest ranked items
+pref_pop(preferences(c("a > b > c > d", "b > c > a > d")), n = 2)
+
+# Remove the highest ranked item instead
+pref_pop(preferences(c("a > b > c", "b > c > a")), lowest = FALSE)
+
+# Remove blank preferences that result from popping
+pref_pop(preferences(c("a > b", "c", "")), drop = TRUE)
+}

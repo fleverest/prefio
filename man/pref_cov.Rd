@@ -25,3 +25,15 @@ item pairs.
 \description{
 Covariance matrix for preferences, calculated using the rankings matrix.
 }
+\examples{
+# Simple covariance on a vector of preferences
+prefs <- preferences(c("a > b > c", "b > c > a", "c > a > b"))
+pref_cov(prefs)
+
+# Weighted covariance by frequency
+df <- tibble::tibble(
+  prefs = preferences(c("a > b > c", "b > c > a")),
+  freq = c(3, 2)
+)
+pref_cov(df, preferences_col = prefs, frequency_col = freq)
+}

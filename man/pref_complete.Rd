@@ -17,3 +17,7 @@ last.
 \description{
 Complete preferences by adding unselected items as last place occurrances.
 }
+\examples{
+# Complete partial rankings by adding unranked items last
+pref_complete(preferences(c("a > b", "c > a", "b")))
+}
