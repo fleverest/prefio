@@ -1,6 +1,8 @@
 #' Check if a preference is blank.
 #' @param x A vector of [`preferences`][preferences].
 #' @return A logical vector indicating which preferences are blank, i.e., `[]`.
+#' @examples
+#' pref_blank(preferences(c("a > b > c", "", "b > c")))
 #' @export
 pref_blank <- function(x) {
   vapply(
@@ -13,6 +15,8 @@ pref_blank <- function(x) {
 #' Check the length (number of rankings) of a preference.
 #' @param x A vector of [`preferences`][preferences].
 #' @return The number of items listed on each of the preferences.
+#' @examples
+#' pref_length(preferences(c("a > b > c", "", "b > c")))
 #' @export
 pref_length <- function(x) {
   vapply(
@@ -26,8 +30,10 @@ pref_length <- function(x) {
 #' @param x A vector of [`preferences`][preferences].
 #' @param item_name The name of the item to extract the rank for.
 #' @return The rank of `item_name` for each of the preferences in `x`.
+#' @examples
+#' pref_rank_of_item(preferences(c("a > b > c", "b > c = a", "")), "a")
 #' @export
-rank_of_item <- function(x, item_name) {
+pref_rank_of_item <- function(x, item_name) {
   idx <- match(item_name, levels(x))[1L]
   if (length(idx) != 1L) {
     stop("`item_name` must name exactly one item in the preferences.")
@@ -51,8 +57,13 @@ rank_of_item <- function(x, item_name) {
 #' @param rank A single integer, the rank which you would like to inspect.
 #' @return A list containing the name(s) of the item(s) ranked `rank` in each of
 #' the preferences in `x`.
+#' @examples
+#' # Get items ranked first
+#' pref_items_at_rank(preferences(c("a > b > c", "b = c > a")), rank = 1)
+#' # Get items ranked second
+#' pref_items_at_rank(preferences(c("a > b > c", "b = c > a")), rank = 2)
 #' @export
-items_at_rank <- function(x, rank) {
+pref_items_at_rank <- function(x, rank) {
   vapply(
     x,
     \(pref) list(levels(x)[pref[which(pref[, 2L] == rank), 1L]]),
@@ -65,11 +76,14 @@ items_at_rank <- function(x, rank) {
 #' @return A new vector of preferences, with each selection starting with the
 #' corresponding selections made in `x`, but with all unranked items placed
 #' last.
+#' @examples
+#' # Complete partial rankings by adding unranked items last
+#' pref_complete(preferences(c("a > b", "c > a", "b")))
 #' @export
 pref_complete <- function(x) {
   if (pref_type(x) %in% c("soi", "toi")) {
     n_items <- nlevels(x)
-    preferences <- x |>
+    x |>
       vapply(
         \(pref) {
           if (nrow(pref) < n_items) {
@@ -96,6 +110,11 @@ pref_complete <- function(x) {
 #' @return A vector of preferences with each selection equal to `x` but omitting
 #' the bottom (if `top_ranks` is `TRUE`, otherwise top) selections so that the
 #' new vector has at most `n_ranks` selections.
+#' @examples
+#' # Keep only the top 2 ranked items
+#' pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2)
+#' # Keep only the bottom 2 ranked items
+#' pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2, top_ranks = FALSE)
 #' @export
 pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
   x |>
@@ -119,8 +138,13 @@ pref_trunc <- function(x, n_ranks = 1L, top_ranks = TRUE) {
 #' @param x A vector of [`preferences`][preferences].
 #' @param items The names of the items which should be removed from the preferences in `x`.
 #' @return A new vector of preferences, but with `items` removed from each selection.
+#' @examples
+#' # Remove 'b' from preference rankings
+#' pref_rm_items(preferences(c("a > b > c", "b > c > a")), "b")
+#' # Remove multiple items
+#' pref_rm_items(preferences(c("a > b > c > d", "b > c > a > d")), c("b", "d"))
 #' @export
-rm_items <- function(x, items) {
+pref_rm_items <- function(x, items) {
   idxs <- match(items, levels(x))
   x |>
     vapply(
@@ -147,6 +171,9 @@ rm_items <- function(x, items) {
 #' @param items The names of the items which should be kept from the preferences in `x`.
 #' @return A new vector of preferences, but with any item not in `items`
 #' removed from each selection.
+#' @examples
+#' # Keep only items 'a' and 'c' from the preferences
+#' pref_project(preferences(c("a > b > c", "b > c > a")), c("a", "c"))
 #' @export
 pref_project <- function(x, items) {
   idxs <- match(items, levels(x))
@@ -170,6 +197,18 @@ pref_project <- function(x, items) {
 #' @param drop If `TRUE`, drops blank preferences from the output.
 #' @return A new vector of preferences which is equal to `x` but with the least
 #' preferred selection dropped for each selection.
+#' @examples
+#' # Remove the lowest ranked item from each preference
+#' pref_pop(preferences(c("a > b > c", "b > c > a")))
+#'
+#' # Remove the 2 lowest ranked items
+#' pref_pop(preferences(c("a > b > c > d", "b > c > a > d")), n = 2)
+#'
+#' # Remove the highest ranked item instead
+#' pref_pop(preferences(c("a > b > c", "b > c > a")), lowest = FALSE)
+#'
+#' # Remove blank preferences that result from popping
+#' pref_pop(preferences(c("a > b", "c", "")), drop = TRUE)
 #' @export
 pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
   n <- as.integer(n)
@@ -218,6 +257,18 @@ pref_pop <- function(x, n = 1L, lowest = TRUE, drop = FALSE) {
 #' @param ... Extra arguments to be passed to `stats::cov.wt`.
 #' @return A covariance matrix containing covariances for the ranks assigned to
 #' item pairs.
+#' @examples
+#' # Simple covariance on a vector of preferences
+#' prefs <- preferences(c("a > b > c", "b > c > a", "c > a > b"))
+#' pref_cov(prefs)
+#'
+#' # Weighted covariance by frequency
+#' df <- tibble::tibble(
+#'   prefs = preferences(c("a > b > c", "b > c > a")),
+#'   freq = c(3, 2)
+#' )
+#' pref_cov(df, preferences_col = prefs, frequency_col = freq)
+#' @export
 pref_cov <- function(x,
                      preferences_col = NULL,
                      frequency_col = NULL,
@@ -237,17 +288,24 @@ pref_cov <- function(x,
 #' @param ... Not used.
 #' @return A vector of preferences with rankings reversed (first becomes last, etc.)
 #' @examples
-#' reverse_preferences(c("a > b > c", "b > c > a"))
-#' reverse_preferences(c("a > b > c", "b > c > a"), format = "long")
+#' reverse_preferences(preferences(c("a > b > c", "b > c > a")))
 #' @export
-reverse_preferences <- function(x, ...) {
+pref_reverse <- function(x, ...) {
   x |>
-    vctrs::vec_cast(preferences()) |>
-    vctrs::vec_map(\(x) {
-      x |>
-        vctrs::vec_rev() |>
-        vctrs::vec_as_names() |>
-        vctrs::vec_as_list_of(preferences())
-    }) |>
-    vctrs::vec_c()
+    vapply(
+      \(pref) {
+        if (dim(pref)[1L] == 0L) {
+          # Return empty preference
+          list(pref)
+        } else {
+          # Reverse rankings by subtracting from max rank + 1
+          max_rank <- max(pref[, 2L])
+          new_pref <- pref
+          new_pref[, 2L] <- max_rank + 1L - pref[, 2L]
+          list(new_pref)
+        }
+      },
+      list(integer())
+    ) |>
+    .vctr_preferences(item_names = levels(x))
 }

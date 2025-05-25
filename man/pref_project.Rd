@@ -18,3 +18,7 @@ removed from each selection.
 \description{
 Remove all but specified items from preferences.
 }
+\examples{
+# Keep only items 'a' and 'c' from the preferences
+pref_project(preferences(c("a > b > c", "b > c > a")), c("a", "c"))
+}
