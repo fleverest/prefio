@@ -667,3 +667,34 @@ test_that("as_preferences handles whitespace correctly", {
   expect_equal(format(prefs)[2], "[C > B > A]")
   expect_equal(format(prefs)[3], "[B > A > C]")
 })
+
+test_that("Concatenating preferences with different items works correctly", {
+  # Create preferences with different item sets
+  pref1 <- preferences(c("A > B", "B > A"))
+  pref2 <- preferences(c("B > C", "C > B"))
+  pref3 <- preferences(c("C > D", "D > C"))
+
+  result1 <- c(pref1, pref2)
+  result2 <- c(pref1, pref3)
+
+  expect_s3_class(result1, "preferences")
+  expect_equal(levels(result1), c("A", "B", "C"))
+  expect_equal(levels(result2), c("A", "B", "C", "D"))
+})
+
+
+test_that("bind_rows works with preferences having different item sets", {
+  df1 <- tibble::tibble(id = 1, prefs = preferences(c("A > B")))
+  df2 <- tibble::tibble(id = 2, prefs = preferences(c("B > C")))
+
+  # This should now work without error
+  result <- dplyr::bind_rows(df1, df2)
+
+  expect_s3_class(result$prefs, "preferences")
+  expect_equal(levels(result$prefs), c("A", "B", "C"))
+  expect_equal(nrow(result), 2L)
+
+  # Check the formatting
+  expect_match(format(result$prefs)[1], "A > B", fixed = TRUE)
+  expect_match(format(result$prefs)[2], "B > C", fixed = TRUE)
+})

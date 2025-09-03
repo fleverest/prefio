@@ -651,7 +651,6 @@ preferences <- function(strings = character(0L), sep = ">", equality = "=", desc
   as_preferences(strings, sep, equality, descending)
 }
 
-
 #' @method levels preferences
 #' @rdname preferences
 #' @param x A vector of preferences.
@@ -757,4 +756,70 @@ levels.preferences <- function(x, ...) {
       dplyr::arrange(-frequency)
   }
   return(x)
+}
+
+# Helper function to reindex preferences to match new item names
+reindex_preferences <- function(prefs, old_items, new_items) {
+  lapply(
+    vctrs::vec_data(prefs),
+    function(pref_matrix) {
+      if (nrow(pref_matrix) == 0L) {
+        return(pref_matrix)
+      }
+      # Map old indices to new indices
+      old_item_names <- old_items[pref_matrix[, 1L]]
+      new_indices <- match(old_item_names, new_items)
+
+      # Return reindexed matrix
+      cbind(new_indices, pref_matrix[, 2L])
+    }
+  )
+}
+
+#' @importFrom vctrs vec_ptype2 vec_cast
+NULL
+
+#' @export
+vec_ptype2.preferences.preferences <- function(x, y, ..., x_arg = "", y_arg = "") {
+  # Get item names from both vectors
+  x_items <- levels(x)
+  y_items <- levels(y)
+
+  # Combine item names by taking the union
+  combined_items <- union(x_items, y_items)
+
+  # Create an empty preferences vector with the combined item names
+  .vctr_preferences(list(), combined_items)
+}
+
+#' @export
+vec_cast.preferences.preferences <- function(x, to, ..., x_arg = "", to_arg = "") {
+  # Get item names from both vectors
+  x_items <- levels(x)
+  to_items <- levels(to)
+
+  # If item names are identical, no conversion needed
+  if (identical(x_items, to_items)) {
+    return(x)
+  }
+
+  # Check if all items in x are present in to
+  missing_items <- setdiff(x_items, to_items)
+  if (length(missing_items) > 0L) {
+    vctrs::stop_incompatible_cast(
+      x, to,
+      x_arg = x_arg, to_arg = to_arg,
+      details = paste0(
+        "Can't cast preferences with items ",
+        toString(missing_items),
+        " to preferences that don't include these items."
+      )
+    )
+  }
+
+  # Reindex preferences to match target item names
+  reindexed_orderings <- reindex_preferences(x, x_items, to_items)
+
+  # Create new preferences vector with target item names
+  .vctr_preferences(reindexed_orderings, to_items)
 }
