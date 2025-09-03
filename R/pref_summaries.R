@@ -36,6 +36,12 @@ pref_cov <- function(x,
 
 #' Compute the instant-runoff voting winner for a set of preferences.
 #'
+#' @description
+#' A very rudimentary implementation of the IRV counting algorithm. It does not handle
+#' ties elegantly, and should only be used for demonstration purposes. This implementation
+#' eliminates all candidates with the fewest first-choice votes in each round until one
+#' candidate has a majority or fewer than two candidates remain.
+#'
 #' @param x A vector of preferences, or a tibble with a column of preferences.
 #' @param preferences_col <[`tidy-select`][dplyr::dplyr_tidy_select]> When `x` is a
 #' `tibble`, the column containing the preferences.

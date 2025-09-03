@@ -25,7 +25,10 @@ A list containing:
 }
 }
 \description{
-Compute the instant-runoff voting winner for a set of preferences.
+A very rudimentary implementation of the IRV counting algorithm. It does not handle
+ties elegantly, and should only be used for demonstration purposes. This implementation
+eliminates all candidates with the fewest first-choice votes in each round until one
+candidate has a majority or fewer than two candidates remain.
 }
 \examples{
 # Multi-round election with four candidates
