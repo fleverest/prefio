@@ -17,20 +17,46 @@ pref_irv(x, preferences_col = NULL, frequency_col = NULL)
 provided, each row is considered to be observed a single time.}
 }
 \value{
-A summary of the results of the IRV contest:
-...
+A list containing:
+\describe{
+\item{winner}{The winning candidate(s) after IRV counting}
+\item{rounds}{A list of tibbles, each containing vote tallies for each round}
+\item{eliminated}{Character vector of eliminated candidates in order}
+}
 }
 \description{
 Compute the instant-runoff voting winner for a set of preferences.
 }
 \examples{
-# Simple contest with five votes between three candidates a, b, and c.
-pref_irv(preferences(c("a > b > c", "a > b > c", "b > c > a", "b > a > c", "b > a > c")))
+# Multi-round election with four candidates
+prefs <- preferences(c(
+  "alice > bob > charlie > david",
+  "alice > bob > charlie > david",
+  "alice > charlie > bob > david",
+  "bob > alice > charlie > david",
+  "bob > charlie > alice > david",
+  "bob > charlie > alice > david",
+  "charlie > david > alice > bob",
+  "charlie > david > bob > alice",
+  "david > charlie > bob > alice",
+  "david > charlie > bob > alice"
+))
+result <- pref_irv(prefs)
+result$winner # Final winner after elimination rounds
+result$rounds # Vote tallies for each round
 
-# Weighted covariance by frequency
+# Using aggregated data frame
 df <- tibble::tibble(
-  prefs = preferences(c("a > b > c", "b > c > a", "c > a > b")),
-  freq = c(3, 2, 1)
+  prefs = preferences(c(
+    "alice > bob > charlie > david",
+    "alice > charlie > bob > david",
+    "bob > alice > charlie > david",
+    "bob > charlie > alice > david",
+    "charlie > david > alice > bob",
+    "charlie > david > bob > alice",
+    "david > charlie > bob > alice"
+  )),
+  freq = c(2, 1, 1, 2, 1, 1, 2)
 )
-pref_irv(df, preferences_col = prefs, frequency_col = freq)
+pref_irv(df, prefs, freq)
 }
