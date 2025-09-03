@@ -121,7 +121,7 @@ pref_irv <- function(x, preferences_col = NULL, frequency_col = NULL) {
     counts <- votes |>
       dplyr::group_by(candidate = pref_get_items(vote, 1L)) |>
       dplyr::summarise(value = sum(weight), .groups = "drop") |>
-      tidyr::unnest(candidate)
+      tidyr::unnest("candidate")
 
     # Record the current round results
     rounds[[length(rounds) + 1L]] <- counts
