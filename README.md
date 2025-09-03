@@ -1,5 +1,5 @@
 
-# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" height="138" align="right" />
+# [prefio](https://fleverest.github.io/prefio/) <img src="man/figures/prefio.svg" width="160" align="right" alt="prefio hex sticker" />
 
 <!-- badges: start -->
 
@@ -212,10 +212,10 @@ long |>
     ## Using `NA`.
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `publication_date`, using today's date(2025-05-26).
+    ## Rank, : Missing `publication_date`, using today's date(2025-09-03).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
-    ## Rank, : Missing `modification_date`, using today's date(2025-05-26).
+    ## Rank, : Missing `modification_date`, using today's date(2025-09-03).
 
     ## Warning in write_preflib(long_preferences(long, vote, id_cols = ID, rank_col =
     ## Rank, : Missing `modification_type`: the PrefLib format requires this to be
@@ -228,8 +228,8 @@ long |>
     ## # MODIFICATION TYPE: NA
     ## # RELATES TO: 
     ## # RELATED FILES: 
-    ## # PUBLICATION DATE: 2025-05-26
-    ## # MODIFICATION DATE: 2025-05-26
+    ## # PUBLICATION DATE: 2025-09-03
+    ## # MODIFICATION DATE: 2025-09-03
     ## # NUMBER ALTERNATIVES: 3
     ## # NUMBER VOTERS: 3
     ## # NUMBER UNIQUE ORDERS: 3
