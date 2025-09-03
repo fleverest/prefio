@@ -82,13 +82,13 @@ pref_cov <- function(x,
 #' pref_irv(df, prefs, freq)
 #' @export
 pref_irv <- function(x, preferences_col = NULL, frequency_col = NULL) {
-  preferences_col <- rlang::enquo(preferences_col)
-  frequency_col <- rlang::enquo(frequency_col)
   # Process input to construct votes tibble
   if (is.data.frame(x)) {
-    if (is.null(preferences_col)) {
+    preferences_col <- rlang::enquo(preferences_col)
+    if (rlang::quo_is_null(preferences_col)) {
       stop("`preferences_col` must be specified when `x` is a data frame.")
     }
+    frequency_col <- rlang::enquo(frequency_col)
     vote <- dplyr::pull(x, !!preferences_col)
     if (rlang::quo_is_null(frequency_col)) {
       weight <- rep(1L, length(vote))
