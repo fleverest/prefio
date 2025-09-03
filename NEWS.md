@@ -1,6 +1,7 @@
 # **prefio** 0.2.0
 
 * 🎉🥳 Made **prefio** tidy! 🎊🎆
+* Added a cool new hex sticker!
 * Reimplemented `preferences` using `vctrs`.
 * Implemented methods required for dplyr operations.
 * Added a suite of tools for operating on `preferences`.
