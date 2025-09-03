@@ -72,6 +72,8 @@
 #'     rank_col = ranking,
 #'     unused_col = list(species = dplyr::first)
 #'   )
+#' @importFrom rlang :=
+#' @importFrom vctrs vec_ptype2 vec_cast
 NULL
 
 # Format a list of orderings as a "preferences" vctr with vctrs::list_of
@@ -127,7 +129,7 @@ long_preferences <- function(data,
     na_action
   )
   preferences |>
-    dplyr::mutate(dplyr::across({{ col }}, .vctr_preferences))
+    dplyr::mutate(!!col := .vctr_preferences(!!col))
 }
 
 # A helper function to validate ordinal preferences in long format.
@@ -253,15 +255,15 @@ format_long <- function(data,
       unique() |>
       stats::na.omit()
   }
+
   # Convert rank to integers
   data <- data |>
     dplyr::mutate(dplyr::across({{ rank_col }}, as.integer))
 
-  # Extract symbols/expressions
+  # Extract symbols/expressions for id_cols
   id_cols_quo <- rlang::enquo(id_cols)
   if (rlang::quo_is_call(id_cols_quo, "c")) {
     symbols <- rlang::call_args(rlang::quo_get_expr(id_cols_quo))
-    # Convert to quosures with proper environment
     id_cols_quos <- purrr::map(symbols, rlang::new_quosure, env = rlang::quo_get_env(id_cols_quo))
   } else {
     id_cols_quos <- list(id_cols_quo)
@@ -269,66 +271,107 @@ format_long <- function(data,
 
   # Handle NA values according to na_action parameter
   if (na_action == "drop_rows") {
-    # Remove individual rows containing NA values
     data <- data |> tidyr::drop_na()
   } else if (na_action == "drop_preferences") {
-    # Identify preference selections containing any NA
-    .has_na <- NULL # Sorry, NSE causes R CMD check to have a fit.
+    .has_na <- NULL # NSE workaround
     na_groups <- data |>
       dplyr::group_by(!!!id_cols_quos) |>
       dplyr::summarise(
-        .has_na = anyNA({{ item_col }}) || anyNA({{ rank_col }})
+        .has_na = anyNA({{ item_col }}) || anyNA({{ rank_col }}),
+        .groups = "drop"
       ) |>
       dplyr::filter(.has_na)
 
-    # Remove entire preference selections containing any NA
     if (nrow(na_groups) > 0L) {
       data <- data |>
-        dplyr::anti_join(na_groups |> dplyr::select(-.has_na), by = gsub("~", "", as.character(id_cols_quos)))
+        dplyr::anti_join(na_groups |> dplyr::select(-.has_na),
+          by = gsub("~", "", as.character(id_cols_quos))
+        )
     }
   }
 
-  # Extract rankings
-  data <- data |>
-    # Filter duplicate rankings, keeping the highest ranking for an item.
-    dplyr::group_by(!!!id_cols_quos) |>
-    dplyr::group_by({{ item_col }}, .add = TRUE) |>
-    dplyr::top_n(1L, -{{ rank_col }}) |>
-    # Convert rankings to dense rankings
-    dplyr::ungroup({{ item_col }}) |>
-    dplyr::mutate(dplyr::across({{ rank_col }}, dplyr::dense_rank)) |>
-    # Convert long-format rankings to wide rankings
-    dplyr::ungroup() |>
-    tidyr::pivot_wider(
-      id_cols = {{ id_cols }},
-      names_from = {{ item_col }},
-      values_from = {{ rank_col }},
-      names_expand = TRUE,
-      unused_fn = unused_fn
-    )
+  # Base R alternative to group_by + pivot_wider to speed things up
+  col_name <- rlang::as_name(rlang::enquo(col))
+  item_col_name <- rlang::as_name(rlang::enquo(item_col))
+  rank_col_name <- rlang::as_name(rlang::enquo(rank_col))
 
-  # Convert rankings into orderings format
-  data[[rlang::as_name(col)]] <- data |>
-    dplyr::select(dplyr::all_of(item_names)) |>
-    apply(
-      1L,
-      function(x) {
-        o <- order(x, na.last = NA)
-        cbind(o, x[o])
-      },
-      simplify = FALSE
-    )
-  # Drop rankings
-  data <- data |>
-    dplyr::select(-dplyr::all_of(item_names))
+  # Get id column names
+  if (length(id_cols_quos) == 1L) {
+    id_col_names <- rlang::as_name(id_cols_quos[[1L]])
+  } else {
+    id_col_names <- sapply(id_cols_quos, rlang::as_name)
+  }
 
-  # Add frequency as an attribute if necessary
-  attr(data[[rlang::as_name(col)]], "item_names") <- item_names
-  data
+  # Extract vectors for maximum performance
+  items <- data[[item_col_name]]
+  ranks <- data[[rank_col_name]]
+  unused_data <- data[, !names(data) %in% c(item_col_name, rank_col_name, id_col_names)]
+
+  # Create group identifiers using base R
+  # To support multiple ID columns, use interaction()
+  group_data <- data[id_col_names]
+  group_ids <- interaction(group_data, drop = TRUE, lex.order = TRUE)
+  group_list <- split(seq_along(group_ids), group_ids)
+
+  # Create item indices
+  item_indices <- match(items, item_names)
+
+  n_groups <- length(group_list)
+
+  # Pre-allocate result list
+  preferences_list <- vector("list", n_groups)
+
+  # Process each group with optimized base R operations
+  for (i in seq_len(n_groups)) {
+    idx <- group_list[[i]]
+    group_items <- item_indices[idx]
+    group_ranks <- ranks[idx]
+
+    # Handle duplicates using aggregate (faster than dplyr for small groups)
+    if (anyDuplicated(group_items) > 0L) {
+      # Use aggregate for deduplication - much faster than dplyr
+      agg_result <- aggregate(
+        group_ranks,
+        by = list(item = group_items),
+        FUN = min,
+        na.rm = TRUE
+      )
+      group_items <- agg_result$item
+      group_ranks <- agg_result$x
+    }
+
+    # Create dense ranks using base R (avoid expensive dplyr::dense_rank)
+    unique_ranks <- sort(unique(group_ranks))
+    dense_ranks <- match(group_ranks, unique_ranks)
+
+    # Create ordering matrix
+    sort_order <- order(dense_ranks)
+    preferences_list[[i]] <- cbind(
+      group_items[sort_order],
+      dense_ranks[sort_order]
+    )
+  }
+
+  # Create result data frame efficiently
+  # Extract unique combinations from original data using group indices
+  group_idx <- match(levels(group_ids), group_ids)
+  result_df <- data[group_idx, id_col_names, drop = FALSE]
+
+  # Add preferences column
+  result_df[[col_name]] <- preferences_list
+
+  # Convert to tibble if original was tibble
+  if (inherits(data, "tbl_df")) {
+    result_df <- tibble::as_tibble(result_df)
+  }
+
+  # Set item_names attribute
+  attr(result_df[[col_name]], "item_names") <- item_names
+
+  return(result_df)
 }
 
 #' @rdname preferences
-#' @importFrom rlang :=
 #' @export
 wide_preferences <- function(data,
                              col = NULL,
@@ -775,9 +818,6 @@ reindex_preferences <- function(prefs, old_items, new_items) {
     }
   )
 }
-
-#' @importFrom vctrs vec_ptype2 vec_cast
-NULL
 
 #' @export
 vec_ptype2.preferences.preferences <- function(x, y, ..., x_arg = "", y_arg = "") {
