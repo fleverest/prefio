@@ -15,6 +15,22 @@ reference:
   - long_preferences
   - wide_preferences
   - preferences
+- title: Operations on `preferences`
+  description: |
+    `preferences` are a bit like character vectors in that a single element
+    comprises a string of information. To operate on many preferences at once,
+    a variety of tools are provided which facilitate basic operations.
+  contents:
+  - pref_add_unranked
+  - pref_blank
+  - pref_get_items
+  - pref_get_rank
+  - pref_keep
+  - pref_length
+  - pref_omit
+  - pref_pop
+  - pref_rev
+  - pref_trunc
 - title: Summaries of `preferences`
   description: |
     Compute summaries on preferences, e.g., covariance matrices, rankings matrix,
@@ -22,5 +38,6 @@ reference:
   contents:
   - pref_cov
   - pref_irv
+  - pref_type
   - ranking_matrix
   - adjacency
