@@ -12,7 +12,7 @@ x <- tibble::tibble(
 
 test_that("Extracting first-preference works using `items_at_rank`", {
   x$pref |>
-    pref_items_at_rank(1) |>
+    pref_get_items(1) |>
     unlist() |>
     expect_equal(c("A", "A", "B"))
 })
@@ -20,11 +20,11 @@ test_that("Extracting first-preference works using `items_at_rank`", {
 test_that("Extracting rank works using `rank_of_item`", {
   x |>
     _$pref |>
-    pref_rank_of_item("A") |>
+    pref_get_rank("A") |>
     expect_equal(c(1, 1, 2))
 })
 
-test_that("`pref_trunc` keeps only the top preferences.", {
+test_that("`pref_trunc` keeps only the top preferences by default.", {
   test_pref <- x |>
     _$pref |>
     pref_trunc(1)
@@ -34,20 +34,18 @@ test_that("`pref_trunc` keeps only the top preferences.", {
     expect_equal(c(1, 1, 1))
   # rank 1 item should be preserved
   test_pref |>
-    pref_items_at_rank(1) |>
+    pref_get_items(1) |>
     unlist() |>
     expect_equal(c("A", "A", "B"))
 })
 
-test_that("`pref_pop` achieves the same as `pref_trunc` for a simple example", {
-  test_pref <- x |>
-    _$pref |>
-    pref_trunc(1) |>
-    expect_equal(
-      x |>
-        _$pref |>
-        pref_pop()
-    )
+test_that("`pref_pop(pref)` achieves the same as `pref_trunc(pref, -1)`", {
+  expect_equal(
+    x$pref |>
+      pref_trunc(-1),
+    x$pref |>
+      pref_pop()
+  )
 })
 
 test_that("`rm_items` removes items by name.", {
@@ -55,7 +53,7 @@ test_that("`rm_items` removes items by name.", {
   # preferences identical (i.e., '[B]')
   x |>
     _$pref |>
-    pref_rm_items("A") |>
+    pref_omit("A") |>
     unique() |>
     length() |>
     expect_equal(1L)
@@ -63,19 +61,19 @@ test_that("`rm_items` removes items by name.", {
   # preferences identical and blank (i.e., '[]')
   x |>
     _$pref |>
-    pref_rm_items(c("A", "B")) |>
+    pref_omit(c("A", "B")) |>
     unique() |>
     length() |>
     expect_equal(1L)
 })
 
-test_that("`pref_project` achieves the same as `rm_items`", {
+test_that("`pref_keep` achieves the same as `rm_items`", {
   res1 <- x |>
     _$pref |>
-    pref_rm_items("A")
+    pref_omit("A")
   res2 <- x |>
     _$pref |>
-    pref_project("B")
+    pref_keep("B")
   expect_equal(res1, res2)
 })
 
@@ -83,20 +81,10 @@ test_that("Removing all items detected by `pref_blank`", {
   # Remove both A and B.
   x |>
     _$pref |>
-    pref_rm_items(c("A", "B")) |>
+    pref_omit(c("A", "B")) |>
     pref_blank() |>
     all() |>
     expect_true()
-})
-
-test_that("`pref_cov` doesn't return NA for simple example", {
-  x |>
-    _$pref |>
-    pref_cov() |>
-    _$cov |>
-    is.na() |>
-    any() |>
-    expect_false()
 })
 
 # Tests based on examples from pref_tools.R
@@ -114,25 +102,25 @@ test_that("pref_length correctly counts number of rankings", {
   expect_equal(result, c(3L, 0L, 2L))
 })
 
-test_that("pref_rank_of_item correctly extracts rank of specific item", {
-  result <- pref_rank_of_item(preferences(c("a > b > c", "b > c = a", "")), "a")
+test_that("pref_get_rank correctly extracts rank of specific item", {
+  result <- pref_get_rank(preferences(c("a > b > c", "b > c = a", "")), "a")
   expect_equal(result, c(1L, 2L, NA_integer_))
 })
 
-test_that("pref_items_at_rank correctly identifies items at specific rank", {
+test_that("pref_get_items correctly identifies items at specific rank", {
   # Get items ranked first
-  result1 <- pref_items_at_rank(preferences(c("a > b > c", "b = c > a")), rank = 1)
+  result1 <- pref_get_items(preferences(c("a > b > c", "b = c > a")), rank = 1)
   expect_equal(result1[[1]], "a")
   expect_equal(sort(result1[[2]]), c("b", "c"))
 
   # Get items ranked second
-  result2 <- pref_items_at_rank(preferences(c("a > b > c", "b = c > a")), rank = 2)
+  result2 <- pref_get_items(preferences(c("a > b > c", "b = c > a")), rank = 2)
   expect_equal(result2[[1]], "b")
   expect_equal(result2[[2]], "a")
 })
 
-test_that("pref_complete correctly adds unselected items as last place", {
-  result <- pref_complete(preferences(c("a > b", "c > a", "b")))
+test_that("pref_add_unranked correctly adds unselected items as last place", {
+  result <- pref_add_unranked(preferences(c("a > b", "c > a", "b")))
 
   # Check that all preferences now have all items
   for (i in seq_along(result)) {
@@ -140,36 +128,53 @@ test_that("pref_complete correctly adds unselected items as last place", {
   }
 
   # Check specific rankings
-  expect_equal(pref_rank_of_item(result, "c")[1], 3L) # c should be last in first pref
-  expect_equal(pref_rank_of_item(result, "b")[2], 3L) # b should be last in second pref
-  expect_equal(pref_rank_of_item(result, "a")[3], 2L) # a should be last in third pref
-  expect_equal(pref_rank_of_item(result, "c")[3], 2L) # c should be last in third pref
+  expect_equal(pref_get_rank(result, "c")[1], 3L) # c should be last in first pref
+  expect_equal(pref_get_rank(result, "b")[2], 3L) # b should be last in second pref
+  expect_equal(pref_get_rank(result, "a")[3], 2L) # a should be last in third pref
+  expect_equal(pref_get_rank(result, "c")[3], 2L) # c should be last in third pref
 })
 
 test_that("pref_trunc correctly truncates preferences", {
+  prefs <- preferences(c("a > b > c > d", "b > c > a"))
   # Keep only the top 2 ranked items
-  result1 <- pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2)
+  result1 <- pref_trunc(prefs, n = 2)
   expect_equal(pref_length(result1), c(2L, 2L))
-  expect_equal(pref_items_at_rank(result1, 1)[[1]], "a")
-  expect_equal(pref_items_at_rank(result1, 1)[[2]], "b")
+  expect_equal(pref_get_items(result1, 1)[[1]], "a")
+  expect_equal(pref_get_items(result1, 2)[[1]], "b")
+  expect_equal(pref_get_items(result1, 1)[[2]], "b")
+  expect_equal(pref_get_items(result1, 2)[[2]], "c")
 
   # Keep only the bottom 2 ranked items
-  result2 <- pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2, top_ranks = FALSE)
+  result2 <- pref_trunc(prefs, n = 2, bottom = TRUE)
   expect_equal(pref_length(result2), c(2L, 2L))
-  expect_equal(pref_items_at_rank(result2, 1)[[1]], "c")
-  expect_equal(pref_items_at_rank(result2, 1)[[2]], "c")
-  expect_equal(pref_items_at_rank(result2, 2)[[1]], "d")
-  expect_equal(pref_items_at_rank(result2, 2)[[2]], "a")
+  expect_equal(pref_get_items(result2, 1)[[1]], "c")
+  expect_equal(pref_get_items(result2, 2)[[1]], "d")
+  expect_equal(pref_get_items(result2, 1)[[2]], "c")
+  expect_equal(pref_get_items(result2, 2)[[2]], "a")
+
+  # Keep all but the bottom 2 ranked items
+  result3 <- pref_trunc(prefs, n = -2)
+  expect_equal(pref_length(result3), c(2L, 1L))
+  expect_equal(pref_get_items(result3, 1)[[1]], "a")
+  expect_equal(pref_get_items(result3, 2)[[1]], "b")
+  expect_equal(pref_get_items(result3, 1)[[2]], "b")
+
+  # Keep all but the top 2 ranked items
+  result4 <- pref_trunc(prefs, n = -2, bottom = TRUE)
+  expect_equal(pref_length(result4), c(2L, 1L))
+  expect_equal(pref_get_items(result4, 1)[[1]], "c")
+  expect_equal(pref_get_items(result4, 2)[[1]], "d")
+  expect_equal(pref_get_items(result4, 1)[[2]], "a")
 })
 
-test_that("pref_rm_items correctly removes specified items", {
+test_that("pref_omit correctly removes specified items", {
   # Remove 'b' from preference rankings
-  result1 <- pref_rm_items(preferences(c("a > b > c", "b > c > a")), "b")
-  expect_equal(pref_items_at_rank(result1, 1)[[1]], "a")
-  expect_equal(pref_items_at_rank(result1, 1)[[2]], "c")
+  result1 <- pref_omit(preferences(c("a > b > c", "b > c > a")), "b")
+  expect_equal(pref_get_items(result1, 1)[[1]], "a")
+  expect_equal(pref_get_items(result1, 1)[[2]], "c")
 
   # Remove multiple items
-  result2 <- pref_rm_items(preferences(c("a > b > c > d", "b > c > a > d")), c("b", "d"))
+  result2 <- pref_omit(preferences(c("a > b > c > d", "b > c > a > d")), c("b", "d"))
   expect_equal(pref_length(result2), c(2L, 2L))
   expect_equal(
     sort(unlist(lapply(result2, function(p) levels(result2)[p[, 1]]))),
@@ -177,13 +182,13 @@ test_that("pref_rm_items correctly removes specified items", {
   )
 })
 
-test_that("pref_project correctly keeps only specified items", {
-  result <- pref_project(preferences(c("a > b > c", "b > c > a")), c("a", "c"))
+test_that("pref_keep correctly keeps only specified items", {
+  result <- pref_keep(preferences(c("a > b > c", "b > c > a")), c("a", "c"))
   expect_equal(pref_length(result), c(2L, 2L))
 
   # Check that only a and c appear in the preferences
   all_items <- unlist(lapply(seq_along(result), function(i) {
-    unlist(pref_items_at_rank(result[i], 1:2))
+    unlist(pref_get_items(result[i], 1:2))
   }))
   expect_true(all(all_items %in% c("a", "c")))
 })
@@ -192,8 +197,8 @@ test_that("pref_pop correctly eliminates lowest ranked items", {
   # Remove the lowest ranked item from each preference
   result1 <- pref_pop(preferences(c("a > b > c", "b > c > a")))
   expect_equal(pref_length(result1), c(2L, 2L))
-  expect_false("c" %in% unlist(pref_items_at_rank(result1[1], 1:2)))
-  expect_false("a" %in% unlist(pref_items_at_rank(result1[2], 1:2)))
+  expect_false("c" %in% unlist(pref_get_items(result1[1], 1:2)))
+  expect_false("a" %in% unlist(pref_get_items(result1[2], 1:2)))
 
   # Remove the 2 lowest ranked items
   result2 <- pref_pop(preferences(c("a > b > c > d", "b > c > a > d")), n = 2)
@@ -202,8 +207,8 @@ test_that("pref_pop correctly eliminates lowest ranked items", {
   # Remove the highest ranked item instead
   result3 <- pref_pop(preferences(c("a > b > c", "b > c > a")), lowest = FALSE)
   expect_equal(pref_length(result3), c(2L, 2L))
-  expect_false("a" %in% unlist(pref_items_at_rank(result3[1], 1:2)))
-  expect_false("b" %in% unlist(pref_items_at_rank(result3[2], 1:2)))
+  expect_false("a" %in% unlist(pref_get_items(result3[1], 1:2)))
+  expect_false("b" %in% unlist(pref_get_items(result3[2], 1:2)))
 
   # Remove blank preferences that result from popping
   result4 <- pref_pop(preferences(c("a > b", "c", "")), drop = TRUE)
@@ -211,34 +216,17 @@ test_that("pref_pop correctly eliminates lowest ranked items", {
   expect_equal(pref_length(result4), 1L)
 })
 
-test_that("pref_cov handles weighted calculations", {
-  # Simple covariance on a vector of preferences
-  prefs <- preferences(c("a > b > c", "b > c > a", "c > a > b"))
-  result1 <- pref_cov(prefs)
-  expect_true("cov" %in% names(result1))
-  expect_equal(dim(result1$cov), c(3, 3))
-
-  # Weighted covariance by frequency
-  df <- tibble::tibble(
-    prefs = preferences(c("a > b > c", "b > c > a")),
-    freq = c(3, 2)
-  )
-  result2 <- pref_cov(df, preferences_col = prefs, frequency_col = freq)
-  expect_true("cov" %in% names(result2))
-  expect_equal(dim(result2$cov), c(3, 3))
-})
-
-test_that("pref_reverse correctly reverses preference rankings", {
-  result <- pref_reverse(preferences(c("a > b > c", "b > c > a")))
+test_that("pref_rev correctly reverses preference rankings", {
+  result <- pref_rev(preferences(c("a > b > c", "b > c > a")))
 
   # First preference should now be last
-  expect_equal(pref_rank_of_item(result, "a")[1], 3L)
-  expect_equal(pref_rank_of_item(result, "c")[1], 1L)
+  expect_equal(pref_get_rank(result, "a")[1], 3L)
+  expect_equal(pref_get_rank(result, "c")[1], 1L)
 
-  expect_equal(pref_rank_of_item(result, "b")[2], 3L)
-  expect_equal(pref_rank_of_item(result, "a")[2], 1L)
+  expect_equal(pref_get_rank(result, "b")[2], 3L)
+  expect_equal(pref_get_rank(result, "a")[2], 1L)
 
   # Test empty preference
-  empty_result <- pref_reverse(preferences(""))
+  empty_result <- pref_rev(preferences(""))
   expect_true(pref_blank(empty_result))
 })

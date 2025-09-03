@@ -548,7 +548,7 @@ test_that("`print.preference` formats correctly", {
   prefs <- syd |>
     dplyr::group_by(ballot_type) |>
     dplyr::summarise(n = dplyr::n()) |>
-    dplyr::mutate(ballot_type = pref_complete(ballot_type)) |>
+    dplyr::mutate(ballot_type = pref_add_unranked(ballot_type)) |>
     head(1)
   expect_output(print(prefs$ballot_type), "\\[GREENWICH Alex > STANTON Phyllisse = TITO Skye = WARD Nick = WHITTON Mark\\]")
 
