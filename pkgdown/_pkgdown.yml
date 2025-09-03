@@ -12,18 +12,15 @@ reference:
   description: |
     Coercing data to `preferences` from various formats.
   contents:
+  - long_preferences
+  - wide_preferences
   - preferences
-  - as.preferences
-- title: Grouping and Aggregating `preferences`
-  description: |
-    Aggregate duplicate `preferences` and group by factor or index.
-  contents:
-  - aggregate.preferences
-  - group.preferences
 - title: Summaries of `preferences`
   description: |
-    Compute summaries such as adjacency or break each preference down into
-    a set of choices.
+    Compute summaries on preferences, e.g., covariance matrices, rankings matrix,
+    adjacency matrix and even compute an instant-runoff voting outcome.
   contents:
-  - choices
+  - pref_cov
+  - pref_irv
+  - ranking_matrix
   - adjacency
