@@ -4,27 +4,28 @@
 \alias{pref_trunc}
 \title{Truncate preferences to a maximum number of ranks.}
 \usage{
-pref_trunc(x, n_ranks = 1L, top_ranks = TRUE)
+pref_trunc(x, n = 1L, bottom = FALSE)
 }
 \arguments{
 \item{x}{A vector of \code{\link{preferences}}.}
 
-\item{n_ranks}{The number of rankings to include in the output.}
+\item{n}{The maximum number of ranks to include (positive) or number of ranks to drop (negative). Must be an integer.}
 
-\item{top_ranks}{If \code{TRUE}, output the top \code{n_ranks}, otherwise the bottom
-\code{n_ranks}.}
+\item{bottom}{If \code{FALSE} (default), operates on top ranks. If \code{TRUE}, operates on bottom ranks.}
 }
 \value{
-A vector of preferences with each selection equal to \code{x} but omitting
-the bottom (if \code{top_ranks} is \code{TRUE}, otherwise top) selections so that the
-new vector has at most \code{n_ranks} selections.
+A vector of preferences with each selection truncated according to the parameters.
 }
 \description{
 Truncate preferences to a maximum number of ranks.
 }
 \examples{
-# Keep only the top 2 ranked items
-pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2)
-# Keep only the bottom 2 ranked items
-pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n_ranks = 2, top_ranks = FALSE)
+# Keep only the top 2 ranks
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n = 2)
+# Keep only the bottom 2 ranks
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n = 2, bottom = TRUE)
+# Drop the bottom 2 ranks (keep top ranks)
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n = -2)
+# Drop the top 2 ranks (keep bottom ranks)
+pref_trunc(preferences(c("a > b > c > d", "b > c > a")), n = -2, bottom = TRUE)
 }

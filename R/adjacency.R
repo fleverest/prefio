@@ -57,7 +57,7 @@ adjacency <- function(x,
     dplyr::mutate( # Ensure preferences are complete to give matrice without NAs
       dplyr::across(
         dplyr::where(~ inherits(.x, "preferences")),
-        pref_complete
+        pref_add_unranked
       )
     )
 
