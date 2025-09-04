@@ -21,11 +21,12 @@
 #' the dataset specifies items by index rather than by name, or when there are
 #' items which do not appear in any preference selection.
 #' @param verbose If `TRUE`, diagnostic messages will be sent to stdout.
-#' @param unused_fn When `format="long"`, passes parameter to
-#' `dplyr::pivot_wider` to summarise values from unused columns. This can be
-#' helpful to keep covariates from columns which are unused in processing
-#' preferences, but are important for upstream tasks. See
-#' <[`pivot_wider`][tidyr::pivot_wider]> for more details and other uses.
+#' @param unused_fn When `format="long"`, summarise the values of unused columns (those
+#' which are not specified by `id_cols`, `item_col`, or `rank_col`). The default action
+#' is to drop all unused columns.
+#' This can be a named list (e.g. `list(column = function)`) if you want to apply different
+#' summaries for different columns or keep only specific unused columns, or it can be a
+#' single function to be applied across all unused columns.
 #' @param na_action Specifies how to handle NA values.
 #' \describe{
 #'   \item{`long_preferences`}{
@@ -49,8 +50,8 @@
 #' x <- tibble::tribble(
 #'   ~voter_id, ~species, ~food, ~ranking,
 #'   1, "Rabbit", "Apple", 1,
-#'   1, "Rabbit", "Banana", 2,
-#'   1, "Rabbit", "Carrot", 3,
+#'   1, "Rabbit", "Carrot", 2,
+#'   1, "Rabbit", "Banana", 3,
 #'   2, "Monkey", "Banana", 1,
 #'   2, "Monkey", "Apple", 2,
 #'   2, "Monkey", "Carrot", 3
@@ -70,7 +71,7 @@
 #'     id_cols = voter_id,
 #'     item_col = food,
 #'     rank_col = ranking,
-#'     unused_col = list(species = dplyr::first)
+#'     unused_fn = list(species = dplyr::first)
 #'   )
 #' @importFrom rlang :=
 #' @importFrom vctrs vec_ptype2 vec_cast
@@ -305,18 +306,73 @@ format_long <- function(data,
   # Extract vectors for maximum performance
   items <- data[[item_col_name]]
   ranks <- data[[rank_col_name]]
-  unused_data <- data[, !names(data) %in% c(item_col_name, rank_col_name, id_col_names)]
 
-  # Create group identifiers using base R
+  # Create group identifiers using base R (helped out a bit by Claude Sonnet 4)
   # To support multiple ID columns, use interaction()
   group_data <- data[id_col_names]
   group_ids <- interaction(group_data, drop = TRUE, lex.order = TRUE)
   group_list <- split(seq_along(group_ids), group_ids)
+  n_groups <- length(group_list)
+
+  # Summarise unused data if `unused_fn` argument is provided
+  unused_summaries <- NULL
+  if (!is.null(unused_fn)) {
+    unused_data <- data[, !names(data) %in% c(item_col_name, rank_col_name, id_col_names), drop = FALSE]
+
+    if (ncol(unused_data) > 0L) {
+      # Convert unused_fn to a named list if it's a single function
+      if (is.function(unused_fn)) {
+        unused_fn <- stats::setNames(
+          rep(list(unused_fn), ncol(unused_data)),
+          names(unused_data)
+        )
+      } else if (!is.list(unused_fn)) {
+        stop("`unused_fn` must be a function or named list of functions.")
+      }
+      # Convert lambdas to functions, if necessary...
+      unused_fn <- lapply(unused_fn, rlang::as_function)
+
+      # Check that all functions in the list are actually functions
+      if (!all(sapply(unused_fn, is.function))) {
+        stop("All elements of `unused_fn` must be functions.")
+      }
+
+      # Apply functions to each column by group
+      unused_summaries <- vector("list", ncol(unused_data))
+      names(unused_summaries) <- names(unused_data)
+
+      for (unused_col in names(unused_data)) {
+        col_values <- unused_data[[unused_col]]
+        # Get the appropriate function for this column
+        fn <- unused_fn[[unused_col]]
+
+        if (!is.null(fn)) {
+          # Apply function to each group
+          group_summaries <- vector("list", n_groups)
+          na_introduced <- FALSE
+          for (i in seq_len(n_groups)) {
+            idx <- group_list[[i]]
+            group_values <- col_values[idx]
+            # Apply the function, handling potential errors
+            group_summaries[[i]] <- tryCatch(
+              fn(group_values),
+              error = function(e) {
+                na_introduced <<- TRUE
+                NA
+              }
+            )
+          }
+          if (na_introduced) {
+            warning("NAs introduced! Error(s) applying unused_fn for column ", unused_col)
+          }
+          unused_summaries[[unused_col]] <- unlist(group_summaries)
+        }
+      }
+    }
+  }
 
   # Create item indices
   item_indices <- match(items, item_names)
-
-  n_groups <- length(group_list)
 
   # Pre-allocate result list
   preferences_list <- vector("list", n_groups)
@@ -359,6 +415,12 @@ format_long <- function(data,
 
   # Add preferences column
   result_df[[col_name]] <- preferences_list
+  # Add unused data summaries
+  if (!is.null(unused_fn) && !is.null(unused_summaries)) {
+    for (unused_col in names(unused_data)) {
+      result_df[[unused_col]] <- unused_summaries[[unused_col]]
+    }
+  }
 
   # Convert to tibble if original was tibble
   if (inherits(data, "tbl_df")) {
@@ -573,25 +635,6 @@ print.preferences <- function(x, ...) {
   }
 }
 
-#' @method format preferences
-#' @rdname preferences
-#' @param x A vector of preferences.
-#' @export
-format.preferences <- function(x, ...) {
-  item_names <- levels(x)
-  fmt_order <- function(pref) {
-    pref[, 1L] <- item_names[pref[, 1L]]
-    paste0(
-      "[",
-      split(pref[, 1L], pref[, 2L]) |>
-        sapply(FUN = paste0, collapse = " = ") |>
-        paste0(collapse = " > "),
-      "]"
-    )
-  }
-  vapply(vctrs::vec_data(x), fmt_order, character(1L))
-}
-
 #' @rdname preferences
 #' @param strings A character vector of preference strings
 #' @param sep Character separating the items in the string (default: ">")
@@ -692,6 +735,25 @@ preferences <- function(strings = character(0L), sep = ">", equality = "=", desc
     return(.vctr_preferences(list(), character(0L)))
   }
   as_preferences(strings, sep, equality, descending)
+}
+
+#' @method format preferences
+#' @rdname preferences
+#' @param x A vector of preferences.
+#' @export
+format.preferences <- function(x, ...) {
+  item_names <- levels(x)
+  fmt_order <- function(pref) {
+    pref[, 1L] <- item_names[pref[, 1L]]
+    paste0(
+      "[",
+      split(pref[, 1L], pref[, 2L]) |>
+        sapply(FUN = paste0, collapse = " = ") |>
+        paste0(collapse = " > "),
+      "]"
+    )
+  }
+  vapply(vctrs::vec_data(x), fmt_order, character(1L))
 }
 
 #' @method levels preferences
