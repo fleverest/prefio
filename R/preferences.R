@@ -133,29 +133,94 @@ long_preferences <- function(data,
     dplyr::mutate(!!col := .vctr_preferences(!!col))
 }
 
-# A helper function to validate ordinal preferences in long format.
-validate_long <- function(data,
-                          id_cols,
-                          rank_col,
-                          item_col,
-                          item_names,
-                          verbose = TRUE) {
+
+
+# Helper function to validate and process items with factor conversion
+process_items_as_factor <- function(items, item_names, verbose = TRUE) {
+  if (is.numeric(items)) {
+    if (is.null(item_names)) {
+      stop(
+        "When items are numeric (indicating indices), `item_names` must be provided ",
+        "to map indices to actual item names."
+      )
+    }
+
+    # Check for out-of-bounds indices
+    max_index <- max(items, na.rm = TRUE)
+    if (max_index > length(item_names)) {
+      stop(
+        "`item` index out of bounds. Maximum index (", max_index, ") exceeds ",
+        "length of `item_names` (", length(item_names), ")."
+      )
+    }
+
+    # Convert numeric indices to factor with item_names as labels
+    # This handles unused elements in item_names automatically
+    items_factor <- factor(items, levels = seq_len(length(item_names)), labels = item_names)
+
+    # Sort the levels to ensure consistent ordering (important for checking equality of preferences)
+    pi <- rank(levels(items_factor))
+    items_factor <- factor(pi[items_factor], levels = seq_len(length(item_names)), labels = sort(item_names))
+  } else {
+    # Non-numeric items: process as factor directly
+    if (is.null(item_names)) {
+      # Extract unique item names from the data and sort them
+      unique_items <- unique(stats::na.omit(items))
+      item_names <- sort(unique_items)
+    } else {
+      # Validate that all items exist in item_names
+      unknown_items <- setdiff(unique(stats::na.omit(items)), item_names)
+      if (length(unknown_items) > 0L) {
+        stop(
+          "Found items not in `item_names`: ", toString(unknown_items), ".\n",
+          "`item_names` parameter must be a superset of items in preferences."
+        )
+      }
+      # Sort item_names
+      item_names <- sort(item_names)
+    }
+
+    # Convert to factor
+    items_factor <- factor(items, levels = item_names)
+  }
+
+  return(items_factor)
+}
+
+# A helper function to convert long format data into an orderings format.
+format_long <- function(data,
+                        col,
+                        id_cols,
+                        item_col,
+                        rank_col,
+                        item_names = NULL,
+                        verbose = TRUE,
+                        unused_fn = NULL,
+                        na_action = c("drop_rows", "drop_preferences")) {
   # Show warning if any columns contain NA
   if (anyNA(data) && verbose) {
     message("Found rows containing `NA`. These rows may be ignored.")
   }
 
-  # Extract symbols/expressions
+  # Extract symbols/expressions for id_cols
   id_cols_quo <- rlang::enquo(id_cols)
   if (rlang::quo_is_call(id_cols_quo, "c")) {
     symbols <- rlang::call_args(rlang::quo_get_expr(id_cols_quo))
-    # Convert to quosures with proper environment
     id_cols_quos <- purrr::map(symbols, rlang::new_quosure, env = rlang::quo_get_env(id_cols_quo))
   } else {
     id_cols_quos <- list(id_cols_quo)
   }
 
-  # Find duplicated items
+  # Validate rank column - must be integer-valued
+  orig_rank <- data |>
+    dplyr::pull({{ rank_col }}) |>
+    stats::na.omit()
+  int_rank <- as.integer(orig_rank)
+  if (anyNA(int_rank) || any(int_rank != orig_rank)) {
+    stop("`rank` must be integer-valued.")
+  }
+
+  # Check for duplicated items within groups
   if (
     (
       data |>
@@ -172,103 +237,19 @@ validate_long <- function(data,
     )
   }
 
-  # Validate items
-  if (is.null(item_names)) {
-    item_names <- data |>
-      dplyr::pull({{ item_col }}) |>
-      unique() |>
-      stats::na.omit()
-  } else {
-    # Check if the item column contains numeric values (potential indices)
-    is_numeric_items <- is.numeric(data |> dplyr::pull({{ item_col }}))
+  # Process items using factor conversion for consistent handling
+  processed_items <- data |>
+    dplyr::pull({{ item_col }}) |>
+    process_items_as_factor(item_names, verbose)
 
-    if (is_numeric_items) {
-      # Check if any index is out of bounds
-      max_index <- max(data |> dplyr::pull({{ item_col }}), na.rm = TRUE)
-      if (max_index > length(item_names)) {
-        stop(
-          "`item` index out of bounds. `item_names` does not contain ",
-          "enough elements to assign a unique name per item index."
-        )
-      }
-      # For numeric items, we'll handle the conversion to item_names later
-      # so we don't need additional validation here
-    } else {
-      # For non-numeric items, validate that all items exist in item_names
-      unknown_items <- data |>
-        dplyr::pull({{ item_col }}) |>
-        unique() |>
-        stats::na.omit() |>
-        setdiff(item_names)
+  item_names <- levels(processed_items)
 
-      if (length(unknown_items) > 0L) {
-        stop(
-          "Found item not in `item_names`. `item_names` parameter must ",
-          "be a superset of items in preferences."
-        )
-      }
-    }
-  }
-
-  # Validate rank
-  orig_rank <- data |>
-    dplyr::pull({{ rank_col }}) |>
-    stats::na.omit()
-  int_rank <- as.integer(orig_rank)
-  if (anyNA(int_rank) || any(int_rank != orig_rank)) {
-    stop("`rank` must be integer-valued.")
-  }
-}
-
-# A helper function to convert long format data into an orderings format.
-format_long <- function(data,
-                        col,
-                        id_cols,
-                        item_col,
-                        rank_col,
-                        item_names = NULL,
-                        verbose = TRUE,
-                        unused_fn = NULL,
-                        na_action = c("drop_rows", "drop_preferences")) {
-  # Validate the data adequately describes preferences
-  validate_long(
-    data,
-    {{ id_cols }},
-    {{ rank_col }},
-    {{ item_col }},
-    item_names,
-    verbose
-  )
-
-  # Replace item names if `item` column is numeric
-  if (
-    !is.null(item_names) &&
-      data |>
-        dplyr::pull({{ item_col }}) |>
-        is.numeric()
-  ) {
-    data <- data |>
-      dplyr::mutate(dplyr::across({{ item_col }}, ~ item_names[.x]))
-  } else if (is.null(item_names)) {
-    # Otherwise extract item_names from `item` column if `item_names` is null
-    item_names <- data |>
-      dplyr::pull({{ item_col }}) |>
-      unique() |>
-      stats::na.omit()
-  }
-
-  # Convert rank to integers
+  # Update data with processed items and ensure ranks are integers
   data <- data |>
-    dplyr::mutate(dplyr::across({{ rank_col }}, as.integer))
-
-  # Extract symbols/expressions for id_cols
-  id_cols_quo <- rlang::enquo(id_cols)
-  if (rlang::quo_is_call(id_cols_quo, "c")) {
-    symbols <- rlang::call_args(rlang::quo_get_expr(id_cols_quo))
-    id_cols_quos <- purrr::map(symbols, rlang::new_quosure, env = rlang::quo_get_env(id_cols_quo))
-  } else {
-    id_cols_quos <- list(id_cols_quo)
-  }
+    dplyr::mutate(
+      {{ item_col }} := processed_items,
+      {{ rank_col }} := as.integer({{ rank_col }})
+    )
 
   # Handle NA values according to na_action parameter
   if (na_action == "drop_rows") {
@@ -307,7 +288,7 @@ format_long <- function(data,
   items <- data[[item_col_name]]
   ranks <- data[[rank_col_name]]
 
-  # Create group identifiers using base R (helped out a bit by Claude Sonnet 4)
+  # Create group identifiers using base R
   # To support multiple ID columns, use interaction()
   group_data <- data[id_col_names]
   group_ids <- interaction(group_data, drop = TRUE, lex.order = TRUE)
@@ -371,16 +352,13 @@ format_long <- function(data,
     }
   }
 
-  # Create item indices
-  item_indices <- match(items, item_names)
-
   # Pre-allocate result list
   preferences_list <- vector("list", n_groups)
 
   # Process each group with optimized base R operations
   for (i in seq_len(n_groups)) {
     idx <- group_list[[i]]
-    group_items <- item_indices[idx]
+    group_items <- items[idx]
     group_ranks <- ranks[idx]
 
     # Handle duplicates using aggregate (faster than dplyr for small groups)
@@ -397,8 +375,7 @@ format_long <- function(data,
     }
 
     # Create dense ranks using base R (avoid expensive dplyr::dense_rank)
-    unique_ranks <- sort(unique(group_ranks))
-    dense_ranks <- match(group_ranks, unique_ranks)
+    dense_ranks <- match(group_ranks, sort(unique(group_ranks)))
 
     # Create ordering matrix
     sort_order <- order(dense_ranks)
