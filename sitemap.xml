@@ -1,51 +1,28 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://fleverest.github.io/prefio/404.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/authors.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/index.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/news/index.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/adjacency.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/aggregate.preferences.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/choices.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/group.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/pipe.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/preferences.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/prefio-package.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/read_preflib.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/reexports.html</loc>
-  </url>
-  <url>
-    <loc>https://fleverest.github.io/prefio/reference/write_preflib.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>https://fleverest.github.io/prefio/404.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/LICENSE-text.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/authors.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/index.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/news/index.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/adjacency.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/index.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_add_unranked.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_blank.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_cov.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_get_items.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_get_rank.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_irv.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_keep.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_length.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_omit.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_pop.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_rev.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_trunc.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/pref_type.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/preferences.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/prefio-package.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/ranking_matrix.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/read_preflib.html</loc></url>
+<url><loc>https://fleverest.github.io/prefio/reference/write_preflib.html</loc></url>
 </urlset>
+
