@@ -4,8 +4,8 @@
 \alias{preferences}
 \alias{long_preferences}
 \alias{wide_preferences}
-\alias{format.preferences}
 \alias{as_preferences}
+\alias{format.preferences}
 \alias{levels.preferences}
 \title{Preferences Objects}
 \usage{
@@ -31,8 +31,6 @@ wide_preferences(
   ...
 )
 
-\method{format}{preferences}(x, ...)
-
 as_preferences(strings, sep = ">", equality = "=", descending = TRUE)
 
 preferences(
@@ -41,6 +39,8 @@ preferences(
   equality = "=",
   descending = TRUE
 )
+
+\method{format}{preferences}(x, ...)
 
 \method{levels}{preferences}(x, ...)
 }
@@ -65,11 +65,12 @@ items which do not appear in any preference selection.}
 
 \item{verbose}{If \code{TRUE}, diagnostic messages will be sent to stdout.}
 
-\item{unused_fn}{When \code{format="long"}, passes parameter to
-\code{dplyr::pivot_wider} to summarise values from unused columns. This can be
-helpful to keep covariates from columns which are unused in processing
-preferences, but are important for upstream tasks. See
-<\code{\link[tidyr:pivot_wider]{pivot_wider}}> for more details and other uses.}
+\item{unused_fn}{When \code{format="long"}, summarise the values of unused columns (those
+which are not specified by \code{id_cols}, \code{item_col}, or \code{rank_col}). The default action
+is to drop all unused columns.
+This can be a named list (e.g. \verb{list(column = function)}) if you want to apply different
+summaries for different columns or keep only specific unused columns, or it can be a
+single function to be applied across all unused columns.}
 
 \item{na_action}{Specifies how to handle NA values.
 \describe{
@@ -92,8 +93,6 @@ preferences, but are important for upstream tasks. See
 \item{ranking_cols}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> The columns from which
 to extract wide-format preferences.}
 
-\item{x}{A vector of preferences.}
-
 \item{strings}{A character vector of preference strings}
 
 \item{sep}{Character separating the items in the string (default: ">")}
@@ -101,6 +100,8 @@ to extract wide-format preferences.}
 \item{equality}{Character representing equality between items (default: "=")}
 
 \item{descending}{If TRUE, parse as descending order preferences.}
+
+\item{x}{A vector of preferences.}
 
 \item{format}{The format of the data: one of "ordering", "ranking", or
 "long" (see above). By default, \code{data} is assumed to be in "long" format.}
@@ -114,8 +115,8 @@ A tidy interface for working with ordinal preferences.
 x <- tibble::tribble(
   ~voter_id, ~species, ~food, ~ranking,
   1, "Rabbit", "Apple", 1,
-  1, "Rabbit", "Banana", 2,
-  1, "Rabbit", "Carrot", 3,
+  1, "Rabbit", "Carrot", 2,
+  1, "Rabbit", "Banana", 3,
   2, "Monkey", "Banana", 1,
   2, "Monkey", "Apple", 2,
   2, "Monkey", "Carrot", 3
@@ -135,6 +136,6 @@ x |>
     id_cols = voter_id,
     item_col = food,
     rank_col = ranking,
-    unused_col = list(species = dplyr::first)
+    unused_fn = list(species = dplyr::first)
   )
 }
