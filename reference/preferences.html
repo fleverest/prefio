@@ -207,7 +207,7 @@ to extract wide-format preferences.</p></dd>
 <span class="r-in"><span>    item_col <span class="op">=</span> <span class="va">food</span>,</span></span>
 <span class="r-in"><span>    rank_col <span class="op">=</span> <span class="va">ranking</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in select(data, {    {        item_col    }}, {    {        rank_col    }}):</span> could not find function "select"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in add_column(dplyr::bind_cols(data[group_idx, id_col_names, drop = FALSE],     unused_summaries), `:=`(!!col, structure(preferences_list,     item_names = item_names))):</span> could not find function "add_column"</span>
 <span class="r-in"><span><span class="co"># The same, but keep the species data.</span></span></span>
 <span class="r-in"><span><span class="va">x</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">long_preferences</span><span class="op">(</span></span></span>
@@ -217,7 +217,7 @@ to extract wide-format preferences.</p></dd>
 <span class="r-in"><span>    rank_col <span class="op">=</span> <span class="va">ranking</span>,</span></span>
 <span class="r-in"><span>    unused_fn <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>species <span class="op">=</span> <span class="fu">dplyr</span><span class="fu">::</span><span class="va"><a href="https://dplyr.tidyverse.org/reference/nth.html" class="external-link">first</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in select(data, {    {        item_col    }}, {    {        rank_col    }}):</span> could not find function "select"</span>
+<span class="r-err co"><span class="r-pr">#&gt;</span> <span class="error">Error in add_column(dplyr::bind_cols(data[group_idx, id_col_names, drop = FALSE],     unused_summaries), `:=`(!!col, structure(preferences_list,     item_names = item_names))):</span> could not find function "add_column"</span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
