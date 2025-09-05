@@ -364,7 +364,7 @@ format_long <- function(data,
     # Handle duplicates using aggregate (faster than dplyr for small groups)
     if (anyDuplicated(group_items) > 0L) {
       # Use aggregate for deduplication - much faster than dplyr
-      agg_result <- aggregate(
+      agg_result <- stats::aggregate(
         group_ranks,
         by = list(item = group_items),
         FUN = min,
