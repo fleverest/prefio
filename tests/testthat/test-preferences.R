@@ -281,8 +281,8 @@ test_that("long_preferences handles unused_fn parameter correctly", {
   expect_true(all(c("region", "age") %in% colnames(result)))
 
   # Check that values are correctly aggregated
-  expect_equal(result$region, c("North", "South"))
-  expect_equal(result$age, c(25, 30))
+  expect_equal(unname(result$region), c("North", "South"))
+  expect_equal(unname(result$age), c(25, 30))
 })
 
 test_that("`preferences` can be constructed from wide format", {
@@ -468,8 +468,8 @@ test_that("wide_preferences and long_preferences produce equivalent results", {
   long_formatted <- format(long_result$food_pref)
 
   # They should produce the same preference orderings
-  expect_equal(wide_formatted[1], long_formatted[1])
-  expect_equal(wide_formatted[2], long_formatted[2])
+  expect_equal(unname(wide_formatted[1]), unname(long_formatted[1]))
+  expect_equal(unname(wide_formatted[2]), unname(long_formatted[2]))
 })
 
 test_that("wide_preferences and long_preferences handle NAs consistently", {
@@ -515,7 +515,7 @@ test_that("wide_preferences and long_preferences handle NAs consistently", {
   long_formatted <- format(long_result$food_pref)
 
   # Check that both approaches handle NAs consistently
-  expect_equal(wide_formatted[2], long_formatted[2])
+  expect_equal(unname(wide_formatted[2]), unname(long_formatted[2]))
 })
 
 syd <- "../data/sydney_2023.tsv" |>
@@ -697,4 +697,160 @@ test_that("bind_rows works with preferences having different item sets", {
   # Check the formatting
   expect_match(format(result$prefs)[1], "A > B", fixed = TRUE)
   expect_match(format(result$prefs)[2], "B > C", fixed = TRUE)
+})
+
+# Create data with multiple unused columns
+long_data <- tibble::tribble(
+  ~voter_id, ~region, ~age, ~income, ~food, ~ranking,
+  1, "North", 25, 50000, "Apple", 2,
+  1, "North", 25, 50000, "Banana", 1,
+  1, "North", 25, 50000, "Carrot", 3,
+  2, "South", 30, 60000, "Apple", 2,
+  2, "South", 30, 60000, "Banana", 3,
+  2, "South", 30, 60000, "Carrot", 1,
+  3, "East", 35, 70000, "Apple", 1,
+  3, "East", 35, 70000, "Banana", 2,
+  3, "East", 35, 70000, "Carrot", 3
+)
+
+test_that("unused_fn parameter: single function summarises all unused columns", {
+  # Use single function to summarise all unused columns
+  result <- long_preferences(
+    long_data,
+    col = food_pref,
+    id_cols = voter_id,
+    item_col = food,
+    rank_col = ranking,
+    unused_fn = dplyr::first, # Single function applied to all unused columns
+    verbose = FALSE
+  )
+
+  # Check that all unused columns are present
+  expect_true(all(c("region", "age", "income") %in% colnames(result)))
+
+  # Check that the function was applied correctly (first value from each group)
+  expect_equal(unname(result$region), c("North", "South", "East"))
+  expect_equal(unname(result$age), c(25, 30, 35))
+  expect_equal(unname(result$income), c(50000, 60000, 70000))
+
+  # Check that preferences are still created correctly
+  expect_s3_class(result$food_pref, "preferences")
+  expect_equal(nrow(result), 3)
+})
+
+test_that("unused_fn parameter: named function list summarises only specified unused columns", {
+  # Use named list to summarise only specific unused columns
+  result <- long_preferences(
+    long_data,
+    col = food_pref,
+    id_cols = voter_id,
+    item_col = food,
+    rank_col = ranking,
+    unused_fn = list(
+      region = dplyr::first, # Keep region using first()
+      age = mean # Summarise age using mean()
+      # Note: income is not specified, so it should be dropped
+    ),
+    verbose = FALSE
+  )
+
+  # Check that only specified unused columns are present
+  expect_true(all(c("region", "age") %in% colnames(result)))
+  expect_false("income" %in% colnames(result)) # Should be dropped
+
+  # Check that the functions were applied correctly
+  expect_equal(unname(result$region), c("North", "South", "East"))
+  expect_equal(unname(result$age), c(25, 30, 35)) # mean() should return the same values since each group has identical values
+
+  # Check that preferences are still created correctly
+  expect_s3_class(result$food_pref, "preferences")
+  expect_equal(nrow(result), 3)
+})
+
+test_that("unused_fn parameter: works with lambda functions and formulas", {
+  # Use lambda functions and formulas
+  result <- long_preferences(
+    long_data,
+    col = food_pref,
+    id_cols = voter_id,
+    item_col = food,
+    rank_col = ranking,
+    unused_fn = list(
+      income = ~ mean(.x), # Formula syntax
+      region = function(x) dplyr::first(x) # Anonymous function
+    ),
+    verbose = FALSE
+  )
+
+  expect_true(all(c("income", "region") %in% colnames(result)))
+  expect_false("age" %in% colnames(result)) # Should be dropped
+
+  # Check that the functions were applied correctly
+  expect_equal(unname(result$region), c("North", "South", "East"))
+  expect_equal(unname(result$income), c(50000, 60000, 70000))
+
+  # Check that preferences are still created correctly
+  expect_s3_class(result$food_pref, "preferences")
+  expect_equal(nrow(result), 3)
+})
+
+test_that("unused_fn parameter: error handling for invalid inputs", {
+  # Test error when unused_fn contains non-existent column names
+  expect_error(
+    long_preferences(
+      long_data,
+      col = food_pref,
+      id_cols = voter_id,
+      item_col = food,
+      rank_col = ranking,
+      unused_fn = list(nonexistent_column = dplyr::first),
+      verbose = FALSE
+    ),
+    "All elements of `unused_fn` must be named, and refer to columns in `data`"
+  )
+
+  # Test error when unused_fn contains non-function elements
+  expect_error(
+    long_preferences(
+      long_data,
+      col = food_pref,
+      id_cols = voter_id,
+      item_col = food,
+      rank_col = ranking,
+      unused_fn = list(region = "not_a_function"),
+      verbose = FALSE
+    ),
+    "All elements of `unused_fn` must be functions"
+  )
+
+  # Test error when unused_fn is not a function or named list
+  expect_error(
+    long_preferences(
+      long_data,
+      col = food_pref,
+      id_cols = voter_id,
+      item_col = food,
+      rank_col = ranking,
+      unused_fn = "not_a_function_or_list",
+      verbose = FALSE
+    ),
+    "`unused_fn` must be a function or named list of functions"
+  )
+})
+
+test_that("unused_fn parameter: warning produced when unused_fn fails", {
+  # Test warning when unused_fn fails, producing NAs.
+  long_data_with_na <- long_data
+  long_data_with_na[1L, "income"] <- NA
+  expect_warning(
+    long_preferences(
+      long_data_with_na,
+      col = food_pref,
+      id_cols = voter_id,
+      item_col = food,
+      rank_col = ranking,
+      unused_fn = list(income = function(x) stopifnot(!anyNA(x)))
+    ),
+    "NAs introduced when applying unused_fn for columns: income"
+  )
 })

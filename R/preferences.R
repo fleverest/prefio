@@ -197,11 +197,6 @@ format_long <- function(data,
                         verbose = TRUE,
                         unused_fn = NULL,
                         na_action = c("drop_rows", "drop_preferences")) {
-  # Show warning if any columns contain NA
-  if (anyNA(data) && verbose) {
-    message("Found rows containing `NA`. These rows may be ignored.")
-  }
-
   # Extract symbols/expressions for id_cols
   id_cols_quo <- rlang::enquo(id_cols)
   if (rlang::quo_is_call(id_cols_quo, "c")) {
@@ -251,9 +246,14 @@ format_long <- function(data,
       {{ rank_col }} := as.integer({{ rank_col }})
     )
 
+  # Show warning if any columns contain NA
+  if (anyNA(select(data, {{ item_col }}, {{ rank_col }})) && verbose) {
+    message("Found rows containing `NA`. These rows may be ignored.")
+  }
+
   # Handle NA values according to na_action parameter
   if (na_action == "drop_rows") {
-    data <- data |> tidyr::drop_na()
+    data <- data |> tidyr::drop_na({{ item_col }}, {{ rank_col }})
   } else if (na_action == "drop_preferences") {
     .has_na <- NULL # NSE workaround
     na_groups <- data |>
@@ -293,71 +293,74 @@ format_long <- function(data,
   group_data <- data[id_col_names]
   group_ids <- interaction(group_data, drop = TRUE, lex.order = TRUE)
   group_list <- split(seq_along(group_ids), group_ids)
-  n_groups <- length(group_list)
 
   # Summarise unused data if `unused_fn` argument is provided
   unused_summaries <- NULL
-  if (!is.null(unused_fn)) {
-    unused_data <- data[, !names(data) %in% c(item_col_name, rank_col_name, id_col_names), drop = FALSE]
-
-    if (ncol(unused_data) > 0L) {
-      # Convert unused_fn to a named list if it's a single function
-      if (is.function(unused_fn)) {
-        unused_fn <- stats::setNames(
-          rep(list(unused_fn), ncol(unused_data)),
-          names(unused_data)
-        )
-      } else if (!is.list(unused_fn)) {
-        stop("`unused_fn` must be a function or named list of functions.")
+  if (!is.null(unused_fn) && length(setdiff(names(data), c(item_col_name, rank_col_name, id_col_names))) > 0L) {
+    # Convert unused_fn to a named list if it's a single function
+    if (is.function(unused_fn) || is.language(unused_fn)) {
+      unused_data <- data[, !names(data) %in% c(item_col_name, rank_col_name, id_col_names), drop = FALSE]
+      # Convert lambda if necessary, and convert to named list
+      unused_fn <- stats::setNames(
+        rep(list(rlang::as_function(unused_fn)), ncol(unused_data)),
+        names(unused_data)
+      )
+    } else if (is.list(unused_fn)) { # Validate named list of functions
+      # Convert lambda(s) to functions, if necessary...
+      tryCatch(
+        {
+          unused_fn <- lapply(unused_fn, rlang::as_function)
+        },
+        error = \(e) {
+          stop("All elements of `unused_fn` must be functions")
+        }
+      )
+      if (!all(names(unused_fn) %in% names(data))) {
+        stop("All elements of `unused_fn` must be named, and refer to columns in `data`.")
       }
-      # Convert lambdas to functions, if necessary...
-      unused_fn <- lapply(unused_fn, rlang::as_function)
+      unused_data <- data[, setdiff(names(unused_fn), c(item_col_name, rank_col_name, id_col_names)), drop = FALSE]
+    } else {
+      stop("`unused_fn` must be a function or named list of functions.")
+    }
 
-      # Check that all functions in the list are actually functions
-      if (!all(sapply(unused_fn, is.function))) {
-        stop("All elements of `unused_fn` must be functions.")
-      }
+    # Check that all functions in the list are actually functions
+    if (!all(sapply(unused_fn, is.function))) {
+      stop("All elements of `unused_fn` must be functions.")
+    }
 
-      # Apply functions to each column by group
-      unused_summaries <- vector("list", ncol(unused_data))
-      names(unused_summaries) <- names(unused_data)
-
-      for (unused_col in names(unused_data)) {
-        col_values <- unused_data[[unused_col]]
-        # Get the appropriate function for this column
-        fn <- unused_fn[[unused_col]]
-
-        if (!is.null(fn)) {
-          # Apply function to each group
-          group_summaries <- vector("list", n_groups)
-          na_introduced <- FALSE
-          for (i in seq_len(n_groups)) {
-            idx <- group_list[[i]]
-            group_values <- col_values[idx]
-            # Apply the function, handling potential errors
-            group_summaries[[i]] <- tryCatch(
-              fn(group_values),
+    # Apply summary functions to each column
+    na_introduced <- character(0L)
+    unused_summaries <- purrr::map2(colnames(unused_data), unused_fn, function(colname, fn) {
+      if (!is.null(fn)) {
+        # Apply function for each group
+        group_summaries <- sapply(
+          group_list,
+          function(idx) {
+            tryCatch(
+              fn(unused_data[[colname]][idx]),
               error = function(e) {
-                na_introduced <<- TRUE
+                na_introduced <<- c(na_introduced, colname)
                 NA
               }
             )
           }
-          if (na_introduced) {
-            warning("NAs introduced! Error(s) applying unused_fn for column ", unused_col)
-          }
-          unused_summaries[[unused_col]] <- unlist(group_summaries)
-        }
+        )
+        unlist(group_summaries)
       }
+    }) |>
+      stats::setNames(colnames(unused_data)) |> # Recover names
+      do.call(what = dplyr::bind_cols) # Output as a dataframe of summarised results
+    if (length(na_introduced) > 0L && verbose) {
+      warning(
+        "NAs introduced when applying unused_fn for columns: ", paste(na_introduced, sep = ", "), ".",
+        call. = FALSE
+      )
     }
   }
 
   # Pre-allocate result list
-  preferences_list <- vector("list", n_groups)
-
-  # Process each group with optimized base R operations
-  for (i in seq_len(n_groups)) {
-    idx <- group_list[[i]]
+  preferences_list <- lapply(group_list, function(idx) {
+    # Process each group with optimized base R operations
     group_items <- items[idx]
     group_ranks <- ranks[idx]
 
@@ -373,41 +376,24 @@ format_long <- function(data,
       group_items <- agg_result$item
       group_ranks <- agg_result$x
     }
-
-    # Create dense ranks using base R (avoid expensive dplyr::dense_rank)
     dense_ranks <- match(group_ranks, sort(unique(group_ranks)))
-
     # Create ordering matrix
     sort_order <- order(dense_ranks)
-    preferences_list[[i]] <- cbind(
+    cbind(
       group_items[sort_order],
       dense_ranks[sort_order]
     )
-  }
+  })
 
-  # Create result data frame efficiently
   # Extract unique combinations from original data using group indices
   group_idx <- match(levels(group_ids), group_ids)
-  result_df <- data[group_idx, id_col_names, drop = FALSE]
 
-  # Add preferences column
-  result_df[[col_name]] <- preferences_list
-  # Add unused data summaries
-  if (!is.null(unused_fn) && !is.null(unused_summaries)) {
-    for (unused_col in names(unused_data)) {
-      result_df[[unused_col]] <- unused_summaries[[unused_col]]
-    }
-  }
-
-  # Convert to tibble if original was tibble
-  if (inherits(data, "tbl_df")) {
-    result_df <- tibble::as_tibble(result_df)
-  }
-
-  # Set item_names attribute
-  attr(result_df[[col_name]], "item_names") <- item_names
-
-  return(result_df)
+  # Construct result data frame
+  dplyr::bind_cols(
+    data[group_idx, id_col_names, drop = FALSE],
+    unused_summaries
+  ) |>
+    add_column(!!col := structure(preferences_list, item_names = item_names))
 }
 
 #' @rdname preferences
@@ -447,18 +433,18 @@ validate_wide <- function(data,
                           cols,
                           na_action,
                           verbose = TRUE) {
+  # Get the ranking columns
+  ranking_cols <- data |>
+    dplyr::select({{ cols }})
+
   # Show warning if any columns contain NA
-  if (anyNA(data) && verbose) {
+  if (anyNA(ranking_cols) && verbose) {
     if (na_action == "drop_preferences") {
       message("Found rows containing `NA`. Any such preferences will be dropped.")
     } else if (na_action == "keep_as_partial") {
       message("Found rows containing `NA`. May result in incomplete preferences.")
     }
   }
-
-  # Get the ranking columns
-  ranking_cols <- data |>
-    dplyr::select({{ cols }})
 
   # Check if any ranking values are non-integer
   for (col_name in colnames(ranking_cols)) {
