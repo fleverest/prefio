@@ -247,7 +247,7 @@ format_long <- function(data,
     )
 
   # Show warning if any columns contain NA
-  if (anyNA(select(data, {{ item_col }}, {{ rank_col }})) && verbose) {
+  if (anyNA(dplyr::select(data, {{ item_col }}, {{ rank_col }})) && verbose) {
     message("Found rows containing `NA`. These rows may be ignored.")
   }
 
