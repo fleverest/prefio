@@ -393,7 +393,7 @@ format_long <- function(data,
     data[group_idx, id_col_names, drop = FALSE],
     unused_summaries
   ) |>
-    add_column(!!col := structure(preferences_list, item_names = item_names))
+    tibble::add_column(!!col := structure(preferences_list, item_names = item_names))
 }
 
 #' @rdname preferences
