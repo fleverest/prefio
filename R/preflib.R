@@ -2,7 +2,7 @@
 #'
 #' Read orderings from `.soc`, `.soi`, `.toc` or `.toi` files storing
 #' ordinal preference data format as defined by
-#' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
+#' \href{https://preflib.github.io/PrefLib-Jekyll/}{\{PrefLib\}: A Library for Preferences}
 #' into a `preferences` object.
 #'
 #' Note that PrefLib refers to the items being ordered by "alternatives".
@@ -239,7 +239,7 @@ read_preflib <- function(file,
 #'
 #' Write `preferences` to `.soc`, `.soi`, `.toc` or `.toi` file types, as
 #' defined by the PrefLib specification:
-#' \href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
+#' \href{https://preflib.github.io/PrefLib-Jekyll/}{\{PrefLib\}: A Library for Preferences}.
 #'
 #' @details The file types supported are
 #' \describe{

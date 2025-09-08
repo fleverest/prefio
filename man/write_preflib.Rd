@@ -69,7 +69,7 @@ No return value. Output will be written to file or stdout.
 \description{
 Write \code{preferences} to \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} file types, as
 defined by the PrefLib specification:
-\href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}.
+\href{https://preflib.github.io/PrefLib-Jekyll/}{\{PrefLib\}: A Library for Preferences}.
 }
 \details{
 The file types supported are

@@ -28,7 +28,7 @@ the \code{frequency} column the relative frequency of this selection.
 \description{
 Read orderings from \code{.soc}, \code{.soi}, \code{.toc} or \code{.toi} files storing
 ordinal preference data format as defined by
-\href{https://www.preflib.org/}{\{PrefLib\}: A Library for Preferences}
+\href{https://preflib.github.io/PrefLib-Jekyll/}{\{PrefLib\}: A Library for Preferences}
 into a \code{preferences} object.
 }
 \details{
