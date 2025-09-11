@@ -106,6 +106,10 @@ to extract wide-format preferences.}
 \item{format}{The format of the data: one of "ordering", "ranking", or
 "long" (see above). By default, \code{data} is assumed to be in "long" format.}
 }
+\value{
+A \code{preferences} object, or a modified tibble with a column of \code{preferences} when \code{data} is
+a \code{data.frame} or \code{tibble}.
+}
 \description{
 A tidy interface for working with ordinal preferences.
 }

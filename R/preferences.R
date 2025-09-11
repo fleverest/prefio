@@ -44,6 +44,9 @@
 #' }
 #' @param ... Unused.
 #'
+#' @return A `preferences` object, or a modified tibble with a column of `preferences` when `data` is
+#' a `data.frame` or `tibble`.
+#'
 #' @examples
 #' # Votes cast by two animals ranking a variety of fruits and vegetables.
 #' # This is not real data, I made this up.
@@ -560,6 +563,8 @@ Ops.preferences <- function(e1, e2) {
 #' @param n_items The number of items, needed to assess whether a selection is
 #' complete or not. Defaults to `nlevels(x)` if `x` has class `preferences`,
 #' otherwise defaults to the length of the longest preference.
+#' @return One of `c("soc", "soi", "toc", "toi")`, indicating the type of
+#' preferences in `x` (with or without ties / complete or incomplete rankings).
 #' @export
 pref_type <- function(x, n_items = NULL) {
   if (is.null(n_items)) {

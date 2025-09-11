@@ -13,6 +13,10 @@ pref_type(x, n_items = NULL)
 complete or not. Defaults to \code{nlevels(x)} if \code{x} has class \code{preferences},
 otherwise defaults to the length of the longest preference.}
 }
+\value{
+One of \code{c("soc", "soi", "toc", "toi")}, indicating the type of
+preferences in \code{x} (with or without ties / complete or incomplete rankings).
+}
 \description{
 Ordinal preferences can order every item, or they can order a subset. Some
 ordinal preference datasets will contain ties between items at a given rank.
